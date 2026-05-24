@@ -16,6 +16,7 @@ public class DataStore {
     public static ArrayList<Pengguna> daftarPengguna = new ArrayList<>();
     public static ArrayList<Peserta> daftarPeserta = new ArrayList<>();
     public static ArrayList<Program> daftarProgram = new ArrayList<>();
+    public static ArrayList<Seleksi> daftarSeleksi = new ArrayList<>();
 
     static {
         // --- Data Admin ---

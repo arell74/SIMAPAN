@@ -9,43 +9,49 @@ package Model;
  * @author arelssi
  */
 public class Seleksi {
-    private String idPeserta;
-    private int nilai;
-    private int percobaan;
-    private String status;
+    private String idSeleksi;
+    private Peserta peserta; // RELASI OBJEK: Objek Seleksi menyimpan Objek Peserta utuh
+    private String jenisSeleksi; // Contoh: "Wawancara", "Ujian Tulis", "Tes Fisik"
+    private String statusHasil;  // Contoh: "Lulus", "Gugur Permanen", "Menunggu"
 
-    public Seleksi(String idPeserta, int nilai, int percobaan, String status) {
-        this.idPeserta = idPeserta;
-        this.nilai = nilai;
-        this.percobaan = percobaan;
-        this.status = status;
-    }
-    
-    public void updateStatus(){
-        if(nilai >= 70){
-            this.status = "LULUS";
-        } else if (percobaan >= 3){
-            this.status = "GUGUR PERMANEN";
-        } else {
-            this.status = "GAGAL";
-        }
+    public Seleksi(String idSeleksi, Peserta peserta, String jenisSeleksi, String statusHasil) {
+        this.idSeleksi = idSeleksi;
+        this.peserta = peserta;
+        this.jenisSeleksi = jenisSeleksi;
+        this.statusHasil = statusHasil;
     }
 
-    public String getIdPeserta() {
-        return idPeserta;
+    public String getIdSeleksi() {
+        return idSeleksi;
     }
 
-    public int getNilai() {
-        return nilai;
+    public void setIdSeleksi(String idSeleksi) {
+        this.idSeleksi = idSeleksi;
     }
 
-    public int getPercobaan() {
-        return percobaan;
+    public Peserta getPeserta() {
+        return peserta;
     }
 
-    public String getStatus() {
-        return status;
+    public void setPeserta(Peserta peserta) {
+        this.peserta = peserta;
     }
-    
+
+    public String getJenisSeleksi() {
+        return jenisSeleksi;
+    }
+
+    public void setJenisSeleksi(String jenisSeleksi) {
+        this.jenisSeleksi = jenisSeleksi;
+    }
+
+    public String getStatusHasil() {
+        return statusHasil;
+    }
+
+    public void setStatusHasil(String statusHasil) {
+        this.statusHasil = statusHasil;
+    }
+
     
 }
