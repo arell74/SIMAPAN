@@ -19,22 +19,59 @@ public class DataStore {
     public static ArrayList<Seleksi> daftarSeleksi = new ArrayList<>();
 
     static {
-        // --- Data Admin ---
+//        Program
+        Program prg1 = new Program("PRG001", "Pemagangan Manufaktur", "Pabrik / Perakitan", 15000000, 30);
+        Program prg2 = new Program("PRG002", "Pemagangan Caregiver", "Kesehatan / Lansia", 12000000, 20);
+        Program prg3 = new Program("PRG003", "Pemagangan Pertanian", "Agrikultur", 10000000, 50);
+        
+        daftarProgram.add(prg1);
+        daftarProgram.add(prg2);
+        daftarProgram.add(prg3);
+        
+//        Admin
         daftarPengguna.add(new AdminLPK("admin", "admin123", "Farel (Admin LPK)"));
 
-        // --- Data Instruktur (Sekarang bisa login!) ---
+//        Instruktur
         Instruktur ins1 = new Instruktur("dian_p", "dian123", "Dian Priatna Kusuma, S.PD.", "INS001", "08123...", "Kaiwa", "N2", "Mandiri");
         Instruktur ins2 = new Instruktur("yamada_s", "yamada123", "Yamada Sensei", "INS002", "08199...", "Kanji", "N1", "Reguler");
+        Instruktur ins3 = new Instruktur("Muhamad Farel Fauzan", "farel123", "Farel F", "INS003", "08199...", "Budaya JP", "N1", "Reguler");
         daftarPengguna.add(ins1);
         daftarPengguna.add(ins2);
+        daftarPengguna.add(ins3);
 
-        // --- Data Peserta (Tetap sama seperti sebelumnya) ---
+//        Peserta
         // (contoh 1 data saja agar singkat)
-        daftarPeserta.add(new Peserta("PST001", "3208010...", "Azril Algiffari", "2002-05-05", "Laki-laki", "089...", "Islam", "Kuningan", "PRG001", ins1, "N4", "Lunas"));
+        Peserta pst1 = new Peserta("PST001", "3208010205050001", "Azril Algiffari", "2002-05-05", "Laki-laki", "0891234567", "Islam", "Kuningan", prg1.getIdProgram(), ins1, "N4", "Lunas");
+        pst1.setStatusSeleksi("Lulus");
+        pst1.setStatusKeberangkatan("Siap Berangkat");
+
+        Peserta pst2 = new Peserta("PST002", "3208013001060002", "Tania Elliyanti", "2003-01-30", "Perempuan", "0897654321", "Islam", "Kuningan", prg2.getIdProgram(), ins2, "N4", "Lunas");
+        pst2.setStatusSeleksi("Lulus");
+        pst2.setStatusKeberangkatan("Belum Berangkat");
+
+        Peserta pst3 = new Peserta("PST003", "3208012008060003", "Akram Pratama Putra", "2003-08-20", "Laki-laki", "0812233445", "Islam", "Kuningan", prg3.getIdProgram(), ins3, "N3", "Lunas");
+        pst3.setStatusSeleksi("Gugur Permanen"); // Dibuat gugur agar statistik merahnya muncul
+        pst3.setStatusKeberangkatan("Batal Berangkat");
+
+        Peserta pst4 = new Peserta("PST004", "3208017049510003", "Muhamad Farel Fauzan", "2003-12-17", "Laki-laki", "0856677889", "Islam", "Kuningan", prg1.getIdProgram(), ins1, "N1", "Lunas");
+        pst4.setStatusSeleksi("Lulus");
+        pst4.setStatusKeberangkatan("Siap Berangkat");
         
-        daftarProgram.add(new Program("PRG001", "Pemagangan Manufaktur", "Pabrik / Manufaktur", 15000000, 30));
-        daftarProgram.add(new Program("PRG002", "Pemagangan Caregiver", "Kesehatan / Lansia", 12000000, 20));
-        daftarProgram.add(new Program("PRG003", "Pemagangan Pertanian", "Agrikultur", 10000000, 50));
+        Peserta pst5 = new Peserta("PST005", "3208011234560005", "Siti Aminah", "2004-02-14", "Perempuan", "0877112233", "Islam", "Kuningan", prg2.getIdProgram(), ins2, "N5", "Belum Lunas");
+        // pst5 sengaja tidak di-set statusnya agar menggunakan default "Belum Seleksi"
+
+        daftarPeserta.add(pst1);
+        daftarPeserta.add(pst2);
+        daftarPeserta.add(pst3);
+        daftarPeserta.add(pst4);
+        daftarPeserta.add(pst5);
+        
+//        Seleksi
+        daftarSeleksi.add(new Seleksi("SEL001", pst1, "Wawancara User (Manufaktur)", "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL002", pst2, "Wawancara User (Kaigo)", "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL003", pst3, "Tes Fisik & Kesamaptaan", "Gugur Permanen"));
+        daftarSeleksi.add(new Seleksi("SEL004", pst4, "Wawancara User (Manufaktur)", "Lulus"));
+       
     }
 
     // Fungsi khusus untuk mengambil HANYA instruktur (digunakan untuk ComboBox di form Tambah Peserta)
