@@ -1,0 +1,260 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
+ */
+package Views;
+
+import DataStore.DataStore;
+import Model.Peserta;
+import Util.TombolAksiEditor;
+import Util.TombolAksiRenderer;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author arelssi
+ */
+public class PanelDataPeserta extends javax.swing.JPanel {
+
+    /**
+     * Creates new form DataPeserta
+     */
+
+    public PanelDataPeserta() {
+        initComponents();
+        setupTable();
+        loadTableData(""); 
+    }
+
+    private void setupTable() {
+        tabelPeserta.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
+        tabelPeserta.getTableHeader().setBackground(new Color(122, 0, 0));
+        tabelPeserta.getTableHeader().setForeground(Color.WHITE);
+        tabelPeserta.setRowHeight(36);
+        
+        // Pasang Renderer dan Editor (Index ke-6 untuk kolom Aksi)
+        tabelPeserta.getColumnModel().getColumn(6).setCellRenderer(new TombolAksiRenderer());
+        tabelPeserta.getColumnModel().getColumn(6).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
+            @Override
+            public void onDetail(int baris) {
+                String id = tabelPeserta.getValueAt(baris, 1).toString();
+                JOptionPane.showMessageDialog(PanelDataPeserta.this, "Menampilkan Detail untuk ID: " + id);
+                // Panggil form detail di sini
+            }
+
+            @Override
+            public void onEdit(int baris) {
+                String id = tabelPeserta.getValueAt(baris, 1).toString();
+                JOptionPane.showMessageDialog(PanelDataPeserta.this, "Membuka Form Edit untuk ID: " + id);
+                // Panggil form edit di sini
+            }
+
+            @Override
+            public void onHapus(int baris) {
+                hapusData(baris);
+            }
+        }));
+    }
+
+    private void loadTableData(String keyword) {
+        DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
+        model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
+
+        int no = 1;
+        
+        // Iterasi objek Peserta dari DataStore
+        for (Peserta p : DataStore.daftarPeserta) {
+            
+            // Logika Pencarian (Search): Cek apakah ID atau Nama mengandung kata kunci
+            // Jika keyword kosong, maka kondisi ini otomatis selalu bernilai 'true'
+            boolean match = keyword.isEmpty() || 
+                            p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
+                            p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
+
+            if (match) {
+                model.addRow(new Object[]{
+                    no++,
+                    p.getIdPeserta(),
+                    p.getNamaLengkap(),
+                    p.getNik(),
+                    p.getProgram(),
+                    p.getStatusSeleksi(),
+                    "" // Kolom indeks 6 (Aksi), dikosongkan karena dirender oleh TombolAksiRenderer
+                });
+            }
+        }
+
+        // Update label jumlah data sesuai baris yang tampil di tabel
+        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
+        
+        try {
+            Util.TabelUtil.autoResizeKolom(tabelPeserta);
+        } catch (Exception e) {
+            System.out.println("TabelUtil error/belum ada: " + e.getMessage());
+        }
+    }
+
+    private void hapusData(int baris) {
+        // Ambil ID dan Nama dari baris yang diklik
+        String idPeserta = tabelPeserta.getValueAt(baris, 1).toString();
+        String nama = tabelPeserta.getValueAt(baris, 2).toString();
+        
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Yakin ingin menghapus data " + nama + "?", 
+            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Hapus objek dari ArrayList menggunakan fungsi bawaan removeIf()
+            boolean sukses = DataStore.daftarPeserta.removeIf(p -> p.getIdPeserta().equals(idPeserta));
+            
+            if (sukses) {
+                JOptionPane.showMessageDialog(this, "Data berhasil dihapus!");
+                
+                // Refresh tabel dengan string kosong agar kembali ke kondisi semula
+                loadTableData(""); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Data gagal dihapus atau ID tidak ditemukan!");
+            }
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        panelToolbar = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
+        jSeparator3 = new javax.swing.JSeparator();
+        panelTabel = new javax.swing.JPanel();
+        scrollTabel = new javax.swing.JScrollPane();
+        tabelPeserta = new javax.swing.JTable();
+        lblTotalData = new javax.swing.JLabel();
+
+        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        panelToolbar.setBackground(new java.awt.Color(255, 255, 255));
+        panelToolbar.setPreferredSize(new java.awt.Dimension(980, 56));
+        panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel3.setText("C");
+        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
+        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
+
+        jTextField1.setPreferredSize(new java.awt.Dimension(280, 30));
+        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(46, 14, -1, -1));
+
+        jButton1.setBackground(new java.awt.Color(80, 80, 80));
+        jButton1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("Cari");
+        jButton1.setPreferredSize(new java.awt.Dimension(70, 30));
+        panelToolbar.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(334, 14, -1, -1));
+
+        jButton2.setBackground(new java.awt.Color(240, 240, 240));
+        jButton2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(80, 80, 80));
+        jButton2.setText("Reset");
+        jButton2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210)));
+        jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButton2.setFocusPainted(false);
+        jButton2.setPreferredSize(new java.awt.Dimension(70, 30));
+        panelToolbar.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(412, 14, -1, -1));
+
+        jButton3.setBackground(new java.awt.Color(122, 0, 0));
+        jButton3.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
+        jButton3.setForeground(new java.awt.Color(255, 255, 255));
+        jButton3.setText("Tambah Peserta");
+        jButton3.setPreferredSize(new java.awt.Dimension(148, 30));
+        panelToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 14, -1, -1));
+
+        jSeparator2.setPreferredSize(new java.awt.Dimension(980, 2));
+        panelToolbar.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 54, -1, -1));
+
+        jSeparator3.setPreferredSize(new java.awt.Dimension(980, 2));
+        panelToolbar.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        panelTabel.setBackground(new java.awt.Color(255, 255, 255));
+        panelTabel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        panelTabel.setPreferredSize(new java.awt.Dimension(948, 460));
+        panelTabel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        scrollTabel.setPreferredSize(new java.awt.Dimension(948, 460));
+
+        tabelPeserta.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        tabelPeserta.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "No.", "ID Peserta", "Nama Lengkap", "NIK", "Program", "Status Seleksi", "Aksi"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        tabelPeserta.setRowHeight(36);
+        tabelPeserta.setSelectionBackground(new java.awt.Color(255, 230, 230));
+        tabelPeserta.setSelectionForeground(new java.awt.Color(122, 0, 0));
+        tabelPeserta.setShowHorizontalLines(true);
+        scrollTabel.setViewportView(tabelPeserta);
+        if (tabelPeserta.getColumnModel().getColumnCount() > 0) {
+            tabelPeserta.getColumnModel().getColumn(0).setPreferredWidth(40);
+            tabelPeserta.getColumnModel().getColumn(1).setPreferredWidth(80);
+            tabelPeserta.getColumnModel().getColumn(2).setPreferredWidth(140);
+            tabelPeserta.getColumnModel().getColumn(3).setPreferredWidth(110);
+            tabelPeserta.getColumnModel().getColumn(4).setPreferredWidth(110);
+            tabelPeserta.getColumnModel().getColumn(5).setPreferredWidth(85);
+            tabelPeserta.getColumnModel().getColumn(6).setPreferredWidth(100);
+        }
+
+        panelTabel.add(scrollTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        add(panelTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, 450));
+
+        lblTotalData.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
+        lblTotalData.setForeground(new java.awt.Color(120, 120, 120));
+        lblTotalData.setText("Menampilkan 0 data peserta");
+        lblTotalData.setPreferredSize(new java.awt.Dimension(300, 20));
+        add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
+    }// </editor-fold>//GEN-END:initComponents
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lblTotalData;
+    private javax.swing.JPanel panelTabel;
+    private javax.swing.JPanel panelToolbar;
+    private javax.swing.JScrollPane scrollTabel;
+    private javax.swing.JTable tabelPeserta;
+    // End of variables declaration//GEN-END:variables
+}
