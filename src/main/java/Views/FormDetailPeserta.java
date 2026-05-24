@@ -16,11 +16,16 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     /**
      * Creates new form FromEditPeserta
      */
-    public FormDetailPeserta() {
+    public FormDetailPeserta(java.awt.Frame parent, boolean modal) {
         initComponents();
+        setSize(790, 512);
+        pack();
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setTitle("Form Detail Peserta");
     }
 
-    FormDetailPeserta(Frame frame, boolean b, ResultSet rs) {
+    private FormDetailPeserta() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -33,18 +38,374 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        panelHeader = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        panelBody = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jSeparator2 = new javax.swing.JSeparator();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel30 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel31 = new javax.swing.JLabel();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel35 = new javax.swing.JLabel();
+        jLabel36 = new javax.swing.JLabel();
+        jLabel37 = new javax.swing.JLabel();
+        jLabel38 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        btnSimpan = new javax.swing.JButton();
+        btnBatal = new javax.swing.JButton();
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        panelHeader.setBackground(new java.awt.Color(122, 0, 0));
+        panelHeader.setPreferredSize(new java.awt.Dimension(520, 68));
+        panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel1.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Muhamad Farel Fauzan");
+        jLabel1.setPreferredSize(new java.awt.Dimension(280, 22));
+        panelHeader.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+
+        jLabel2.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setText("PST003  ·  Terdaftar sejak 01 Oktober 2025");
+        jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
+        panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
+
+        jButton1.setBackground(new java.awt.Color(160, 20, 20));
+        jButton1.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("X");
+        jButton1.setBorderPainted(false);
+        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButton1.setFocusPainted(false);
+        jButton1.setPreferredSize(new java.awt.Dimension(30, 30));
+        panelHeader.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 20, -1, -1));
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 30, Short.MAX_VALUE)
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 30, Short.MAX_VALUE)
         );
+
+        panelHeader.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 30, 30));
+
+        getContentPane().add(panelHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 790, -1));
+
+        panelBody.setBackground(new java.awt.Color(248, 248, 248));
+        panelBody.setPreferredSize(new java.awt.Dimension(520, 364));
+        panelBody.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel3.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel3.setText("DATA IDENTITAS");
+        jLabel3.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
+
+        jSeparator1.setPreferredSize(new java.awt.Dimension(480, 8));
+        panelBody.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 32, 420, -1));
+
+        jLabel4.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel4.setText("NIK");
+        jLabel4.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 44, -1, -1));
+
+        jLabel5.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel5.setText("Tanggal Lahir");
+        jLabel5.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 44, -1, -1));
+
+        jLabel6.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel6.setText("10 Januari 2007");
+        jLabel6.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
+
+        jSeparator2.setPreferredSize(new java.awt.Dimension(480, 8));
+        panelBody.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 225, 420, -1));
+
+        jLabel11.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel11.setText("2250800020");
+        jLabel11.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
+
+        jLabel12.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel12.setText("Jenis Kelamin");
+        jLabel12.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, -1, -1));
+
+        jLabel13.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel13.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel13.setText("Laki-laki");
+        jLabel13.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 95, -1, -1));
+
+        jLabel14.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel14.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel14.setText("Agama");
+        jLabel14.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 80, -1, -1));
+
+        jLabel15.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel15.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel15.setText("Islam");
+        jLabel15.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 95, -1, -1));
+
+        jLabel16.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel16.setText("No. HP");
+        jLabel16.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, -1, -1));
+
+        jLabel17.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel17.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel17.setText("2250800020");
+        jLabel17.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 135, -1, -1));
+
+        jLabel18.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel18.setText("Level Bahasa");
+        jLabel18.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 120, -1, -1));
+
+        jLabel19.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel19.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel19.setText("N3");
+        jLabel19.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 135, -1, -1));
+
+        jLabel20.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel20.setText("Alamat");
+        jLabel20.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, -1, -1));
+
+        jLabel21.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel21.setText("Kuningan, Windusengkahan RT 11 RW 04");
+        jLabel21.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 175, 470, -1));
+
+        jLabel22.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel22.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel22.setText("Program");
+        jLabel22.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
+
+        jLabel23.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel23.setText("PRG002 - Industri Makanan");
+        jLabel23.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, -1, -1));
+
+        jLabel24.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel24.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel24.setText("Instruktur");
+        jLabel24.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 230, -1, -1));
+
+        jLabel25.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel25.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel25.setText("Ayumi Diana");
+        jLabel25.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 250, -1, -1));
+
+        jLabel26.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel26.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel26.setText("Biaya Program");
+        jLabel26.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+
+        jLabel27.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel27.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel27.setText("Rp. 38.500.000");
+        jLabel27.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, -1, -1));
+
+        jLabel28.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel28.setForeground(new java.awt.Color(90, 90, 90));
+        jLabel28.setText("No. Paspor");
+        jLabel28.setPreferredSize(new java.awt.Dimension(140, 14));
+        panelBody.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
+
+        jLabel29.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel29.setForeground(new java.awt.Color(10, 10, 10));
+        jLabel29.setText("Belum diinput");
+        jLabel29.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel29, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 290, -1, -1));
+
+        jPanel1.setBackground(new java.awt.Color(210, 255, 210));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel1.setPreferredSize(new java.awt.Dimension(104, 22));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel9.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(0, 122, 0));
+        jLabel9.setText("Lulus");
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
+
+        panelBody.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, -1, 20));
+
+        jPanel2.setBackground(new java.awt.Color(210, 210, 255));
+        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel2.setPreferredSize(new java.awt.Dimension(104, 22));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel10.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(0, 0, 122));
+        jLabel10.setText("Lunas");
+        jPanel2.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
+
+        panelBody.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 320, -1, -1));
+
+        jPanel3.setBackground(new java.awt.Color(255, 230, 210));
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel3.setPreferredSize(new java.awt.Dimension(104, 22));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel8.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(200, 100, 0));
+        jLabel8.setText("Menunggu dokumen");
+        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 3, -1, -1));
+
+        panelBody.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 320, 140, -1));
+
+        jLabel30.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel30.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel30.setText("DATA PROGRAM & STATUS");
+        jLabel30.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, -1, -1));
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel6.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel31.setFont(new java.awt.Font("JetBrainsMono NF", 1, 10)); // NOI18N
+        jLabel31.setText("Seleksi Wawancara");
+        jPanel6.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+
+        jLabel32.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+        jLabel32.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel32.setText("55");
+        jPanel6.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 10, -1, -1));
+
+        jLabel33.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel33.setText("12 Oktober 2025");
+        jPanel6.add(jLabel33, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+
+        jLabel34.setBackground(new java.awt.Color(0, 122, 0));
+        jLabel34.setFont(new java.awt.Font("JetBrainsMono NF", 1, 15)); // NOI18N
+        jLabel34.setForeground(new java.awt.Color(220, 10, 10));
+        jLabel34.setText("Mengulang");
+        jPanel6.add(jLabel34, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 50, -1, -1));
+
+        jPanel5.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 260, 80));
+
+        jPanel7.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel35.setFont(new java.awt.Font("JetBrainsMono NF", 1, 10)); // NOI18N
+        jLabel35.setText("Seleksi Bahasa Jepang");
+        jPanel7.add(jLabel35, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+
+        jLabel36.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+        jLabel36.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel36.setText("75");
+        jPanel7.add(jLabel36, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 10, -1, -1));
+
+        jLabel37.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel37.setText("06 Oktober 2025");
+        jPanel7.add(jLabel37, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+
+        jLabel38.setBackground(new java.awt.Color(0, 122, 0));
+        jLabel38.setFont(new java.awt.Font("JetBrainsMono NF", 1, 15)); // NOI18N
+        jLabel38.setForeground(new java.awt.Color(0, 122, 0));
+        jLabel38.setText("Lulus");
+        jPanel7.add(jLabel38, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 50, -1, -1));
+
+        jPanel5.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 80));
+
+        panelBody.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 30, 280, 310));
+
+        jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel7.setText("RIWAYAT SELEKSI");
+        jLabel7.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, -1, -1));
+
+        getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, 790, -1));
+
+        btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
+        btnSimpan.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
+        btnSimpan.setForeground(new java.awt.Color(255, 255, 255));
+        btnSimpan.setText("Edit");
+        btnSimpan.setBorderPainted(false);
+        btnSimpan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnSimpan.setFocusPainted(false);
+        btnSimpan.setPreferredSize(new java.awt.Dimension(116, 34));
+        getContentPane().add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 450, -1, -1));
+
+        btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        btnBatal.setForeground(new java.awt.Color(80, 80, 80));
+        btnBatal.setText("Tutup");
+        btnBatal.setToolTipText("Batal");
+        btnBatal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnBatal.setFocusPainted(false);
+        btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
+        getContentPane().add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 450, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -86,5 +447,57 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatal;
+    private javax.swing.JButton btnSimpan;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JPanel panelBody;
+    private javax.swing.JPanel panelHeader;
     // End of variables declaration//GEN-END:variables
 }

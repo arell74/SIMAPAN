@@ -42,8 +42,8 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             @Override
             public void onDetail(int baris) {
                 String id = tabelPeserta.getValueAt(baris, 1).toString();
-                JOptionPane.showMessageDialog(PanelDataPeserta.this, "Menampilkan Detail untuk ID: " + id);
-                // Panggil form detail di sini
+                FormDetailPeserta formd = new FormDetailPeserta(null, true);
+                formd.setVisible(true);
             }
 
             @Override
@@ -136,7 +136,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btnTambah = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         panelTabel = new javax.swing.JPanel();
@@ -174,12 +174,17 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jButton2.setPreferredSize(new java.awt.Dimension(70, 30));
         panelToolbar.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(412, 14, -1, -1));
 
-        jButton3.setBackground(new java.awt.Color(122, 0, 0));
-        jButton3.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
-        jButton3.setForeground(new java.awt.Color(255, 255, 255));
-        jButton3.setText("Tambah Peserta");
-        jButton3.setPreferredSize(new java.awt.Dimension(148, 30));
-        panelToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 14, -1, -1));
+        btnTambah.setBackground(new java.awt.Color(122, 0, 0));
+        btnTambah.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
+        btnTambah.setForeground(new java.awt.Color(255, 255, 255));
+        btnTambah.setText("Tambah Peserta");
+        btnTambah.setPreferredSize(new java.awt.Dimension(148, 30));
+        btnTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahActionPerformed(evt);
+            }
+        });
+        panelToolbar.add(btnTambah, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 14, -1, -1));
 
         jSeparator2.setPreferredSize(new java.awt.Dimension(980, 2));
         panelToolbar.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 54, -1, -1));
@@ -242,11 +247,16 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
+        FormTambahPeserta form = new FormTambahPeserta(null, true);
+        form.setVisible(true);
+    }//GEN-LAST:event_btnTambahActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnTambah;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
