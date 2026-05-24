@@ -292,7 +292,7 @@ public class PanelAdmin extends javax.swing.JPanel {
 
         scrollPane1.add(jScrollPane1);
 
-        mainContent.add(scrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 196, -1, -1));
+        mainContent.add(scrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 196, -1, 230));
 
         btnTambahPeserta.setBackground(new java.awt.Color(122, 0, 0));
         btnTambahPeserta.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N

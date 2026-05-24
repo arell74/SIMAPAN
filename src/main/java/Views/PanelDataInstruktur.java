@@ -158,12 +158,13 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
         panelToolbar.setBackground(new java.awt.Color(255, 255, 255));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jLabel3.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/search.png")); // NOI18N
         jLabel3.setText("C");
         jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
         panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
 
         txtCari.setPreferredSize(new java.awt.Dimension(280, 30));
-        panelToolbar.add(txtCari, new org.netbeans.lib.awtextra.AbsoluteConstraints(46, 14, -1, -1));
+        panelToolbar.add(txtCari, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
 
         btnCari.setBackground(new java.awt.Color(80, 80, 80));
         btnCari.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
