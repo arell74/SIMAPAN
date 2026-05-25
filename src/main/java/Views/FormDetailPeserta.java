@@ -85,7 +85,8 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     }
     
     private void loadRiwayatSeleksi(String idPeserta) {
-        panelRiwayatSeleksi.removeAll(); // Bersihkan panel terlebih dahulu
+        panelRiwayatSeleksi.removeAll();
+        
 
         boolean adaRiwayat = false;
 
@@ -112,7 +113,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 lblJudul.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
                 
                 // Asumsi kamu menambahkan atribut tanggalSeleksi di kelas Seleksi
-                javax.swing.JLabel lblTanggal = new javax.swing.JLabel("Tanggal ujian"); 
+                javax.swing.JLabel lblTanggal = new javax.swing.JLabel(sel.getTanggalSeleksi());
                 lblTanggal.setFont(new java.awt.Font("Inter", java.awt.Font.PLAIN, 10));
                 lblTanggal.setForeground(Color.GRAY);
                 
@@ -124,7 +125,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 panelKanan.setBackground(Color.WHITE);
                 
                 // Asumsi kamu menambahkan atribut nilai (int) di kelas Seleksi
-                javax.swing.JLabel lblNilai = new javax.swing.JLabel("Nilai", javax.swing.SwingConstants.RIGHT);
+                javax.swing.JLabel lblNilai = new javax.swing.JLabel(String.valueOf(sel.getNilai()), javax.swing.SwingConstants.RIGHT);
                 lblNilai.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 14));
                 lblNilai.setForeground(new Color(150, 0, 0)); // Merah maroon
 
@@ -218,8 +219,8 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         panelRiwayatSeleksi = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jLabel31 = new javax.swing.JLabel();
-        jLabel32 = new javax.swing.JLabel();
-        jLabel33 = new javax.swing.JLabel();
+        lblNilai = new javax.swing.JLabel();
+        lblTanggal = new javax.swing.JLabel();
         jLabel34 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jLabel35 = new javax.swing.JLabel();
@@ -485,14 +486,14 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel31.setText("Seleksi Wawancara");
         jPanel6.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        jLabel32.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
-        jLabel32.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel32.setText("55");
-        jPanel6.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 10, -1, -1));
+        lblNilai.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+        lblNilai.setForeground(new java.awt.Color(122, 0, 0));
+        lblNilai.setText("55");
+        jPanel6.add(lblNilai, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 10, -1, -1));
 
-        jLabel33.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel33.setText("12 Oktober 2025");
-        jPanel6.add(jLabel33, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+        lblTanggal.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        lblTanggal.setText("12 Oktober 2025");
+        jPanel6.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
 
         jLabel34.setBackground(new java.awt.Color(0, 122, 0));
         jLabel34.setFont(new java.awt.Font("JetBrainsMono NF", 1, 15)); // NOI18N
@@ -621,8 +622,6 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
@@ -649,11 +648,13 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     private javax.swing.JLabel lblLevelBahasa;
     private javax.swing.JLabel lblNamaHeader;
     private javax.swing.JLabel lblNik;
+    private javax.swing.JLabel lblNilai;
     private javax.swing.JLabel lblNoHp;
     private javax.swing.JLabel lblProgram;
     private javax.swing.JLabel lblStatusBayar;
     private javax.swing.JLabel lblStatusDokumen;
     private javax.swing.JLabel lblStatusSeleksi;
+    private javax.swing.JLabel lblTanggal;
     private javax.swing.JLabel lblTglLahir;
     private javax.swing.JPanel panelBody;
     private javax.swing.JPanel panelHeader;

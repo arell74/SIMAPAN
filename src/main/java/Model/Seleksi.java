@@ -10,14 +10,18 @@ package Model;
  */
 public class Seleksi {
     private String idSeleksi;
-    private Peserta peserta; // RELASI OBJEK: Objek Seleksi menyimpan Objek Peserta utuh
-    private String jenisSeleksi; // Contoh: "Wawancara", "Ujian Tulis", "Tes Fisik"
-    private String statusHasil;  // Contoh: "Lulus", "Gugur Permanen", "Menunggu"
+    private Peserta peserta; 
+    private String jenisSeleksi; 
+    private String tanggalSeleksi;
+    private int nilai;
+    private String statusHasil;  
 
-    public Seleksi(String idSeleksi, Peserta peserta, String jenisSeleksi, String statusHasil) {
+    public Seleksi(String idSeleksi, Peserta peserta, String jenisSeleksi, String tanggalSeleksi, int nilai, String statusHasil) {
         this.idSeleksi = idSeleksi;
         this.peserta = peserta;
         this.jenisSeleksi = jenisSeleksi;
+        this.tanggalSeleksi = tanggalSeleksi;
+        this.nilai = nilai;
         this.statusHasil = statusHasil;
     }
 
@@ -25,17 +29,10 @@ public class Seleksi {
         return idSeleksi;
     }
 
-    public void setIdSeleksi(String idSeleksi) {
-        this.idSeleksi = idSeleksi;
-    }
-
     public Peserta getPeserta() {
         return peserta;
     }
-
-    public void setPeserta(Peserta peserta) {
-        this.peserta = peserta;
-    }
+    
 
     public String getJenisSeleksi() {
         return jenisSeleksi;
@@ -43,6 +40,22 @@ public class Seleksi {
 
     public void setJenisSeleksi(String jenisSeleksi) {
         this.jenisSeleksi = jenisSeleksi;
+    }
+
+    public String getTanggalSeleksi() {
+        return tanggalSeleksi;
+    }
+
+    public void setTanggalSeleksi(String tanggalSeleksi) {
+        this.tanggalSeleksi = tanggalSeleksi;
+    }
+
+    public int getNilai() {
+        return nilai;
+    }
+
+    public void setNilai(int nilai) {
+        this.nilai = nilai;
     }
 
     public String getStatusHasil() {
@@ -53,5 +66,4 @@ public class Seleksi {
         this.statusHasil = statusHasil;
     }
 
-    
 }

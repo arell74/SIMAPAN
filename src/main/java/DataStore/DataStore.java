@@ -65,10 +65,12 @@ public class DataStore {
         daftarPeserta.add(pst5);
         
 //        Seleksi
-        daftarSeleksi.add(new Seleksi("SEL001", pst1, "Wawancara User (Manufaktur)", "Lulus"));
-        daftarSeleksi.add(new Seleksi("SEL002", pst2, "Wawancara User (Kaigo)", "Lulus"));
-        daftarSeleksi.add(new Seleksi("SEL003", pst3, "Tes Fisik & Kesamaptaan", "Gugur Permanen"));
-        daftarSeleksi.add(new Seleksi("SEL004", pst4, "Wawancara User (Manufaktur)", "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL001", pst3, "Seleksi Bahasa Jepang", "06 Oktober 2025", 75, "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL002", pst3, "Seleksi Wawancara", "12 Oktober 2025", 55, "Mengulang"));
+
+        // Data dummy untuk peserta lain
+        daftarSeleksi.add(new Seleksi("SEL003", pst1, "Tes Fisik & Kesamaptaan", "20 Mei 2026", 85, "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL004", pst2, "Wawancara User (Kaigo)", "22 Mei 2026", 90, "Lulus"));
        
     }
 
