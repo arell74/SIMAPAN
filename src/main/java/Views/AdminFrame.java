@@ -84,12 +84,13 @@ public class AdminFrame extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         jButton7 = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
-        jButton8 = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
         panelHeadr = new javax.swing.JPanel();
         lblHalamanJudul = new javax.swing.JLabel();
         lblHalamanSub = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         mainContent = new javax.swing.JPanel();
         panelKartu1 = new javax.swing.JPanel();
@@ -279,16 +280,21 @@ public class AdminFrame extends javax.swing.JFrame {
         jSeparator4.setPreferredSize(new java.awt.Dimension(220, 8));
         sidebar.add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 620, 120, 20));
 
-        jButton8.setBackground(new java.awt.Color(100, 0, 0));
-        jButton8.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
-        jButton8.setForeground(new java.awt.Color(255, 160, 160));
-        jButton8.setText("Logout");
-        jButton8.setBorderPainted(false);
-        jButton8.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton8.setFocusPainted(false);
-        jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton8.setPreferredSize(new java.awt.Dimension(220, 42));
-        sidebar.add(jButton8, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, -1, -1));
+        btnLogout.setBackground(new java.awt.Color(100, 0, 0));
+        btnLogout.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
+        btnLogout.setForeground(new java.awt.Color(255, 255, 255));
+        btnLogout.setText("Logout");
+        btnLogout.setBorderPainted(false);
+        btnLogout.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnLogout.setFocusPainted(false);
+        btnLogout.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLogout.setPreferredSize(new java.awt.Dimension(220, 42));
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+        sidebar.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, -1, -1));
 
         panelHeadr.setBackground(new java.awt.Color(255, 255, 255));
         panelHeadr.setPreferredSize(new java.awt.Dimension(980, 64));
@@ -310,7 +316,7 @@ public class AdminFrame extends javax.swing.JFrame {
         lblTanggal.setForeground(new java.awt.Color(140, 140, 140));
         lblTanggal.setText("Selasa, 12 Mei 2026");
         lblTanggal.setPreferredSize(new java.awt.Dimension(240, 16));
-        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 10, -1, -1));
+        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 10, 180, 20));
 
         jLabel9.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(40, 40, 40));
@@ -318,8 +324,29 @@ public class AdminFrame extends javax.swing.JFrame {
         jLabel9.setPreferredSize(new java.awt.Dimension(160, 16));
         panelHeadr.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 30, -1, -1));
 
+        jPanel1.setBackground(new java.awt.Color(255, 235, 235));
+
+        jLabel10.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15)); // NOI18N
         jLabel10.setText("A");
-        panelHeadr.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(906, 12, -1, -1));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jLabel10)
+                .addContainerGap(15, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(13, Short.MAX_VALUE)
+                .addComponent(jLabel10)
+                .addContainerGap())
+        );
+
+        panelHeadr.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 10, 40, 40));
 
         mainContent.setBackground(new java.awt.Color(245, 245, 245));
         mainContent.setName("mainContent"); // NOI18N
@@ -584,6 +611,22 @@ public class AdminFrame extends javax.swing.JFrame {
         setActiveButton(btnManajemenSeleksi);
     }//GEN-LAST:event_btnManajemenSeleksiActionPerformed
 
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+        int konfirmasi = javax.swing.JOptionPane.showConfirmDialog(this, 
+            "Apakah Anda yakin ingin keluar dari sistem?", 
+            "Konfirmasi Logout", 
+            javax.swing.JOptionPane.YES_NO_OPTION, 
+            javax.swing.JOptionPane.QUESTION_MESSAGE);
+
+        if (konfirmasi == javax.swing.JOptionPane.YES_OPTION) {
+
+            FormLogin formLogin = new FormLogin();
+            formLogin.setVisible(true);
+
+            this.dispose(); 
+        }
+    }//GEN-LAST:event_btnLogoutActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -623,13 +666,13 @@ public class AdminFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnInstruktur;
+    private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
     private javax.swing.JButton btnProgram;
     private javax.swing.JButton btnTambahPeserta;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
-    private javax.swing.JButton jButton8;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -651,6 +694,7 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;

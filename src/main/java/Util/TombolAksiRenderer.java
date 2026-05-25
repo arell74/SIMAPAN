@@ -27,7 +27,7 @@ public class TombolAksiRenderer extends JPanel implements TableCellRenderer {
         btnEdit.setForeground(new Color(50, 50, 50));
         btnEdit.setBorderPainted(false);
         btnEdit.setFocusPainted(false);
-        btnEdit.setPreferredSize(new Dimension(46, 26));
+        btnEdit.setPreferredSize(new Dimension(60, 26));
 
 //         Tombol Hapus
         btnHapus.setFont(new Font("Segoe UI", Font.PLAIN, 11));
@@ -35,7 +35,7 @@ public class TombolAksiRenderer extends JPanel implements TableCellRenderer {
         btnHapus.setForeground(new Color(180, 0, 0));
         btnHapus.setBorderPainted(false);
         btnHapus.setFocusPainted(false);
-        btnHapus.setPreferredSize(new Dimension(52, 26));
+        btnHapus.setPreferredSize(new Dimension(60, 26));
 
         add(btnDetail);
         add(btnEdit);

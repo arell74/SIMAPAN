@@ -64,6 +64,7 @@ import javax.swing.JOptionPane;
         cmbStatusBayar.setModel(new DefaultComboBoxModel<>(new String[]{"Belum Lunas", "Lunas"}));
         cmbAgama.setModel(new DefaultComboBoxModel<>(new String[]{"Islam", "Kristen", "Hindu", "Katholik", "Budha"}));
         cmbJenisKelamin.setModel(new DefaultComboBoxModel<>(new String[]{"Laki-laki", "Perempuan"}));
+        cmbProgram.setModel(new DefaultComboBoxModel<>(new String[]{"Manufaktur", "Caregiver", "Pertanian"}));
         
     }
 

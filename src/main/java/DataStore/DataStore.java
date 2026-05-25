@@ -34,13 +34,12 @@ public class DataStore {
 //        Instruktur
         Instruktur ins1 = new Instruktur("dian_p", "dian123", "Dian Priatna Kusuma, S.PD.", "INS001", "08123...", "Kaiwa", "N2", "Mandiri");
         Instruktur ins2 = new Instruktur("yamada_s", "yamada123", "Yamada Sensei", "INS002", "08199...", "Kanji", "N1", "Reguler");
-        Instruktur ins3 = new Instruktur("Muhamad Farel Fauzan", "farel123", "Farel F", "INS003", "08199...", "Budaya JP", "N1", "Reguler");
+        Instruktur ins3 = new Instruktur("farelfwzn", "farel123", "Muhamad Farel Fauzan", "INS003", "08199...", "Budaya JP", "N1", "Reguler");
         daftarPengguna.add(ins1);
         daftarPengguna.add(ins2);
         daftarPengguna.add(ins3);
 
 //        Peserta
-        // (contoh 1 data saja agar singkat)
         Peserta pst1 = new Peserta("PST001", "3208010205050001", "Azril Algiffari", "2002-05-05", "Laki-laki", "0891234567", "Islam", "Kuningan", prg1.getIdProgram(), ins1, "N4", "Lunas");
         pst1.setStatusSeleksi("Lulus");
         pst1.setStatusKeberangkatan("Siap Berangkat");
@@ -50,15 +49,14 @@ public class DataStore {
         pst2.setStatusKeberangkatan("Belum Berangkat");
 
         Peserta pst3 = new Peserta("PST003", "3208012008060003", "Akram Pratama Putra", "2003-08-20", "Laki-laki", "0812233445", "Islam", "Kuningan", prg3.getIdProgram(), ins3, "N3", "Lunas");
-        pst3.setStatusSeleksi("Gugur Permanen"); // Dibuat gugur agar statistik merahnya muncul
+        pst3.setStatusSeleksi("Gugur Permanen");
         pst3.setStatusKeberangkatan("Batal Berangkat");
 
         Peserta pst4 = new Peserta("PST004", "3208017049510003", "Muhamad Farel Fauzan", "2003-12-17", "Laki-laki", "0856677889", "Islam", "Kuningan", prg1.getIdProgram(), ins1, "N1", "Lunas");
         pst4.setStatusSeleksi("Lulus");
         pst4.setStatusKeberangkatan("Siap Berangkat");
         
-        Peserta pst5 = new Peserta("PST005", "3208011234560005", "Siti Aminah", "2004-02-14", "Perempuan", "0877112233", "Islam", "Kuningan", prg2.getIdProgram(), ins2, "N5", "Belum Lunas");
-        // pst5 sengaja tidak di-set statusnya agar menggunakan default "Belum Seleksi"
+        Peserta pst5 = new Peserta("PST005", "3208011234560005", "Nova Shabilla", "2004-02-14", "Perempuan", "0877112233", "Islam", "Kuningan", prg2.getIdProgram(), ins2, "N5", "Belum Lunas");
 
         daftarPeserta.add(pst1);
         daftarPeserta.add(pst2);

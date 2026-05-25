@@ -4,8 +4,16 @@
  */
 package Views;
 
+import DataStore.DataStore;
+import Model.Peserta;
+import Model.Program;
+import Model.Seleksi;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.sql.ResultSet;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 
 /**
  *
@@ -16,13 +24,142 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     /**
      * Creates new form FromEditPeserta
      */
-    public FormDetailPeserta(java.awt.Frame parent, boolean modal) {
+    public FormDetailPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
         initComponents();
-        setSize(790, 512);
+        setSize(790, 517);
         pack();
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Form Detail Peserta");
+        panelRiwayatSeleksi.setLayout(new BoxLayout(panelRiwayatSeleksi, BoxLayout.Y_AXIS));
+        
+        loadDataIdentitas(idPeserta);
+        loadRiwayatSeleksi(idPeserta);
+    }
+    
+    private void loadDataIdentitas(String idPeserta) {
+        Peserta pesertaAktif = null;
+
+        // 1. Cari objek Peserta berdasarkan ID
+        for (Peserta p : DataStore.daftarPeserta) {
+            if (p.getIdPeserta().equals(idPeserta)) {
+                pesertaAktif = p;
+                break;
+            }
+        }
+
+        if (pesertaAktif != null) {
+            // Set Label Header
+            lblNamaHeader.setText(pesertaAktif.getNamaLengkap());
+            lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · Terdaftar sejak 01 Oktober 2025"); 
+
+            // Set Label Data Pribadi
+            lblNik.setText(pesertaAktif.getNik());
+            lblTglLahir.setText(pesertaAktif.getTanggalLahir());
+            lblJenisKelamin.setText(pesertaAktif.getJenisKelamin());
+            lblAgama.setText(pesertaAktif.getAgama());
+            lblNoHp.setText(pesertaAktif.getNoHp());
+            lblLevelBahasa.setText(pesertaAktif.getLevelBahasa());
+            lblAlamat.setText(pesertaAktif.getAlamat());
+            
+            // Set Status & Paspor (Asumsi Getter sudah kamu tambahkan di model)
+            // lblNoPaspor.setText(pesertaAktif.getNoPaspor() == null ? "Belum diinput" : pesertaAktif.getNoPaspor());
+            
+            // Menampilkan data Instruktur (OOP Association)
+            lblInstruktur.setText(pesertaAktif.getInstrukturDamping().getNamaLengkap());
+
+            // 2. Cari objek Program untuk mengambil data Biaya
+            for (Program prg : DataStore.daftarProgram) {
+                if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {
+                    lblProgram.setText(prg.getIdProgram() + " - " + prg.getNamaProgram());
+                    lblBiaya.setText("Rp " + String.format("%,.0f", prg.getBiaya()).replace(',', '.'));
+                    break;
+                }
+            }
+            
+            // Set text pada badge/label status di bawah
+            lblStatusSeleksi.setText(pesertaAktif.getStatusSeleksi());
+            lblStatusBayar.setText(pesertaAktif.getStatusPembayaran());
+            lblStatusDokumen.setText(pesertaAktif.getStatusKeberangkatan());
+        }
+    }
+    
+    private void loadRiwayatSeleksi(String idPeserta) {
+        panelRiwayatSeleksi.removeAll(); // Bersihkan panel terlebih dahulu
+
+        boolean adaRiwayat = false;
+
+        // Loop ke database memori DataStore
+        for (Seleksi sel : DataStore.daftarSeleksi) {
+            // Jika objek peserta di dalam seleksi ini sama dengan idPeserta yang sedang dibuka
+            if (sel.getPeserta().getIdPeserta().equals(idPeserta)) {
+                adaRiwayat = true;
+                
+                // --- MEMBUAT CARD PANEL SECARA DINAMIS ---
+                JPanel card = new JPanel();
+                card.setLayout(new java.awt.BorderLayout());
+                card.setBackground(Color.WHITE);
+                card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                    javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)), // Garis bawah
+                    javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10) // Padding dalam
+                ));
+                card.setMaximumSize(new Dimension(400, 80));
+
+                // Komponen Kiri: Judul dan Tanggal
+                JPanel panelKiri = new JPanel(new java.awt.GridLayout(2, 1));
+                panelKiri.setBackground(Color.WHITE);
+                javax.swing.JLabel lblJudul = new javax.swing.JLabel(sel.getJenisSeleksi());
+                lblJudul.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
+                
+                // Asumsi kamu menambahkan atribut tanggalSeleksi di kelas Seleksi
+                javax.swing.JLabel lblTanggal = new javax.swing.JLabel("Tanggal ujian"); 
+                lblTanggal.setFont(new java.awt.Font("Inter", java.awt.Font.PLAIN, 10));
+                lblTanggal.setForeground(Color.GRAY);
+                
+                panelKiri.add(lblJudul);
+                panelKiri.add(lblTanggal);
+
+                // Komponen Kanan: Nilai dan Status
+                JPanel panelKanan = new JPanel(new java.awt.GridLayout(2, 1));
+                panelKanan.setBackground(Color.WHITE);
+                
+                // Asumsi kamu menambahkan atribut nilai (int) di kelas Seleksi
+                javax.swing.JLabel lblNilai = new javax.swing.JLabel("Nilai", javax.swing.SwingConstants.RIGHT);
+                lblNilai.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 14));
+                lblNilai.setForeground(new Color(150, 0, 0)); // Merah maroon
+
+                javax.swing.JLabel lblStatus = new javax.swing.JLabel(sel.getStatusHasil(), javax.swing.SwingConstants.RIGHT);
+                lblStatus.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
+                
+                // Ubah warna text status sesuai hasil
+                if (sel.getStatusHasil().equalsIgnoreCase("Lulus")) {
+                    lblStatus.setForeground(new Color(0, 150, 0)); // Hijau
+                } else {
+                    lblStatus.setForeground(Color.RED); // Merah
+                }
+
+                panelKanan.add(lblNilai);
+                panelKanan.add(lblStatus);
+
+                // Gabungkan komponen ke dalam Card
+                card.add(panelKiri, java.awt.BorderLayout.CENTER);
+                card.add(panelKanan, java.awt.BorderLayout.EAST);
+
+                // Masukkan Card ke dalam Panel utama
+                panelRiwayatSeleksi.add(card);
+            }
+        }
+
+        // Jika kosong, tampilkan pesan
+        if (!adaRiwayat) {
+            javax.swing.JLabel lblKosong = new javax.swing.JLabel("Belum ada riwayat seleksi.");
+            lblKosong.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            panelRiwayatSeleksi.add(lblKosong);
+        }
+
+        // Refresh panel agar perubahan terlihat
+        panelRiwayatSeleksi.revalidate();
+        panelRiwayatSeleksi.repaint();
     }
 
     private FormDetailPeserta() {
@@ -39,8 +176,8 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     private void initComponents() {
 
         panelHeader = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        lblNamaHeader = new javax.swing.JLabel();
+        lblIdHeader = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         panelBody = new javax.swing.JPanel();
@@ -48,35 +185,37 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        lblTglLahir = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
-        jLabel11 = new javax.swing.JLabel();
+        lblNik = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        lblJenisKelamin = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
+        lblAgama = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
-        jLabel17 = new javax.swing.JLabel();
+        lblNoHp = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
+        lblLevelBahasa = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
+        lblAlamat = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
+        lblProgram = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
+        lblInstruktur = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
+        lblBiaya = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
+        lblStatusSeleksi = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
+        lblStatusBayar = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
+        lblStatusDokumen = new javax.swing.JLabel();
         jLabel30 = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        panelRiwayatSeleksi = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jLabel31 = new javax.swing.JLabel();
         jLabel32 = new javax.swing.JLabel();
@@ -87,9 +226,8 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel36 = new javax.swing.JLabel();
         jLabel37 = new javax.swing.JLabel();
         jLabel38 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
         btnSimpan = new javax.swing.JButton();
-        btnBatal = new javax.swing.JButton();
+        btnTutup = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -98,17 +236,17 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         panelHeader.setPreferredSize(new java.awt.Dimension(520, 68));
         panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("Muhamad Farel Fauzan");
-        jLabel1.setPreferredSize(new java.awt.Dimension(280, 22));
-        panelHeader.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+        lblNamaHeader.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+        lblNamaHeader.setForeground(new java.awt.Color(255, 255, 255));
+        lblNamaHeader.setText("Muhamad Farel Fauzan");
+        lblNamaHeader.setPreferredSize(new java.awt.Dimension(280, 22));
+        panelHeader.add(lblNamaHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
 
-        jLabel2.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("PST003  ·  Terdaftar sejak 01 Oktober 2025");
-        jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
-        panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
+        lblIdHeader.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
+        lblIdHeader.setForeground(new java.awt.Color(255, 255, 255));
+        lblIdHeader.setText("PST003  ·  Terdaftar sejak 01 Oktober 2025");
+        lblIdHeader.setPreferredSize(new java.awt.Dimension(300, 16));
+        panelHeader.add(lblIdHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
 
         jButton1.setBackground(new java.awt.Color(160, 20, 20));
         jButton1.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
@@ -118,6 +256,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButton1.setFocusPainted(false);
         jButton1.setPreferredSize(new java.awt.Dimension(30, 30));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         panelHeader.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 20, -1, -1));
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -160,20 +303,20 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel5.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 44, -1, -1));
 
-        jLabel6.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel6.setText("10 Januari 2007");
-        jLabel6.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
+        lblTglLahir.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblTglLahir.setForeground(new java.awt.Color(10, 10, 10));
+        lblTglLahir.setText("10 Januari 2007");
+        lblTglLahir.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblTglLahir, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
 
         jSeparator2.setPreferredSize(new java.awt.Dimension(480, 8));
         panelBody.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 225, 420, -1));
 
-        jLabel11.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel11.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel11.setText("2250800020");
-        jLabel11.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
+        lblNik.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblNik.setForeground(new java.awt.Color(10, 10, 10));
+        lblNik.setText("2250800020");
+        lblNik.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblNik, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
 
         jLabel12.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(90, 90, 90));
@@ -181,11 +324,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel12.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, -1, -1));
 
-        jLabel13.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel13.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel13.setText("Laki-laki");
-        jLabel13.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 95, -1, -1));
+        lblJenisKelamin.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblJenisKelamin.setForeground(new java.awt.Color(10, 10, 10));
+        lblJenisKelamin.setText("Laki-laki");
+        lblJenisKelamin.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblJenisKelamin, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 95, -1, -1));
 
         jLabel14.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(90, 90, 90));
@@ -193,11 +336,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel14.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 80, -1, -1));
 
-        jLabel15.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel15.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel15.setText("Islam");
-        jLabel15.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 95, -1, -1));
+        lblAgama.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblAgama.setForeground(new java.awt.Color(10, 10, 10));
+        lblAgama.setText("Islam");
+        lblAgama.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblAgama, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 95, -1, -1));
 
         jLabel16.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel16.setForeground(new java.awt.Color(90, 90, 90));
@@ -205,11 +348,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel16.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, -1, -1));
 
-        jLabel17.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel17.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel17.setText("2250800020");
-        jLabel17.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 135, -1, -1));
+        lblNoHp.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblNoHp.setForeground(new java.awt.Color(10, 10, 10));
+        lblNoHp.setText("2250800020");
+        lblNoHp.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblNoHp, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 135, -1, -1));
 
         jLabel18.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(90, 90, 90));
@@ -217,11 +360,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel18.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 120, -1, -1));
 
-        jLabel19.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel19.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel19.setText("N3");
-        jLabel19.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 135, -1, -1));
+        lblLevelBahasa.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblLevelBahasa.setForeground(new java.awt.Color(122, 0, 0));
+        lblLevelBahasa.setText("N3");
+        lblLevelBahasa.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblLevelBahasa, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 135, -1, -1));
 
         jLabel20.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel20.setForeground(new java.awt.Color(90, 90, 90));
@@ -229,11 +372,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel20.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, -1, -1));
 
-        jLabel21.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel21.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel21.setText("Kuningan, Windusengkahan RT 11 RW 04");
-        jLabel21.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 175, 470, -1));
+        lblAlamat.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblAlamat.setForeground(new java.awt.Color(10, 10, 10));
+        lblAlamat.setText("Kuningan, Windusengkahan RT 11 RW 04");
+        lblAlamat.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblAlamat, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 175, 470, -1));
 
         jLabel22.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel22.setForeground(new java.awt.Color(90, 90, 90));
@@ -241,11 +384,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel22.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
 
-        jLabel23.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel23.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel23.setText("PRG002 - Industri Makanan");
-        jLabel23.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, -1, -1));
+        lblProgram.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblProgram.setForeground(new java.awt.Color(10, 10, 10));
+        lblProgram.setText("PRG002 - Industri Makanan");
+        lblProgram.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, -1, -1));
 
         jLabel24.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel24.setForeground(new java.awt.Color(90, 90, 90));
@@ -253,11 +396,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel24.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 230, -1, -1));
 
-        jLabel25.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel25.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel25.setText("Ayumi Diana");
-        jLabel25.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 250, -1, -1));
+        lblInstruktur.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblInstruktur.setForeground(new java.awt.Color(10, 10, 10));
+        lblInstruktur.setText("Ayumi Diana");
+        lblInstruktur.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 250, -1, -1));
 
         jLabel26.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel26.setForeground(new java.awt.Color(90, 90, 90));
@@ -265,11 +408,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel26.setPreferredSize(new java.awt.Dimension(140, 14));
         panelBody.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
 
-        jLabel27.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel27.setForeground(new java.awt.Color(10, 10, 10));
-        jLabel27.setText("Rp. 38.500.000");
-        jLabel27.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, -1, -1));
+        lblBiaya.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        lblBiaya.setForeground(new java.awt.Color(10, 10, 10));
+        lblBiaya.setText("Rp. 38.500.000");
+        lblBiaya.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(lblBiaya, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, -1, -1));
 
         jLabel28.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel28.setForeground(new java.awt.Color(90, 90, 90));
@@ -288,10 +431,10 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jPanel1.setPreferredSize(new java.awt.Dimension(104, 22));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel9.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(0, 122, 0));
-        jLabel9.setText("Lulus");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
+        lblStatusSeleksi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        lblStatusSeleksi.setForeground(new java.awt.Color(0, 122, 0));
+        lblStatusSeleksi.setText("Lulus");
+        jPanel1.add(lblStatusSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
 
         panelBody.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 320, -1, 20));
 
@@ -300,10 +443,10 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jPanel2.setPreferredSize(new java.awt.Dimension(104, 22));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel10.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(0, 0, 122));
-        jLabel10.setText("Lunas");
-        jPanel2.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
+        lblStatusBayar.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        lblStatusBayar.setForeground(new java.awt.Color(0, 0, 122));
+        lblStatusBayar.setText("Lunas");
+        jPanel2.add(lblStatusBayar, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 3, -1, -1));
 
         panelBody.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 320, -1, -1));
 
@@ -312,10 +455,10 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jPanel3.setPreferredSize(new java.awt.Dimension(104, 22));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel8.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(200, 100, 0));
-        jLabel8.setText("Menunggu dokumen");
-        jPanel3.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 3, -1, -1));
+        lblStatusDokumen.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        lblStatusDokumen.setForeground(new java.awt.Color(200, 100, 0));
+        lblStatusDokumen.setText("Menunggu dokumen");
+        jPanel3.add(lblStatusDokumen, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 3, -1, -1));
 
         panelBody.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 320, 140, -1));
 
@@ -325,8 +468,14 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel30.setPreferredSize(new java.awt.Dimension(200, 14));
         panelBody.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, -1, -1));
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel7.setText("RIWAYAT SELEKSI");
+        jLabel7.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, -1, -1));
+
+        panelRiwayatSeleksi.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        panelRiwayatSeleksi.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
         jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -351,7 +500,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel34.setText("Mengulang");
         jPanel6.add(jLabel34, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 50, -1, -1));
 
-        jPanel5.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 260, 80));
+        panelRiwayatSeleksi.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 260, 80));
 
         jPanel7.setBackground(new java.awt.Color(255, 255, 255));
         jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -376,15 +525,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         jLabel38.setText("Lulus");
         jPanel7.add(jLabel38, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 50, -1, -1));
 
-        jPanel5.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 80));
+        panelRiwayatSeleksi.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 260, 80));
 
-        panelBody.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 30, 280, 310));
+        jScrollPane1.setViewportView(panelRiwayatSeleksi);
 
-        jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel7.setText("RIWAYAT SELEKSI");
-        jLabel7.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, -1, -1));
+        panelBody.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 30, 290, 310));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, 790, -1));
 
@@ -398,17 +543,30 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         btnSimpan.setPreferredSize(new java.awt.Dimension(116, 34));
         getContentPane().add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 450, -1, -1));
 
-        btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        btnBatal.setForeground(new java.awt.Color(80, 80, 80));
-        btnBatal.setText("Tutup");
-        btnBatal.setToolTipText("Batal");
-        btnBatal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnBatal.setFocusPainted(false);
-        btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
-        getContentPane().add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 450, -1, -1));
+        btnTutup.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        btnTutup.setForeground(new java.awt.Color(80, 80, 80));
+        btnTutup.setText("Tutup");
+        btnTutup.setToolTipText("Batal");
+        btnTutup.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnTutup.setFocusPainted(false);
+        btnTutup.setPreferredSize(new java.awt.Dimension(100, 34));
+        btnTutup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTutupActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnTutup, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 450, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void btnTutupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTutupActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnTutupActionPerformed
 
     /**
      * @param args the command line arguments
@@ -447,29 +605,17 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
+    private javax.swing.JButton btnTutup;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
@@ -484,20 +630,33 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblAgama;
+    private javax.swing.JLabel lblAlamat;
+    private javax.swing.JLabel lblBiaya;
+    private javax.swing.JLabel lblIdHeader;
+    private javax.swing.JLabel lblInstruktur;
+    private javax.swing.JLabel lblJenisKelamin;
+    private javax.swing.JLabel lblLevelBahasa;
+    private javax.swing.JLabel lblNamaHeader;
+    private javax.swing.JLabel lblNik;
+    private javax.swing.JLabel lblNoHp;
+    private javax.swing.JLabel lblProgram;
+    private javax.swing.JLabel lblStatusBayar;
+    private javax.swing.JLabel lblStatusDokumen;
+    private javax.swing.JLabel lblStatusSeleksi;
+    private javax.swing.JLabel lblTglLahir;
     private javax.swing.JPanel panelBody;
     private javax.swing.JPanel panelHeader;
+    private javax.swing.JPanel panelRiwayatSeleksi;
     // End of variables declaration//GEN-END:variables
 }

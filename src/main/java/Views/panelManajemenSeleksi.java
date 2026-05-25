@@ -11,6 +11,7 @@ import Util.TombolAksiEditor;
 import Util.TombolAksiRenderer;
 import java.awt.Color;
 import java.awt.Font;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -31,7 +32,10 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         setupTable();
         loadStatistics();
         loadTableData("");
+        
+        cbFilter.setModel(new DefaultComboBoxModel<>(new String[]{"Semua", "Lulus", "Gugur"}));
     }
+    
     private void setupTable() {
         tabelSeleksi.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelSeleksi.getTableHeader().setBackground(new Color(122, 0, 0));
@@ -112,11 +116,11 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
                     sel.getPeserta().getIdPeserta(),
                     sel.getPeserta().getNamaLengkap(),
                     sel.getJenisSeleksi(),
-                    "" // Kolom Aksi
+                    ""
                 });
             }
         }
-        
+        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data Seleksi");
         try { 
             TabelUtil.autoResizeKolom(tabelSeleksi); 
         } catch (Exception e) {}
@@ -152,7 +156,6 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     }
 
     private void cbFilterActionPerformed(java.awt.event.ActionEvent evt) {
-        // Otomatis filter tabel saat combobox diubah
         loadTableData(txtCari.getText());
     }
 
@@ -189,7 +192,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelSeleksi = new javax.swing.JTable();
-        jLabel7 = new javax.swing.JLabel();
+        lblTotalData = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -316,10 +319,10 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
         jPanel4.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 37, 928, 332));
 
-        jLabel7.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(120, 120, 120));
-        jLabel7.setText("Menampilkan 0 data seleksi");
-        jPanel4.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 10, -1, -1));
+        lblTotalData.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        lblTotalData.setForeground(new java.awt.Color(120, 120, 120));
+        lblTotalData.setText("Menampilkan 0 data seleksi");
+        jPanel4.add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 10, -1, -1));
 
         add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 225, 930, 370));
     }// </editor-fold>//GEN-END:initComponents
@@ -334,7 +337,6 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
@@ -347,6 +349,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     private javax.swing.JPanel kartuTotal2;
     private javax.swing.JLabel lblGugur;
     private javax.swing.JLabel lblLulus;
+    private javax.swing.JLabel lblTotalData;
     private javax.swing.JLabel lblTotalSeleksi;
     private javax.swing.JPanel pnlToolbar;
     private javax.swing.JTable tabelSeleksi;

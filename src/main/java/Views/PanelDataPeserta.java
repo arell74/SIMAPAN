@@ -42,8 +42,12 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             @Override
             public void onDetail(int baris) {
                 String id = tabelPeserta.getValueAt(baris, 1).toString();
-                FormDetailPeserta formd = new FormDetailPeserta(null, true);
-                formd.setVisible(true);
+        
+                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelDataPeserta.this);
+                if (parentWindow instanceof java.awt.Frame) {
+                    FormDetailPeserta detailForm = new FormDetailPeserta((java.awt.Frame) parentWindow, true, id);
+                    detailForm.setVisible(true);
+                }
             }
 
             @Override
@@ -132,13 +136,13 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     private void initComponents() {
 
         panelToolbar = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         btnTambah = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
+        jLabel3 = new javax.swing.JLabel();
         panelTabel = new javax.swing.JPanel();
         scrollTabel = new javax.swing.JScrollPane();
         tabelPeserta = new javax.swing.JTable();
@@ -150,12 +154,8 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         panelToolbar.setPreferredSize(new java.awt.Dimension(980, 56));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setText("C");
-        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
-        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
-
         jTextField1.setPreferredSize(new java.awt.Dimension(280, 30));
-        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(46, 14, -1, -1));
+        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
 
         jButton1.setBackground(new java.awt.Color(80, 80, 80));
         jButton1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -191,6 +191,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
 
         jSeparator3.setPreferredSize(new java.awt.Dimension(980, 2));
         panelToolbar.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/search.png")); // NOI18N
+        jLabel3.setText("C");
+        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
+        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
 
         add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 

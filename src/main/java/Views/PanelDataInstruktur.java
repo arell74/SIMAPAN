@@ -89,9 +89,9 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
                     no++,
                     ins.getIdInstruktur(),
                     ins.getNamaLengkap(),
-                    ins.getNoTelp(),
                     ins.getSpesialisasi(),
                     ins.getLevelJlpt(),
+                    ins.getNoTelp(),
                     ins.getKelasDiampu(),
                     ""
                 });
