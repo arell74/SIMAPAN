@@ -4,13 +4,8 @@
  */
 package Model;
 
-/**
- *
- * @author arelssi
- */
 public class Peserta {
-    // ENCAPSULATION: Menyembunyikan atribut menggunakan private
-    // Data Pribadi
+    // Encapsulation
     private String idPeserta;
     private String nik;
     private String namaLengkap;
@@ -22,17 +17,14 @@ public class Peserta {
     
     // Data Program & Akademik
     private String program;
-    private Instruktur instrukturDamping; // Relasi Antar Objek (Association)
+    private Instruktur instrukturDamping;
     private String levelBahasa;
     private String statusPembayaran;
     
-    // Status Tambahan (Akan diupdate kemudian hari oleh Admin di halaman seleksi)
-    private String statusSeleksi;        // Contoh: "Lulus", "Belum Seleksi", "Gugur"
-    private String statusKeberangkatan;  // Contoh: "Siap Berangkat", "Belum Berangkat"
+    private String statusSeleksi;        
+    private String statusKeberangkatan;
 
-    // Konstruktor: Mencetak objek Peserta saat disubmit dari form GUI
-    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, 
-                   String jenisKelamin, String noHp, String agama, String alamat, 
+    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, String jenisKelamin, String noHp, String agama, String alamat, 
                    String program, Instruktur instrukturDamping, String levelBahasa, String statusPembayaran) {
         this.idPeserta = idPeserta;
         this.nik = nik;
@@ -47,7 +39,7 @@ public class Peserta {
         this.levelBahasa = levelBahasa;
         this.statusPembayaran = statusPembayaran;
         
-        // Default Status Awal saat peserta baru pertama kali ditambahkan
+        // Default Status Awal
         this.statusSeleksi = "Belum Seleksi";
         this.statusKeberangkatan = "Belum Berangkat";
     }

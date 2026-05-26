@@ -12,7 +12,7 @@ import Model.*;
 import java.util.ArrayList;
 
 public class DataStore {
-    // 1 List ini menampung Admin dan Instruktur sekaligus (Polymorphism)
+//    polymorphism
     public static ArrayList<Pengguna> daftarPengguna = new ArrayList<>();
     public static ArrayList<Peserta> daftarPeserta = new ArrayList<>();
     public static ArrayList<Program> daftarProgram = new ArrayList<>();

@@ -23,26 +23,18 @@ import javax.swing.JOptionPane;
  */
     public class FormTambahPeserta extends javax.swing.JFrame {
 
-        // Method untuk membuat ID Otomatis
+        //ID Otomatis
     private String generateIdPeserta() {
-        // Mengambil jumlah data yang ada di ArrayList
         int ukuranData = DataStore.daftarPeserta.size();
-        
-        // Format ID: PST + 3 digit angka (PST001, PST002, dst)
         return String.format("PST%03d", ukuranData + 1);
     }
 
-    // Method untuk mengisi ComboBox dengan Objek Instruktur
     private void loadComboBoxInstruktur() {
         cmbInstruktur.removeAllItems();
-        
-        // Ambil khusus data instruktur dari DataStore
         for (Instruktur ins : DataStore.getHanyaInstruktur()) {
-            cmbInstruktur.addItem(ins); // Menambahkan objek utuh, bukan cuma teks
+            cmbInstruktur.addItem(ins);
         }
     }
-    
-    
 
     public FormTambahPeserta(java.awt.Frame parent, boolean modal) {
         initComponents();
@@ -52,13 +44,10 @@ import javax.swing.JOptionPane;
         setResizable(false);
         setTitle("Tambah Peserta Baru");
         
-        // Atur ID Peserta agar otomatis terisi dan tidak bisa diedit manual
         txtIdPeserta.setText(generateIdPeserta());
         txtIdPeserta.setEditable(false);
         
-        // Panggil method untuk mengisi ComboBox
         loadComboBoxInstruktur();
-        // Contoh isi manual untuk Level Bahasa
         cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3"}));
         // Status Pembayaran
         cmbStatusBayar.setModel(new DefaultComboBoxModel<>(new String[]{"Belum Lunas", "Lunas"}));
@@ -113,7 +102,7 @@ import javax.swing.JOptionPane;
         cmbStatusBayar = new javax.swing.JComboBox<>();
         footer = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
-        jButton2 = new javax.swing.JButton();
+        btnBatal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -290,17 +279,17 @@ import javax.swing.JOptionPane;
         jSeparator3.setPreferredSize(new java.awt.Dimension(560, 2));
         footer.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
-        jButton2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(80, 80, 80));
-        jButton2.setText("Batal");
-        jButton2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210)));
-        jButton2.setPreferredSize(new java.awt.Dimension(100, 34));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        btnBatal.setForeground(new java.awt.Color(80, 80, 80));
+        btnBatal.setText("Batal");
+        btnBatal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210)));
+        btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnBatalActionPerformed(evt);
             }
         });
-        footer.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(316, 12, -1, -1));
+        footer.add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(316, 12, -1, -1));
 
         btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
         btnSimpan.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
@@ -326,30 +315,28 @@ import javax.swing.JOptionPane;
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
         int konfirm = javax.swing.JOptionPane.showConfirmDialog(
-        this,
-        "Data yang diisi akan hilang. Yakin ingin membatalkan?",
-        "Konfirmasi Batal",
-        javax.swing.JOptionPane.YES_NO_OPTION,
-        javax.swing.JOptionPane.WARNING_MESSAGE
-    );
-    if (konfirm == javax.swing.JOptionPane.YES_OPTION) {
-        this.dispose();
-    }
-    }//GEN-LAST:event_jButton2ActionPerformed
+            this,
+            "Data yang diisi akan hilang. Yakin ingin membatalkan?",
+            "Konfirmasi Batal",
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.WARNING_MESSAGE
+        );
+        if (konfirm == javax.swing.JOptionPane.YES_OPTION) {
+            this.dispose();
+        }
+    }//GEN-LAST:event_btnBatalActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-    // 1. Validasi Input Dasar (Contoh NIK dan Nama harus diisi)
         if (txtNik.getText().trim().isEmpty() || txtNamaLengkap.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, 
                 "Harap isi NIK dan Nama Lengkap dengan benar!", 
                 "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return; // Hentikan proses simpan
+            return;
         }
 
         try {
-            // 2. Ambil semua data dari komponen GUI
             String id = txtIdPeserta.getText();
             String nik = txtNik.getText();
             String nama = txtNamaLengkap.getText();
@@ -362,19 +349,15 @@ import javax.swing.JOptionPane;
             String level = cmbLevelBahasa.getSelectedItem().toString();
             String bayar = cmbStatusBayar.getSelectedItem().toString();
 
-            // 3. Ambil Objek Instruktur terpilih dari ComboBox (Casting Object)
             Instruktur instrukturPilihan = (Instruktur) cmbInstruktur.getSelectedItem();
 
-            // 4. Buat instance Objek Peserta Baru
             Peserta pesertaBaru = new Peserta(
                 id, nik, nama, tglLahir, jk, noHp, agama, alamat, 
                 program, instrukturPilihan, level, bayar
             );
 
-            // 5. Simpan ke dalam In-Memory DataStore
             DataStore.daftarPeserta.add(pesertaBaru);
 
-            // 6. Tampilkan pesan sukses dan tutup jendela Form
             JOptionPane.showMessageDialog(this, "Data Peserta Baru Berhasil Disimpan!");
             this.dispose(); 
             
@@ -421,6 +404,7 @@ import javax.swing.JOptionPane;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
     private javax.swing.JComboBox<String> cmbAgama;
     private javax.swing.JComboBox cmbInstruktur;
@@ -430,7 +414,6 @@ import javax.swing.JOptionPane;
     private javax.swing.JComboBox<String> cmbStatusBayar;
     private javax.swing.JPanel footer;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

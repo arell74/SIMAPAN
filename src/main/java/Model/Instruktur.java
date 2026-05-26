@@ -15,7 +15,6 @@ public class Instruktur extends Pengguna {
     private String levelJlpt;
     private String kelasDiampu;
 
-    // Konstruktor super() memanggil milik Pengguna
     public Instruktur(String username, String password, String namaLengkap, 
                       String idInstruktur, String noTelp, String spesialisasi, 
                       String levelJlpt, String kelasDiampu) {
@@ -27,7 +26,6 @@ public class Instruktur extends Pengguna {
         this.kelasDiampu = kelasDiampu;
     }
 
-    // Getter untuk atribut spesifik Instruktur
     public String getIdInstruktur() { return idInstruktur; }
     public String getSpesialisasi() { return spesialisasi; }
     public String getLevelJlpt() { return levelJlpt; }

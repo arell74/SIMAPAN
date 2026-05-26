@@ -23,7 +23,7 @@ public class FormLogin extends javax.swing.JFrame {
         setSize(1100, 686);
         setLocationRelativeTo(null);
         setResizable(false);
-        setTitle("Sistem Manajemen Pemagangan LPK");
+        setTitle("Sistem Manajemen Pemagangan ke japan - SIMAPAN");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         pnlRight.putClientProperty("JComponent.arc", 25);
@@ -317,7 +317,6 @@ public class FormLogin extends javax.swing.JFrame {
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         String inputUsername = txtUsername.getText().trim();
-
         String inputPassword = new String(txtPassword.getPassword()); 
 
         if (inputUsername.isEmpty() || inputPassword.isEmpty()) {
@@ -327,16 +326,11 @@ public class FormLogin extends javax.swing.JFrame {
                 javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         boolean loginSukses = false;
 
-        // 3. Looping data pengguna dari DataStore (Penerapan Polimorfisme)
         for (Model.Pengguna user : DataStore.DataStore.daftarPengguna) {
-
-            // Memanggil method dari class model untuk mencocokkan data
             if (user.validasiLogin(inputUsername, inputPassword)) {
                 loginSukses = true;
-
                 javax.swing.JOptionPane.showMessageDialog(this, 
                     "Selamat Datang, " + user.getNamaLengkap() + "!\n" + user.getMenuOtoritas(), 
                     "Login Berhasil", 
@@ -345,22 +339,16 @@ public class FormLogin extends javax.swing.JFrame {
                 if (user.getRole().equals("ADMIN")) {
                     AdminFrame adminDashboard = new AdminFrame();
                     adminDashboard.setVisible(true);
-
                 } else if (user.getRole().equals("INSTRUKTUR")) {
-                    // Buka Frame Dashboard Instruktur
-                    // InstrukturDashboardFrame instrukturDashboard = new InstrukturDashboardFrame();
-                    // instrukturDashboard.setVisible(true);
-
+                     InstrukturFrame instrukturFrame = new InstrukturFrame();
+                     instrukturFrame.setVisible(true);
                     javax.swing.JOptionPane.showMessageDialog(this, "Mengarahkan ke halaman Instruktur...");
                 }
-
-                // 5. Tutup halaman login ini agar tidak menumpuk di background
                 this.dispose();
-                break; // Keluar dari perulangan karena user sudah ditemukan
+                break;
             }
         }
 
-        // 6. Jika loop selesai tapi tidak ada data yang cocok
         if (!loginSukses) {
             javax.swing.JOptionPane.showMessageDialog(this, 
                 "Username atau Password salah! Silakan coba lagi.", 

@@ -22,6 +22,6 @@ public abstract class Pengguna {
         return this.username.equals(u) && this.password.equals(p);
     }
 
-    // Abstract Method (Pilar Abstraction)
+    // Abstract Method 
     public abstract String getMenuOtoritas();
 }

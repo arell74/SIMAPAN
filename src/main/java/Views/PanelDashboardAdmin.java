@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author arelssi
  */
-public class PanelAdmin extends javax.swing.JPanel {
+public class PanelDashboardAdmin extends javax.swing.JPanel {
     // --- 1. UPDATE: Metode loadStatistics Tanpa Database ---
     private void loadStatistics() {
         int totalPeserta = DataStore.daftarPeserta.size();
@@ -68,7 +68,7 @@ public class PanelAdmin extends javax.swing.JPanel {
             });
         }
     }
-    public PanelAdmin() {
+    public PanelDashboardAdmin() {
         initComponents();
         tabelPeserta.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelPeserta.getTableHeader().setOpaque(false);

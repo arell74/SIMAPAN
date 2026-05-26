@@ -36,7 +36,6 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         tabelPeserta.getTableHeader().setForeground(Color.WHITE);
         tabelPeserta.setRowHeight(36);
         
-        // Pasang Renderer dan Editor (Index ke-6 untuk kolom Aksi)
         tabelPeserta.getColumnModel().getColumn(6).setCellRenderer(new TombolAksiRenderer());
         tabelPeserta.getColumnModel().getColumn(6).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
             @Override
@@ -53,8 +52,15 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             @Override
             public void onEdit(int baris) {
                 String id = tabelPeserta.getValueAt(baris, 1).toString();
-                JOptionPane.showMessageDialog(PanelDataPeserta.this, "Membuka Form Edit untuk ID: " + id);
-                // Panggil form edit di sini
+        
+                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelDataPeserta.this);
+                
+                if (parentWindow instanceof java.awt.Frame) {
+                    FormEditPeserta editForm = new FormEditPeserta((java.awt.Frame) parentWindow, true, id);
+                    editForm.setVisible(true); 
+                    
+                    loadTableData(""); 
+                }
             }
 
             @Override
@@ -66,15 +72,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
 
     private void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
-        model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
+        model.setRowCount(0);
 
         int no = 1;
         
-        // Iterasi objek Peserta dari DataStore
         for (Peserta p : DataStore.daftarPeserta) {
-            
-            // Logika Pencarian (Search): Cek apakah ID atau Nama mengandung kata kunci
-            // Jika keyword kosong, maka kondisi ini otomatis selalu bernilai 'true'
             boolean match = keyword.isEmpty() || 
                             p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
                             p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
@@ -87,12 +89,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                     p.getNik(),
                     p.getProgram(),
                     p.getStatusSeleksi(),
-                    "" // Kolom indeks 6 (Aksi), dikosongkan karena dirender oleh TombolAksiRenderer
+                    ""
                 });
             }
         }
 
-        // Update label jumlah data sesuai baris yang tampil di tabel
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
         
         try {
@@ -103,7 +104,6 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     }
 
     private void hapusData(int baris) {
-        // Ambil ID dan Nama dari baris yang diklik
         String idPeserta = tabelPeserta.getValueAt(baris, 1).toString();
         String nama = tabelPeserta.getValueAt(baris, 2).toString();
         
@@ -112,13 +112,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
-            // Hapus objek dari ArrayList menggunakan fungsi bawaan removeIf()
             boolean sukses = DataStore.daftarPeserta.removeIf(p -> p.getIdPeserta().equals(idPeserta));
             
             if (sukses) {
                 JOptionPane.showMessageDialog(this, "Data berhasil dihapus!");
                 
-                // Refresh tabel dengan string kosong agar kembali ke kondisi semula
                 loadTableData(""); 
             } else {
                 JOptionPane.showMessageDialog(this, "Data gagal dihapus atau ID tidak ditemukan!");

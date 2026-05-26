@@ -50,12 +50,12 @@ public class AdminFrame extends javax.swing.JFrame {
             pack();
             setLocationRelativeTo(null);
             setResizable(false);
-            setTitle("LPK Yuuki - Dashboard Admin");
+            setTitle("SIMAPAN - Role Admin");
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", 
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
-            showPanel(new PanelAdmin());
+            showPanel(new PanelDashboardAdmin());
     }
 
     /**
@@ -570,7 +570,7 @@ public class AdminFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Dashboard");
         lblHalamanSub.setText("Selamat datang, Admin LPK");
 
-        showPanel(new PanelAdmin());
+        showPanel(new PanelDashboardAdmin());
         setActiveButton(btnDashboard);
     }//GEN-LAST:event_btnDashboardActionPerformed
 

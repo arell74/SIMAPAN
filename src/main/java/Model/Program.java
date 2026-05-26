@@ -4,12 +4,8 @@
  */
 package Model;
 
-/**
- *
- * @author arelssi
- */
 public class Program {
-    // Encapsulation: Atribut private
+    // Encapsulation
     private String idProgram;
     private String namaProgram;
     private String bidangUsaha;
@@ -64,7 +60,6 @@ public class Program {
         this.kuota = kuota;
     }
     
-    // Override toString agar mudah ditampilkan di ComboBox (misal di form Tambah Peserta)
     @Override
     public String toString() {
         return namaProgram;

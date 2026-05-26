@@ -39,8 +39,6 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     
     private void loadDataIdentitas(String idPeserta) {
         Peserta pesertaAktif = null;
-
-        // 1. Cari objek Peserta berdasarkan ID
         for (Peserta p : DataStore.daftarPeserta) {
             if (p.getIdPeserta().equals(idPeserta)) {
                 pesertaAktif = p;
@@ -49,11 +47,9 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         }
 
         if (pesertaAktif != null) {
-            // Set Label Header
             lblNamaHeader.setText(pesertaAktif.getNamaLengkap());
             lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · Terdaftar sejak 01 Oktober 2025"); 
 
-            // Set Label Data Pribadi
             lblNik.setText(pesertaAktif.getNik());
             lblTglLahir.setText(pesertaAktif.getTanggalLahir());
             lblJenisKelamin.setText(pesertaAktif.getJenisKelamin());
@@ -62,13 +58,8 @@ public class FormDetailPeserta extends javax.swing.JFrame {
             lblLevelBahasa.setText(pesertaAktif.getLevelBahasa());
             lblAlamat.setText(pesertaAktif.getAlamat());
             
-            // Set Status & Paspor (Asumsi Getter sudah kamu tambahkan di model)
-            // lblNoPaspor.setText(pesertaAktif.getNoPaspor() == null ? "Belum diinput" : pesertaAktif.getNoPaspor());
-            
-            // Menampilkan data Instruktur (OOP Association)
             lblInstruktur.setText(pesertaAktif.getInstrukturDamping().getNamaLengkap());
 
-            // 2. Cari objek Program untuk mengambil data Biaya
             for (Program prg : DataStore.daftarProgram) {
                 if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {
                     lblProgram.setText(prg.getIdProgram() + " - " + prg.getNamaProgram());
@@ -77,7 +68,6 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 }
             }
             
-            // Set text pada badge/label status di bawah
             lblStatusSeleksi.setText(pesertaAktif.getStatusSeleksi());
             lblStatusBayar.setText(pesertaAktif.getStatusPembayaran());
             lblStatusDokumen.setText(pesertaAktif.getStatusKeberangkatan());
@@ -90,13 +80,10 @@ public class FormDetailPeserta extends javax.swing.JFrame {
 
         boolean adaRiwayat = false;
 
-        // Loop ke database memori DataStore
         for (Seleksi sel : DataStore.daftarSeleksi) {
-            // Jika objek peserta di dalam seleksi ini sama dengan idPeserta yang sedang dibuka
             if (sel.getPeserta().getIdPeserta().equals(idPeserta)) {
                 adaRiwayat = true;
                 
-                // --- MEMBUAT CARD PANEL SECARA DINAMIS ---
                 JPanel card = new JPanel();
                 card.setLayout(new java.awt.BorderLayout());
                 card.setBackground(Color.WHITE);
@@ -106,13 +93,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 ));
                 card.setMaximumSize(new Dimension(400, 80));
 
-                // Komponen Kiri: Judul dan Tanggal
                 JPanel panelKiri = new JPanel(new java.awt.GridLayout(2, 1));
                 panelKiri.setBackground(Color.WHITE);
                 javax.swing.JLabel lblJudul = new javax.swing.JLabel(sel.getJenisSeleksi());
                 lblJudul.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
                 
-                // Asumsi kamu menambahkan atribut tanggalSeleksi di kelas Seleksi
                 javax.swing.JLabel lblTanggal = new javax.swing.JLabel(sel.getTanggalSeleksi());
                 lblTanggal.setFont(new java.awt.Font("Inter", java.awt.Font.PLAIN, 10));
                 lblTanggal.setForeground(Color.GRAY);
@@ -120,45 +105,37 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 panelKiri.add(lblJudul);
                 panelKiri.add(lblTanggal);
 
-                // Komponen Kanan: Nilai dan Status
                 JPanel panelKanan = new JPanel(new java.awt.GridLayout(2, 1));
                 panelKanan.setBackground(Color.WHITE);
                 
-                // Asumsi kamu menambahkan atribut nilai (int) di kelas Seleksi
                 javax.swing.JLabel lblNilai = new javax.swing.JLabel(String.valueOf(sel.getNilai()), javax.swing.SwingConstants.RIGHT);
                 lblNilai.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 14));
-                lblNilai.setForeground(new Color(150, 0, 0)); // Merah maroon
+                lblNilai.setForeground(new Color(150, 0, 0));
 
                 javax.swing.JLabel lblStatus = new javax.swing.JLabel(sel.getStatusHasil(), javax.swing.SwingConstants.RIGHT);
                 lblStatus.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
                 
-                // Ubah warna text status sesuai hasil
                 if (sel.getStatusHasil().equalsIgnoreCase("Lulus")) {
                     lblStatus.setForeground(new Color(0, 150, 0)); // Hijau
                 } else {
-                    lblStatus.setForeground(Color.RED); // Merah
+                    lblStatus.setForeground(Color.RED);
                 }
 
                 panelKanan.add(lblNilai);
                 panelKanan.add(lblStatus);
 
-                // Gabungkan komponen ke dalam Card
                 card.add(panelKiri, java.awt.BorderLayout.CENTER);
                 card.add(panelKanan, java.awt.BorderLayout.EAST);
 
-                // Masukkan Card ke dalam Panel utama
                 panelRiwayatSeleksi.add(card);
             }
         }
-
-        // Jika kosong, tampilkan pesan
         if (!adaRiwayat) {
             javax.swing.JLabel lblKosong = new javax.swing.JLabel("Belum ada riwayat seleksi.");
             lblKosong.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
             panelRiwayatSeleksi.add(lblKosong);
         }
 
-        // Refresh panel agar perubahan terlihat
         panelRiwayatSeleksi.revalidate();
         panelRiwayatSeleksi.repaint();
     }
