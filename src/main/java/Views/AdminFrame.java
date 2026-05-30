@@ -81,7 +81,7 @@ public class AdminFrame extends javax.swing.JFrame {
         btnDokumenK = new javax.swing.JButton();
         jSeparator3 = new javax.swing.JSeparator();
         jLabel5 = new javax.swing.JLabel();
-        jButton7 = new javax.swing.JButton();
+        btnLihatLaporan = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
         btnLogout = new javax.swing.JButton();
         panelHeadr = new javax.swing.JPanel();
@@ -268,17 +268,22 @@ public class AdminFrame extends javax.swing.JFrame {
         jLabel5.setPreferredSize(new java.awt.Dimension(160, 14));
         sidebar.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 428, -1, -1));
 
-        jButton7.setBackground(new java.awt.Color(122, 0, 0));
-        jButton7.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jButton7.setForeground(new java.awt.Color(255, 210, 210));
-        jButton7.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
-        jButton7.setText(" Lihat Laporan");
-        jButton7.setBorderPainted(false);
-        jButton7.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton7.setFocusPainted(false);
-        jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton7.setPreferredSize(new java.awt.Dimension(220, 41));
-        sidebar.add(jButton7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 448, -1, -1));
+        btnLihatLaporan.setBackground(new java.awt.Color(122, 0, 0));
+        btnLihatLaporan.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        btnLihatLaporan.setForeground(new java.awt.Color(255, 210, 210));
+        btnLihatLaporan.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
+        btnLihatLaporan.setText(" Lihat Laporan");
+        btnLihatLaporan.setBorderPainted(false);
+        btnLihatLaporan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnLihatLaporan.setFocusPainted(false);
+        btnLihatLaporan.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLihatLaporan.setPreferredSize(new java.awt.Dimension(220, 41));
+        btnLihatLaporan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLihatLaporanActionPerformed(evt);
+            }
+        });
+        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 448, -1, -1));
 
         jSeparator4.setForeground(new java.awt.Color(255, 160, 160));
         jSeparator4.setPreferredSize(new java.awt.Dimension(220, 8));
@@ -632,12 +637,20 @@ public class AdminFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnDokumenKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDokumenKActionPerformed
-        lblHalamanJudul.setText("Manajemen Seleksi");
-        lblHalamanSub.setText("Kelola Manajemen Seleksi Peserta");
+        lblHalamanJudul.setText("Dokumen & Keberangkatan");
+        lblHalamanSub.setText("Kelola Dokumen dan Keberangkatan Peserta");
 
         showPanel(new PanelDokumenBerangkat());
         setActiveButton(btnDokumenK);
     }//GEN-LAST:event_btnDokumenKActionPerformed
+
+    private void btnLihatLaporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLihatLaporanActionPerformed
+        lblHalamanJudul.setText("Lihat Laporan");
+        lblHalamanSub.setText("Lihat Laporan");
+
+        showPanel(new PanelLaporan());
+        setActiveButton(btnLihatLaporan);
+    }//GEN-LAST:event_btnLihatLaporanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -679,12 +692,12 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnDokumenK;
     private javax.swing.JButton btnInstruktur;
+    private javax.swing.JButton btnLihatLaporan;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
     private javax.swing.JButton btnProgram;
     private javax.swing.JButton btnTambahPeserta;
-    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

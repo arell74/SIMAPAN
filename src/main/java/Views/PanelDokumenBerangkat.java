@@ -31,6 +31,18 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         loadStatistics();
     }
     
+    private void setupComboBoxFilter() {
+        // 1. Hapus opsi bawaan NetBeans (Item 1, Item 2, dst)
+        cbFilter.removeAllItems();
+        
+        // 2. Tambahkan opsi sesuai dengan status yang ada di DataStore
+        // Pastikan huruf besar/kecilnya sama persis!
+        cbFilter.addItem("Semua");
+        cbFilter.addItem("Siap Berangkat");
+        cbFilter.addItem("Menunggu Dokumen");
+        cbFilter.addItem("Belum Berangkat");
+    }
+    
     private void setupTable() {
         tabelDokumen.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelDokumen.getTableHeader().setBackground(new Color(122, 0, 0));
@@ -191,6 +203,12 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         pnlToolbar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
         pnlToolbar.setPreferredSize(new java.awt.Dimension(980, 56));
         pnlToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        txtCari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCariActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(txtCari, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 270, 34));
 
         btnCari.setBackground(new java.awt.Color(80, 80, 80));
@@ -212,6 +230,11 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         pnlToolbar.add(btnReset, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 20, 90, 34));
 
         cbFilter.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Semua" }));
+        cbFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbFilterActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(cbFilter, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 20, 170, 34));
 
         jButton3.setBackground(new java.awt.Color(122, 0, 0));
@@ -314,6 +337,14 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
     private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
         loadTableData(txtCari.getText());   
     }//GEN-LAST:event_btnCariActionPerformed
+
+    private void cbFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFilterActionPerformed
+        loadTableData(txtCari.getText());
+    }//GEN-LAST:event_cbFilterActionPerformed
+
+    private void txtCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCariActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCariActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -243,7 +243,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jButton3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
         jButton3.setText("Input Seleksi");
-        pnlToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 20, -1, 34));
+        pnlToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(800, 20, -1, 34));
 
         add(pnlToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 156, 930, 70));
 
