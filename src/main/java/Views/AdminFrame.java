@@ -30,7 +30,7 @@ public class AdminFrame extends javax.swing.JFrame {
         private Color foregroundDefault = new Color(255,210,210);
 
         private void setActiveButton(JButton activeBtn) {
-        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnProgram, btnManajemenSeleksi, btnDokumenK};
+        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnProgram, btnManajemenSeleksi, btnDokumenK, btnLihatLaporan};
 
         for (JButton btn : sidebarButtons) {
             btn.setBackground(colorDefault);

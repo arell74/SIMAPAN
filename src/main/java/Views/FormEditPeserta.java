@@ -25,7 +25,7 @@ public class FormEditPeserta extends javax.swing.JFrame {
     
     public FormEditPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
         initComponents();
-        
+        setLocationRelativeTo(null);
         txtIdPeserta.setEditable(false);
         
         loadComboBoxData();
