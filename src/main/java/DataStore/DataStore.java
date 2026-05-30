@@ -17,6 +17,7 @@ public class DataStore {
     public static ArrayList<Peserta> daftarPeserta = new ArrayList<>();
     public static ArrayList<Program> daftarProgram = new ArrayList<>();
     public static ArrayList<Seleksi> daftarSeleksi = new ArrayList<>();
+    public static ArrayList<Dokumen> daftarDokumen = new ArrayList<>();
 
     static {
 //        Program
@@ -56,6 +57,18 @@ public class DataStore {
         pst4.setStatusSeleksi("Lulus");
         pst4.setStatusKeberangkatan("Siap Berangkat");
         
+//        Dokumen
+        pst1.setStatusKeberangkatan("Siap Berangkat");
+        pst2.setStatusKeberangkatan("Siap Berangkat");
+        pst3.setStatusKeberangkatan("Menunggu Dokumen");
+        pst4.setStatusKeberangkatan("Belum Berangkat");
+
+        // Masukkan data ke daftarDokumen
+        daftarDokumen.add(new Dokumen("DOK001", pst1, "B1234567", "01/02/2026"));
+        daftarDokumen.add(new Dokumen("DOK002", pst2, "C9876543", "01/02/2026"));
+        daftarDokumen.add(new Dokumen("DOK003", pst3, "Belum diinput", "—"));
+        daftarDokumen.add(new Dokumen("DOK004", pst4, "Belum diinput", "—"));
+
         Peserta pst5 = new Peserta("PST005", "3208011234560005", "Nova Shabilla", "2004-02-14", "Perempuan", "0877112233", "Islam", "Kuningan", prg2.getIdProgram(), ins2, "N5", "Belum Lunas");
 
         daftarPeserta.add(pst1);

@@ -30,7 +30,7 @@ public class AdminFrame extends javax.swing.JFrame {
         private Color foregroundDefault = new Color(255,210,210);
 
         private void setActiveButton(JButton activeBtn) {
-        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnProgram, btnManajemenSeleksi};
+        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnProgram, btnManajemenSeleksi, btnDokumenK};
 
         for (JButton btn : sidebarButtons) {
             btn.setBackground(colorDefault);
@@ -42,8 +42,7 @@ public class AdminFrame extends javax.swing.JFrame {
             activeBtn.setBackground(colorActive);
             activeBtn.setForeground(foregroundActive);
         }
-
-
+        
     public AdminFrame() {
         initComponents();
         setSize(1200, 680);
@@ -79,7 +78,7 @@ public class AdminFrame extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         btnManajemenSeleksi = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        btnDokumenK = new javax.swing.JButton();
         jSeparator3 = new javax.swing.JSeparator();
         jLabel5 = new javax.swing.JLabel();
         jButton7 = new javax.swing.JButton();
@@ -243,16 +242,21 @@ public class AdminFrame extends javax.swing.JFrame {
         });
         sidebar.add(btnManajemenSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 324, -1, -1));
 
-        jButton6.setBackground(new java.awt.Color(122, 0, 0));
-        jButton6.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jButton6.setForeground(new java.awt.Color(255, 210, 210));
-        jButton6.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/google-docs.png")); // NOI18N
-        jButton6.setText(" Dokumen & Berangkat");
-        jButton6.setBorderPainted(false);
-        jButton6.setFocusPainted(false);
-        jButton6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jButton6.setPreferredSize(new java.awt.Dimension(220, 42));
-        sidebar.add(jButton6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 366, -1, -1));
+        btnDokumenK.setBackground(new java.awt.Color(122, 0, 0));
+        btnDokumenK.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        btnDokumenK.setForeground(new java.awt.Color(255, 210, 210));
+        btnDokumenK.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/google-docs.png")); // NOI18N
+        btnDokumenK.setText(" Dokumen & Berangkat");
+        btnDokumenK.setBorderPainted(false);
+        btnDokumenK.setFocusPainted(false);
+        btnDokumenK.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnDokumenK.setPreferredSize(new java.awt.Dimension(220, 42));
+        btnDokumenK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDokumenKActionPerformed(evt);
+            }
+        });
+        sidebar.add(btnDokumenK, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 366, -1, -1));
 
         jSeparator3.setForeground(new java.awt.Color(160, 30, 30));
         jSeparator3.setPreferredSize(new java.awt.Dimension(220, 8));
@@ -623,9 +627,17 @@ public class AdminFrame extends javax.swing.JFrame {
             FormLogin formLogin = new FormLogin();
             formLogin.setVisible(true);
 
-            this.dispose(); 
+            this.dispose();
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnDokumenKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDokumenKActionPerformed
+        lblHalamanJudul.setText("Manajemen Seleksi");
+        lblHalamanSub.setText("Kelola Manajemen Seleksi Peserta");
+
+        showPanel(new PanelDokumenBerangkat());
+        setActiveButton(btnDokumenK);
+    }//GEN-LAST:event_btnDokumenKActionPerformed
 
     /**
      * @param args the command line arguments
@@ -665,13 +677,13 @@ public class AdminFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
+    private javax.swing.JButton btnDokumenK;
     private javax.swing.JButton btnInstruktur;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
     private javax.swing.JButton btnProgram;
     private javax.swing.JButton btnTambahPeserta;
-    private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

@@ -15,13 +15,11 @@ import javax.swing.table.DefaultTableModel;
  * @author arelssi
  */
 public class PanelDashboardAdmin extends javax.swing.JPanel {
-    // --- 1. UPDATE: Metode loadStatistics Tanpa Database ---
     private void loadStatistics() {
         int totalPeserta = DataStore.daftarPeserta.size();
         int lulus = 0;
         int gugur = 0;
 
-        // Iterasi (Looping) data dari ArrayList
         for (Peserta p : DataStore.daftarPeserta) {
             if (p.getStatusSeleksi().equalsIgnoreCase("Lulus")) {
                 lulus++;
@@ -31,22 +29,17 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
             }
         }
 
-        // Memanggil method khusus instruktur yang sudah kita buat sebelumnya
         int totalInstruktur = DataStore.getHanyaInstruktur().size();
-
-        // Tampilkan ke JLabel
         lblTotalPeserta.setText(String.valueOf(totalPeserta));
         lblPesertaLulus.setText(String.valueOf(lulus));
         lblPesertaGugur.setText(String.valueOf(gugur));
         lblTotalInstruktur.setText(String.valueOf(totalInstruktur));
     }
 
-    // --- 2. UPDATE: Metode loadTableData Tanpa Database ---
     private void loadTableData() {
         DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
-        model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
+        model.setRowCount(0);
         
-        // Panggil utilitas resize kolom Anda jika ada
         try {
             Util.TabelUtil.autoResizeKolom(tabelPeserta);
         } catch (Exception e) {
@@ -54,7 +47,6 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
         }
 
         int no = 1;
-        // Mengisi tabel dengan data dari Objek di dalam ArrayList
         for (Peserta p : DataStore.daftarPeserta) {
             model.addRow(new Object[]{
                 no++,
@@ -135,25 +127,25 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
         jLabel13.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/user-solid (1) (1).png")); // NOI18N
         jLabel13.setText("s");
         jLabel13.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 60, 60));
+        panelKartu1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 60, 60));
 
         jLabel14.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(130, 130, 130));
         jLabel14.setText("Total Peserta");
         jLabel14.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+        panelKartu1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         lblTotalPeserta.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
         lblTotalPeserta.setForeground(new java.awt.Color(122, 0, 0));
         lblTotalPeserta.setText("10");
         lblTotalPeserta.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu1.add(lblTotalPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 34, -1, -1));
+        panelKartu1.add(lblTotalPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 40, -1));
 
         jLabel16.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         jLabel16.setForeground(new java.awt.Color(170, 170, 170));
         jLabel16.setText("Peserta Terdaftar");
         jLabel16.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 72, -1, -1));
+        panelKartu1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
 
         mainContent.add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, -1, -1));
 
@@ -166,25 +158,25 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
         jLabel11.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/check-solid (1).png")); // NOI18N
         jLabel11.setText("jLabel11");
         jLabel11.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu2.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 14, -1, -1));
+        panelKartu2.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
 
         jLabel12.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jLabel12.setForeground(new java.awt.Color(130, 130, 130));
         jLabel12.setText("Peserta Lulus");
         jLabel12.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+        panelKartu2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         lblPesertaLulus.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
         lblPesertaLulus.setForeground(new java.awt.Color(0, 140, 60));
         lblPesertaLulus.setText("3");
         lblPesertaLulus.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu2.add(lblPesertaLulus, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 34, -1, -1));
+        panelKartu2.add(lblPesertaLulus, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
 
         jLabel18.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         jLabel18.setForeground(new java.awt.Color(170, 170, 170));
         jLabel18.setText("lulus seleksi");
         jLabel18.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 72, -1, -1));
+        panelKartu2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, -1, -1));
 
         mainContent.add(panelKartu2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 24, -1, -1));
 
@@ -197,25 +189,25 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
         jLabel19.setForeground(new java.awt.Color(255, 0, 0));
         jLabel19.setText("X");
         jLabel19.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu3.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 14, -1, -1));
+        panelKartu3.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 30, -1, -1));
 
         lblPesertaGugur.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
         lblPesertaGugur.setForeground(new java.awt.Color(200, 0, 0));
         lblPesertaGugur.setText("0");
         lblPesertaGugur.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu3.add(lblPesertaGugur, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 34, -1, -1));
+        panelKartu3.add(lblPesertaGugur, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
 
         jLabel21.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jLabel21.setForeground(new java.awt.Color(130, 130, 130));
         jLabel21.setText("Peserta Gugur");
         jLabel21.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+        panelKartu3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         jLabel22.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         jLabel22.setForeground(new java.awt.Color(170, 170, 170));
         jLabel22.setText("gugur permanen");
         jLabel22.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu3.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 72, -1, -1));
+        panelKartu3.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
 
         mainContent.add(panelKartu3, new org.netbeans.lib.awtextra.AbsoluteConstraints(476, 24, -1, -1));
 
@@ -227,25 +219,25 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
         jLabel23.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/profile (3) (1).png")); // NOI18N
         jLabel23.setToolTipText("");
         jLabel23.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelkartu4.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, -1, -1));
+        panelkartu4.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 40, -1, -1));
 
         jLabel24.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jLabel24.setForeground(new java.awt.Color(130, 130, 130));
         jLabel24.setText("Total Instruktur");
         jLabel24.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelkartu4.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+        panelkartu4.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         lblTotalInstruktur.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
         lblTotalInstruktur.setForeground(new java.awt.Color(0, 100, 100));
         lblTotalInstruktur.setText("5");
         lblTotalInstruktur.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelkartu4.add(lblTotalInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 34, -1, -1));
+        panelkartu4.add(lblTotalInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
 
         jLabel26.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         jLabel26.setForeground(new java.awt.Color(170, 170, 170));
         jLabel26.setText("instruktur aktif");
         jLabel26.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelkartu4.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 72, -1, -1));
+        panelkartu4.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
 
         mainContent.add(panelkartu4, new org.netbeans.lib.awtextra.AbsoluteConstraints(702, 24, -1, -1));
 

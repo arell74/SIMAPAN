@@ -189,7 +189,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         lblLulus = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
+        panelTabel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelSeleksi = new javax.swing.JTable();
         lblTotalData = new javax.swing.JLabel();
@@ -300,9 +300,9 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
         add(kartuTotal1, new org.netbeans.lib.awtextra.AbsoluteConstraints(345, 30, -1, 100));
 
-        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelTabel.setBackground(new java.awt.Color(255, 255, 255));
+        panelTabel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        panelTabel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         tabelSeleksi.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -317,14 +317,14 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(tabelSeleksi);
 
-        jPanel4.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 37, 928, 332));
+        panelTabel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 37, 928, 332));
 
         lblTotalData.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         lblTotalData.setForeground(new java.awt.Color(120, 120, 120));
         lblTotalData.setText("Menampilkan 0 data seleksi");
-        jPanel4.add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 10, -1, -1));
+        panelTabel.add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 10, -1, -1));
 
-        add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 225, 930, 370));
+        add(panelTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 225, 930, 370));
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -342,7 +342,6 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel kartuTotal;
     private javax.swing.JPanel kartuTotal1;
@@ -351,6 +350,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     private javax.swing.JLabel lblLulus;
     private javax.swing.JLabel lblTotalData;
     private javax.swing.JLabel lblTotalSeleksi;
+    private javax.swing.JPanel panelTabel;
     private javax.swing.JPanel pnlToolbar;
     private javax.swing.JTable tabelSeleksi;
     private javax.swing.JTextField txtCari;
