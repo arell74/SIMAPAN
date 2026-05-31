@@ -31,7 +31,6 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
     }
     
     private void setupTable() {
-        // Styling Header Tabel
         tabelInstruktur.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelInstruktur.getTableHeader().setBackground(new Color(122, 0, 0));
         tabelInstruktur.getTableHeader().setForeground(Color.WHITE);
@@ -39,7 +38,6 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
         tabelInstruktur.setRowHeight(36);
         tabelInstruktur.setSelectionBackground(new Color(255, 230, 230));
 
-        // Pasang Renderer dan Editor Aksi (Menggunakan index kolom ke-6 karena "Aksi" ada di paling akhir)
         tabelInstruktur.getColumnModel().getColumn(7).setCellRenderer(new TombolAksiRenderer());
         tabelInstruktur.getColumnModel().getColumn(7).setCellEditor(
             new TombolAksiEditor(new TombolAksiEditor.AksiListener() {

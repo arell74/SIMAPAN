@@ -9,8 +9,20 @@ import Model.Dokumen;
 import Model.Peserta;
 import Model.Program;
 import Model.Seleksi;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.Phrase;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -86,9 +98,6 @@ public class PanelLaporan extends javax.swing.JPanel {
         int no = 1;
 
         for (Peserta p : DataStore.daftarPeserta) {
-            
-            // 1. FILTERING
-            // Kita cari objek Program yang sesuai dengan ID Program di Peserta
             String namaProgramPeserta = "";
             for (Program prg : DataStore.daftarProgram) {
                 if (prg.getIdProgram().equals(p.getProgram())) {
@@ -246,7 +255,6 @@ public class PanelLaporan extends javax.swing.JPanel {
         cbPeriode = new javax.swing.JComboBox<>();
         panelTabel = new javax.swing.JPanel();
         lblTotalData = new javax.swing.JLabel();
-        scrollPane1 = new java.awt.ScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelLaporan = new javax.swing.JTable();
         kartuTotal3 = new javax.swing.JPanel();
@@ -328,6 +336,11 @@ public class PanelLaporan extends javax.swing.JPanel {
         btnEkspor.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         btnEkspor.setForeground(new java.awt.Color(255, 255, 255));
         btnEkspor.setText("Ekspor Laporan");
+        btnEkspor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEksporActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(btnEkspor, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 20, -1, 34));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
@@ -357,9 +370,11 @@ public class PanelLaporan extends javax.swing.JPanel {
         lblTotalData.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         lblTotalData.setForeground(new java.awt.Color(120, 120, 120));
         lblTotalData.setText("Rekap Keberangkatan Peserta");
-        panelTabel.add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 10, -1, -1));
+        panelTabel.add(lblTotalData, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        scrollPane1.setPreferredSize(new java.awt.Dimension(930, 380));
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setToolTipText("");
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         tabelLaporan.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -375,14 +390,15 @@ public class PanelLaporan extends javax.swing.JPanel {
         jScrollPane1.setViewportView(tabelLaporan);
         if (tabelLaporan.getColumnModel().getColumnCount() > 0) {
             tabelLaporan.getColumnModel().getColumn(0).setMaxWidth(50);
+            tabelLaporan.getColumnModel().getColumn(1).setPreferredWidth(50);
+            tabelLaporan.getColumnModel().getColumn(2).setPreferredWidth(180);
+            tabelLaporan.getColumnModel().getColumn(3).setPreferredWidth(150);
             tabelLaporan.getColumnModel().getColumn(4).setMaxWidth(70);
         }
 
-        scrollPane1.add(jScrollPane1);
+        panelTabel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 910, 180));
 
-        panelTabel.add(scrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 910, 160));
-
-        add(panelTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 400, 910, 190));
+        add(panelTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 380, 910, 210));
 
         kartuTotal3.setBackground(new java.awt.Color(255, 255, 255));
         kartuTotal3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -413,7 +429,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         jLabel9.setText("Rata-rata Nilai");
         kartuTotal3.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        add(kartuTotal3, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 90, 217, 120));
+        add(kartuTotal3, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 80, 217, 120));
 
         kartuTotal4.setBackground(new java.awt.Color(255, 255, 255));
         kartuTotal4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -445,7 +461,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         jLabel10.setText("Total Peserta");
         kartuTotal4.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        add(kartuTotal4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 217, 120));
+        add(kartuTotal4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 217, 120));
 
         kartuTotal5.setBackground(new java.awt.Color(255, 255, 255));
         kartuTotal5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -476,7 +492,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         jLabel12.setText("Tingkat Kelulusan");
         kartuTotal5.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        add(kartuTotal5, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 90, 217, 120));
+        add(kartuTotal5, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 80, 217, 120));
 
         kartuTotal6.setBackground(new java.awt.Color(255, 255, 255));
         kartuTotal6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -507,7 +523,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         jLabel14.setText("Siap Berangkat");
         kartuTotal6.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
-        add(kartuTotal6, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 90, 217, 120));
+        add(kartuTotal6, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 80, 217, 120));
 
         panelPerProgram.setBackground(new java.awt.Color(255, 255, 255));
         panelPerProgram.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -570,7 +586,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         lblAngkaBelum.setText("1");
         panelPerProgram.add(lblAngkaBelum, new org.netbeans.lib.awtextra.AbsoluteConstraints(403, 100, -1, -1));
 
-        add(panelPerProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 230, 447, 150));
+        add(panelPerProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 210, 447, 150));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -638,7 +654,7 @@ public class PanelLaporan extends javax.swing.JPanel {
         lblAngkaMakanan.setText("7");
         panelProgram.add(lblAngkaMakanan, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 100, -1, -1));
 
-        add(panelProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 230, 447, 150));
+        add(panelProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 210, 447, 150));
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbPeriodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbPeriodeActionPerformed
@@ -650,10 +666,151 @@ public class PanelLaporan extends javax.swing.JPanel {
     }//GEN-LAST:event_cbProgramActionPerformed
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
-        cbProgram.setSelectedIndex(0); // Kembali ke "Semua"
+        cbProgram.setSelectedIndex(0);
         cbPeriode.setSelectedIndex(0);
         generateLaporan();
     }//GEN-LAST:event_btnResetActionPerformed
+
+    private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan Laporan PDF");
+        
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            
+            // Pastikan format akhirnya .pdf
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".pdf")) {
+                filePath += ".pdf";
+            }
+
+            try {
+                // 1. SEMBUNYIKAN TOMBOL DAN KESELURUHAN PANEL TABEL
+                btnReset.setVisible(false);
+                btnEkspor.setVisible(false);
+                panelTabel.setVisible(false); // Sembunyikan panel pembungkus tabel secara utuh
+
+                // 2. MOTRET PANEL & AUTO-CROP
+                int fullWidth = this.getWidth();
+                int fullHeight = this.getHeight();
+                
+                BufferedImage imageCapture = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2d = imageCapture.createGraphics();
+                this.printAll(g2d); 
+                g2d.dispose();
+
+                // MUNCULKAN KEMBALI UI SECEPAT MUNGKIN SEBELUM USER SADAR
+                btnReset.setVisible(true);
+                btnEkspor.setVisible(true);
+                panelTabel.setVisible(true);
+
+                // --- TRIK RAHASIA: MEMOTONG BAGIAN KOSONG (CROP) ---
+                // Kita potong gambar dari atas (y=0) sampai batas mulainya panelTabel
+                int batasCropBawah = panelTabel.getY(); 
+                // Pastikan nilai crop tidak melebihi tinggi asli
+                if (batasCropBawah == 0) batasCropBawah = fullHeight / 2; 
+                BufferedImage croppedImage = imageCapture.getSubimage(0, 0, fullWidth, batasCropBawah);
+
+
+                // 3. SETUP DOKUMEN PDF
+                Document document = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
+                PdfWriter.getInstance(document, new FileOutputStream(filePath));
+                document.open();
+
+                // --- HALAMAN 1: DASHBOARD & RINGKASAN EKSEKUTIF ---
+                com.itextpdf.text.Font fontJudul = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+                com.itextpdf.text.Font fontTanggal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.GRAY);
+                com.itextpdf.text.Font fontDeskripsi = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
+                
+                // Judul
+                com.itextpdf.text.Paragraph judulLaporan = new com.itextpdf.text.Paragraph("LAPORAN STATISTIK PEMAGANGAN - LPK YUUKI KUNINGAN", fontJudul);
+                judulLaporan.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(judulLaporan);
+                
+                // Tanggal
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
+                String waktuCetak = sdf.format(new java.util.Date());
+                com.itextpdf.text.Paragraph infoCetak = new com.itextpdf.text.Paragraph("Dicetak pada: " + waktuCetak, fontTanggal);
+                infoCetak.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                document.add(infoCetak);
+                
+                document.add(new com.itextpdf.text.Paragraph(" ")); 
+
+                // Masukkan gambar yang sudah di-crop
+                Image pdfImage = Image.getInstance(croppedImage, null);
+                // Sesuaikan skala agar fit di kertas tanpa terdistorsi
+                pdfImage.scaleToFit(document.getPageSize().getWidth() - 60, document.getPageSize().getHeight() - 150);
+                pdfImage.setAlignment(Image.ALIGN_CENTER);
+                document.add(pdfImage);
+
+                // Tambahkan Teks Ringkasan Eksekutif di bawah grafik
+                document.add(new com.itextpdf.text.Paragraph(" "));
+                String teksRingkasan = "Ringkasan Eksekutif:\n" +
+                                       "Berdasarkan visualisasi data di atas, laporan ini merepresentasikan distribusi kelulusan " +
+                                       "dan kesiapan dokumen dari seluruh peserta yang terdaftar di sistem. Rincian detail dari masing-masing " +
+                                       "peserta (termasuk nomor paspor dan jadwal keberangkatan) dapat dilihat pada halaman lampiran berikutnya.";
+                                       
+                com.itextpdf.text.Paragraph ringkasan = new com.itextpdf.text.Paragraph(teksRingkasan, fontDeskripsi);
+                ringkasan.setAlignment(com.itextpdf.text.Element.ALIGN_JUSTIFIED);
+                document.add(ringkasan);
+
+
+                // --- HALAMAN 2: NATIVE PDF TABLE (LAMPIRAN) ---
+                document.newPage(); // Pindah halaman
+
+                com.itextpdf.text.Paragraph judulTabel = new com.itextpdf.text.Paragraph("Lampiran: Rincian Data Keberangkatan Peserta", fontJudul);
+                judulTabel.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                judulTabel.setSpacingAfter(20f); 
+                document.add(judulTabel);
+
+                int jumlahKolom = tabelLaporan.getColumnCount();
+                PdfPTable pdfTable = new PdfPTable(jumlahKolom);
+                pdfTable.setWidthPercentage(100); 
+
+                com.itextpdf.text.Font fontHeader = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 11, com.itextpdf.text.Font.BOLD);
+                for (int i = 0; i < jumlahKolom; i++) {
+                    PdfPCell cell = new PdfPCell(new Phrase(tabelLaporan.getColumnName(i), fontHeader));
+                    cell.setBackgroundColor(com.itextpdf.text.BaseColor.LIGHT_GRAY);
+                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+                    cell.setPadding(6f);
+                    pdfTable.addCell(cell);
+                }
+
+                com.itextpdf.text.Font fontData = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10);
+                for (int baris = 0; baris < tabelLaporan.getRowCount(); baris++) {
+                    for (int kolom = 0; kolom < jumlahKolom; kolom++) {
+                        Object nilaiCell = tabelLaporan.getValueAt(baris, kolom);
+                        String teksCell = (nilaiCell == null) ? "" : nilaiCell.toString();
+                        
+                        PdfPCell cell = new PdfPCell(new Phrase(teksCell, fontData));
+                        cell.setPadding(5f);
+                        pdfTable.addCell(cell);
+                    }
+                }
+
+                document.add(pdfTable);
+                document.close();
+
+                JOptionPane.showMessageDialog(this, 
+                    "Berhasil!\nLaporan tersimpan di: " + filePath, 
+                    "Ekspor Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception e) {
+                // Antisipasi Error: Kembalikan UI seperti semula
+                btnReset.setVisible(true);
+                btnEkspor.setVisible(true);
+                panelTabel.setVisible(true); 
+                
+                JOptionPane.showMessageDialog(this, 
+                    "Gagal mengekspor laporan: " + e.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnEksporActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -718,7 +875,6 @@ public class PanelLaporan extends javax.swing.JPanel {
     private javax.swing.JPanel panelProgram;
     private javax.swing.JPanel panelTabel;
     private javax.swing.JPanel pnlToolbar;
-    private java.awt.ScrollPane scrollPane1;
     private javax.swing.JTable tabelLaporan;
     // End of variables declaration//GEN-END:variables
 }
