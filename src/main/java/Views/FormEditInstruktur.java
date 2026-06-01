@@ -1,6 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Views;
 
@@ -8,20 +8,13 @@ package Views;
  *
  * @author arelssi
  */
-public class FormTambahInstruktur extends javax.swing.JDialog {
+public class FormEditInstruktur extends javax.swing.JFrame {
 
     /**
-     * Creates new form FormTambahInstruktur
+     * Creates new form FormEditInstruktur
      */
-    public FormTambahInstruktur(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public FormEditInstruktur() {
         initComponents();
-        setSize(520, 490);
-        pack();
-        setLocationRelativeTo(null);
-        setResizable(false);
-        setTitle("Tambah Instruktur Baru");
-        setModal(true);
     }
 
     /**
@@ -60,7 +53,7 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         btnBatal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         panelHeader.setBackground(new java.awt.Color(122, 0, 0));
@@ -68,13 +61,13 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("Tambah Instruktur Baru");
+        jLabel1.setText("Edit Instruktur");
         jLabel1.setPreferredSize(new java.awt.Dimension(280, 22));
         panelHeader.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Isi data instruktur dengan benar");
+        jLabel2.setText("Pastikan data instruktur sudah benar");
         jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
         panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
 
@@ -239,27 +232,20 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormEditInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormEditInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormEditInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormEditInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
-        /* Create and display the dialog */
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FormTambahInstruktur dialog = new FormTambahInstruktur(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+                new FormEditInstruktur().setVisible(true);
             }
         });
     }

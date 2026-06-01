@@ -1,6 +1,6 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Views;
 
@@ -8,20 +8,14 @@ package Views;
  *
  * @author arelssi
  */
-public class FormTambahInstruktur extends javax.swing.JDialog {
+public class FormTambahSeleksii extends javax.swing.JFrame {
 
     /**
-     * Creates new form FormTambahInstruktur
+     * Creates new form FormTambahSeleksi
      */
-    public FormTambahInstruktur(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    
+    public FormTambahSeleksii() {
         initComponents();
-        setSize(520, 490);
-        pack();
-        setLocationRelativeTo(null);
-        setResizable(false);
-        setTitle("Tambah Instruktur Baru");
-        setModal(true);
     }
 
     /**
@@ -33,34 +27,43 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         panelHeader = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
         panelBody = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         txtIdInstruktur = new javax.swing.JTextField();
         jTextField2 = new javax.swing.JTextField();
         jTextField3 = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
         cmbSpesialisasi = new javax.swing.JComboBox<>();
-        cmbLevelJLPT = new javax.swing.JComboBox<>();
-        cmbKelas = new javax.swing.JComboBox<>();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        jSeparator4 = new javax.swing.JSeparator();
+        jLabel18 = new javax.swing.JLabel();
+        cmbSpesialisasi1 = new javax.swing.JComboBox<>();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
         panelFooter = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
         btnBatal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         panelHeader.setBackground(new java.awt.Color(122, 0, 0));
@@ -68,13 +71,13 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("Tambah Instruktur Baru");
+        jLabel1.setText("Input Hasil Seleksi");
         jLabel1.setPreferredSize(new java.awt.Dimension(280, 22));
         panelHeader.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Isi data instruktur dengan benar");
+        jLabel2.setText("Masukkan nilai dan hasil seleksi peserta");
         jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
         panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
 
@@ -99,95 +102,125 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         panelBody.setPreferredSize(new java.awt.Dimension(520, 364));
         panelBody.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel3.setText("DATA IDENTITAS");
-        jLabel3.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
-
         jSeparator1.setPreferredSize(new java.awt.Dimension(480, 8));
-        panelBody.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 32, -1, -1));
+        panelBody.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(60, 60, 60));
-        jLabel4.setText("ID Instruktur");
+        jLabel4.setText("ID Seleksi");
         jLabel4.setPreferredSize(new java.awt.Dimension(140, 14));
-        panelBody.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 44, -1, -1));
+        panelBody.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, -1, -1));
 
         jLabel5.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(60, 60, 60));
-        jLabel5.setText("No. Telp");
+        jLabel5.setText("Tanggal Seleksi");
         jLabel5.setPreferredSize(new java.awt.Dimension(140, 14));
-        panelBody.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 44, -1, -1));
-
-        jLabel6.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(60, 60, 60));
-        jLabel6.setText("Nama Instruktur");
-        jLabel6.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 102, -1, -1));
+        panelBody.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 110, -1, -1));
 
         txtIdInstruktur.setEditable(false);
         txtIdInstruktur.setBackground(new java.awt.Color(245, 245, 245));
         txtIdInstruktur.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         txtIdInstruktur.setForeground(new java.awt.Color(160, 160, 160));
-        txtIdInstruktur.setText("jTextField1");
         txtIdInstruktur.setPreferredSize(new java.awt.Dimension(220, 34));
-        panelBody.add(txtIdInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
+        panelBody.add(txtIdInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 127, -1, -1));
 
         jTextField2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jTextField2.setForeground(new java.awt.Color(30, 30, 30));
         jTextField2.setPreferredSize(new java.awt.Dimension(480, 34));
-        panelBody.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 118, -1, -1));
+        panelBody.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, 220, -1));
 
         jTextField3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jTextField3.setForeground(new java.awt.Color(30, 30, 30));
         jTextField3.setPreferredSize(new java.awt.Dimension(230, 34));
-        panelBody.add(jTextField3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
-
-        jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel7.setText("DATA KEAHLIAN");
-        jLabel7.setPreferredSize(new java.awt.Dimension(200, 14));
-        panelBody.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 168, -1, -1));
-
-        jSeparator2.setPreferredSize(new java.awt.Dimension(480, 8));
-        panelBody.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 184, -1, -1));
+        panelBody.add(jTextField3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 127, -1, -1));
 
         jLabel8.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(30, 30, 30));
         jLabel8.setText("Spesialisasi");
         jLabel8.setPreferredSize(new java.awt.Dimension(160, 14));
-        panelBody.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 196, -1, -1));
+        panelBody.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 170, -1, -1));
 
-        jLabel9.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel9.setForeground(new java.awt.Color(30, 30, 30));
-        jLabel9.setText("Level JLPT");
+        jLabel9.setFont(new java.awt.Font("Inter", 0, 8)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(70, 70, 70));
+        jLabel9.setText("nilai lebih dari atau sama dengan 70.");
         jLabel9.setPreferredSize(new java.awt.Dimension(160, 14));
-        panelBody.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 254, -1, -1));
-
-        jLabel10.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(30, 30, 30));
-        jLabel10.setText("Kelas Diampu");
-        jLabel10.setPreferredSize(new java.awt.Dimension(160, 14));
-        panelBody.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 254, -1, -1));
+        panelBody.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 343, 420, -1));
 
         cmbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cmbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
         cmbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cmbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
-        panelBody.add(cmbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 212, -1, -1));
+        panelBody.add(cmbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, -1, -1));
 
-        cmbLevelJLPT.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        cmbLevelJLPT.setForeground(new java.awt.Color(30, 30, 30));
-        cmbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbLevelJLPT.setPreferredSize(new java.awt.Dimension(220, 34));
-        panelBody.add(cmbLevelJLPT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 40));
 
-        cmbKelas.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        cmbKelas.setForeground(new java.awt.Color(30, 30, 30));
-        cmbKelas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbKelas.setPreferredSize(new java.awt.Dimension(230, 34));
-        panelBody.add(cmbKelas, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
+        jLabel6.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
+        jLabel6.setText("Muhamad Farel Fauzan");
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, -1, -1));
+
+        jLabel10.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel10.setText("Level N3");
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 35, -1, -1));
+
+        jLabel12.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel12.setText("PST-001");
+        jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 35, -1, -1));
+
+        jLabel13.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel13.setText("Level N3");
+        jPanel1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(175, 35, -1, -1));
+
+        jLabel14.setFont(new java.awt.Font("Inter", 1, 14)); // NOI18N
+        jLabel14.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel14.setText("2 dari 3 - sisa 1");
+        jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 30, -1, -1));
+
+        jLabel15.setFont(new java.awt.Font("Inter", 0, 8)); // NOI18N
+        jLabel15.setText("Percobaan Seleksi");
+        jPanel1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 10, -1, 20));
+
+        panelBody.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 520, 70));
+
+        jLabel16.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel16.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel16.setText("DATA SELEKSI");
+        jLabel16.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, -1, -1));
+
+        jLabel17.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        jLabel17.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel17.setText("HASIL SELEKSI");
+        jLabel17.setPreferredSize(new java.awt.Dimension(200, 14));
+        panelBody.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 240, -1, -1));
+
+        jSeparator4.setPreferredSize(new java.awt.Dimension(480, 8));
+        panelBody.add(jSeparator4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 260, -1, -1));
+
+        jLabel18.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(30, 30, 30));
+        jLabel18.setText("Status Kelulusan");
+        jLabel18.setPreferredSize(new java.awt.Dimension(160, 14));
+        panelBody.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
+
+        cmbSpesialisasi1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        cmbSpesialisasi1.setForeground(new java.awt.Color(30, 30, 30));
+        cmbSpesialisasi1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbSpesialisasi1.setPreferredSize(new java.awt.Dimension(480, 34));
+        panelBody.add(cmbSpesialisasi1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 290, 230, -1));
+
+        jLabel19.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+        jLabel19.setForeground(new java.awt.Color(30, 30, 30));
+        jLabel19.setText("Nilai Seleksi");
+        jLabel19.setPreferredSize(new java.awt.Dimension(160, 14));
+        panelBody.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+
+        jLabel20.setFont(new java.awt.Font("Inter", 0, 8)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(70, 70, 70));
+        jLabel20.setText("Skala 0 sampai 100. Peserta dinyatakan lulus jika ");
+        jLabel20.setPreferredSize(new java.awt.Dimension(160, 14));
+        panelBody.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 330, 420, -1));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, -1, -1));
 
@@ -239,27 +272,21 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormTambahSeleksii.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormTambahSeleksii.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormTambahSeleksii.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FormTambahSeleksii.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        //</editor-fold>
 
-        /* Create and display the dialog */
+        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FormTambahInstruktur dialog = new FormTambahInstruktur(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+                new FormTambahSeleksii().setVisible(true);
             }
         });
     }
@@ -267,24 +294,33 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
-    private javax.swing.JComboBox<String> cmbKelas;
-    private javax.swing.JComboBox<String> cmbLevelJLPT;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cmbSpesialisasi;
+    private javax.swing.JComboBox<String> cmbSpesialisasi1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JPanel panelBody;

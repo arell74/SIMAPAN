@@ -616,7 +616,7 @@ public class AdminFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Manajemen Seleksi");
         lblHalamanSub.setText("Kelola Manajemen Seleksi Peserta");
 
-        showPanel(new panelManajemenSeleksi());
+        showPanel(new PanelManajemenSeleksi());
         setActiveButton(btnManajemenSeleksi);
     }//GEN-LAST:event_btnManajemenSeleksiActionPerformed
 

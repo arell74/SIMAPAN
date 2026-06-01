@@ -19,111 +19,144 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author arelssi
  */
-public class panelManajemenSeleksi extends javax.swing.JPanel {
+public class PanelManajemenSeleksi extends javax.swing.JPanel {
 
     /**
      * Creates new form panelManajemenSeleksi
      */
-    public panelManajemenSeleksi() {
+    public PanelManajemenSeleksi() {
         initComponents();
         setPreferredSize(new java.awt.Dimension(980, 616));
         setBackground(new java.awt.Color(245, 245, 245));
         
+        cbFilterStatus.setModel(new DefaultComboBoxModel<>(new String[]{"Semua", "Lulus", "Gugur"}));
         setupTable();
+        
         loadStatistics();
         loadTableData("");
-        
-        cbFilter.setModel(new DefaultComboBoxModel<>(new String[]{"Semua", "Lulus", "Gugur"}));
     }
     
     private void setupTable() {
-        tabelSeleksi.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
-        tabelSeleksi.getTableHeader().setBackground(new Color(122, 0, 0));
-        tabelSeleksi.getTableHeader().setForeground(Color.WHITE);
-        tabelSeleksi.setRowHeight(36);
+        // Styling tabel standar...
+        tabelSeleksi.setRowHeight(40);
+        
+        // Asumsi kolom "Aksi" berada di indeks ke-9 (Kolom ke-10)
+        tabelSeleksi.getColumnModel().getColumn(9).setCellRenderer(new TombolAksiRenderer());
+        tabelSeleksi.getColumnModel().getColumn(9).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
+            
+            @Override
+            public void onDetail(int baris) {
+                // Logika melihat detail riwayat (opsional, mungkin memanggil FormDetailPeserta)
+            }
 
-        // PASANG RENDERER DAN EDITOR KE KOLOM AKSI (Indeks ke-5)
-        tabelSeleksi.getColumnModel().getColumn(5).setCellRenderer(new TombolAksiRenderer());
-        tabelSeleksi.getColumnModel().getColumn(5).setCellEditor(
-            new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
+            @Override
+            public void onEdit(int baris) {
+                // KITA GUNAKAN FUNGSI INI UNTUK TOMBOL "INPUT"
+                // Ambil ID Peserta dari kolom ke-3 (Indeks 2)
+                String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString(); 
                 
-                @Override
-                public void onDetail(int baris) {
-                    String id = tabelSeleksi.getValueAt(baris, 1).toString();
-                    JOptionPane.showMessageDialog(panelManajemenSeleksi.this, "Detail Seleksi: " + id);
+                // Cari frame induk
+                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelManajemenSeleksi.this);
+                if (parentWindow instanceof java.awt.Frame) {
+                    
+                    // PANGGIL FORM INPUT SELEKSI (Sembari mengirim ID Peserta)
+                    FormInputSeleksi inputForm = new FormInputSeleksi((java.awt.Frame) parentWindow, true, idPeserta);
+                    inputForm.setVisible(true); // Form terbuka dan sistem "menunggu" di baris ini
+                    
+                    // OTOMATIS REFRESH SETELAH FORM INPUT DITUTUP
+                    loadTableData("");
+                    loadStatistics();
                 }
+            }
 
-                @Override
-                public void onEdit(int baris) {
-                    String id = tabelSeleksi.getValueAt(baris, 1).toString();
-                    JOptionPane.showMessageDialog(panelManajemenSeleksi.this, "Edit Hasil Seleksi: " + id);
-                }
-
-                @Override
-                public void onHapus(int baris) {
-                    hapusData(baris);
-                }
-            })
-        );
+            @Override
+            public void onHapus(int baris) {
+                // Kosongkan jika tidak ada tombol hapus
+            }
+        }));
     }
 
     // --- LOGIKA MENGHITUNG KARTU STATISTIK ---
     private void loadStatistics() {
-        int total = DataStore.daftarSeleksi.size();
-        int lulus = 0;
-        int gugur = 0;
+        int totalSeleksi = DataStore.daftarSeleksi.size(); // Total semua riwayat seleksi yang pernah dilakukan
+        int pesertaLulus = 0;
+        int gugurPermanen = 0;
 
-        for (Seleksi sel : DataStore.daftarSeleksi) {
-            if (sel.getStatusHasil().equalsIgnoreCase("Lulus")) {
-                lulus++;
-            } else if (sel.getStatusHasil().equalsIgnoreCase("Gugur Permanen")) {
-                gugur++;
+        // Kita hitung dari status akhir tiap peserta
+        for (Model.Peserta p : DataStore.daftarPeserta) {
+            // Null-Safe: Jika status p null, tidak akan error, langsung dianggap false
+            if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
+                pesertaLulus++;
+            } else if ("Gugur".equalsIgnoreCase(p.getStatusSeleksi()) || "Gugur Permanen".equalsIgnoreCase(p.getStatusSeleksi())) {
+                gugurPermanen++;
             }
         }
 
-        lblTotalSeleksi.setText(String.valueOf(total));
-        lblLulus.setText(String.valueOf(lulus));
-        lblGugur.setText(String.valueOf(gugur));
+        lblTotalSeleksi.setText(String.valueOf(totalSeleksi));
+        lblPesertaLulus.setText(String.valueOf(pesertaLulus));
+        lblGugurPermanen.setText(String.valueOf(gugurPermanen));
     }
 
     // --- LOGIKA TABEL DENGAN MULTI-FILTER ---
     private void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelSeleksi.getModel();
-        model.setRowCount(0); 
-
-        // Ambil filter status dari ComboBox (Misal isinya: "Semua", "Lulus", "Gugur Permanen")
-        String filterStatus = cbFilter.getSelectedItem().toString();
-
+        model.setRowCount(0);
+        
+        // Ambil filter dari dropdown (Misal: cbFilterStatus)
+        String filter = cbFilterStatus.getSelectedItem() != null ? cbFilterStatus.getSelectedItem().toString() : "Semua Status";
         int no = 1;
-        for (Seleksi sel : DataStore.daftarSeleksi) {
+
+        // 1. Loop semua daftar Peserta
+        for (Model.Peserta p : DataStore.daftarPeserta) {
             
-            // 1. Pencarian Teks (Cek ID Seleksi, ID Peserta, atau Nama Peserta)
-            // Perhatikan cara kita memanggil nama peserta dari objek di dalam objek: sel.getPeserta().getNamaLengkap()
-            boolean textMatch = keyword.isEmpty() || 
-                                sel.getIdSeleksi().toLowerCase().contains(keyword.toLowerCase()) || 
-                                sel.getPeserta().getIdPeserta().toLowerCase().contains(keyword.toLowerCase()) ||
-                                sel.getPeserta().getNamaLengkap().toLowerCase().contains(keyword.toLowerCase());
+            // Filter Pencarian Teks
+            boolean matchText = keyword.isEmpty() || 
+                                p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
+                                p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
+            
+            if (!matchText) continue;
 
-            // 2. Filter ComboBox Status
-            boolean statusMatch = filterStatus.equals("Semua") || 
-                                  sel.getStatusHasil().equalsIgnoreCase(filterStatus);
+            // 2. Kalkulasi Riwayat Seleksi (Algoritma Pencarian)
+            int jumlahPercobaan = 0;
+            Model.Seleksi seleksiTerakhir = null;
+            
+            for (Model.Seleksi s : DataStore.daftarSeleksi) {
+                if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                    jumlahPercobaan++;
+                    seleksiTerakhir = s; // Variabel ini akan terus tertimpa sampai menemukan data yang paling akhir (terbaru)
+                }
+            }
 
-            // Jika cocok teks DAN cocok filter combobox, tampilkan!
-            if (textMatch && statusMatch) {
+            // 3. Tentukan Nilai Kolom Berdasarkan Hasil Kalkulasi
+            String idSel = (seleksiTerakhir != null) ? seleksiTerakhir.getIdSeleksi() : "—";
+            String jenisSel = (seleksiTerakhir != null) ? seleksiTerakhir.getJenisSeleksi() : "—";
+            String tglSel = (seleksiTerakhir != null) ? seleksiTerakhir.getTanggalSeleksi() : "—";
+            String nilaiStr = (seleksiTerakhir != null) ? String.valueOf(seleksiTerakhir.getNilai()) : "—";
+            
+            // Tentukan status, jika belum pernah seleksi sama sekali = "Menunggu"
+            String status = (seleksiTerakhir != null) ? seleksiTerakhir.getStatusHasil() : "Menunggu";
+            
+            // Format string percobaan seperti di desain: "1 / 3"
+            String teksPercobaan = jumlahPercobaan + " / 3";
+
+            // 4. Terapkan Filter Status Dropdown
+            boolean matchStatus = filter.equals("Semua Status") || status.equalsIgnoreCase(filter);
+            
+            if (matchStatus) {
                 model.addRow(new Object[]{
                     no++,
-                    sel.getIdSeleksi(),
-                    sel.getPeserta().getIdPeserta(),
-                    sel.getPeserta().getNamaLengkap(),
-                    sel.getJenisSeleksi(),
-                    ""
+                    idSel,
+                    p.getIdPeserta(),
+                    p.getNamaLengkap(),
+                    jenisSel,
+                    tglSel,
+                    nilaiStr,
+                    teksPercobaan,
+                    status,
+                    "" // Kolom Aksi
                 });
             }
         }
-        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data Seleksi");
-        try { 
-            TabelUtil.autoResizeKolom(tabelSeleksi); 
-        } catch (Exception e) {}
     }
 
     // --- LOGIKA HAPUS DATA ---
@@ -151,7 +184,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {
         txtCari.setText("");
-        cbFilter.setSelectedIndex(0); // Kembali ke "Semua"
+        cbFilterStatus.setSelectedIndex(0); // Kembali ke "Semua"
         loadTableData("");
     }
 
@@ -170,14 +203,14 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
         kartuTotal2 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        lblGugur = new javax.swing.JLabel();
+        lblGugurPermanen = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         pnlToolbar = new javax.swing.JPanel();
         txtCari = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        cbFilter = new javax.swing.JComboBox<>();
+        cbFilterStatus = new javax.swing.JComboBox<>();
         jButton3 = new javax.swing.JButton();
         kartuTotal = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -186,7 +219,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jLabel9 = new javax.swing.JLabel();
         kartuTotal1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        lblLulus = new javax.swing.JLabel();
+        lblPesertaLulus = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         panelTabel = new javax.swing.JPanel();
@@ -205,10 +238,10 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jLabel5.setText("Gugur pemanen");
         kartuTotal2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, -1, -1));
 
-        lblGugur.setFont(new java.awt.Font("Inter", 1, 36)); // NOI18N
-        lblGugur.setForeground(new java.awt.Color(200, 0, 0));
-        lblGugur.setText("0");
-        kartuTotal2.add(lblGugur, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, -1, -1));
+        lblGugurPermanen.setFont(new java.awt.Font("Inter", 1, 36)); // NOI18N
+        lblGugurPermanen.setForeground(new java.awt.Color(200, 0, 0));
+        lblGugurPermanen.setText("0");
+        kartuTotal2.add(lblGugurPermanen, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, -1, -1));
 
         jPanel3.setBackground(new java.awt.Color(255, 235, 235));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -236,8 +269,8 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jButton2.setText("Reset");
         pnlToolbar.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 20, 90, 34));
 
-        cbFilter.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Semua" }));
-        pnlToolbar.add(cbFilter, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 20, 170, 34));
+        cbFilterStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Semua" }));
+        pnlToolbar.add(cbFilterStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 20, 170, 34));
 
         jButton3.setBackground(new java.awt.Color(122, 0, 0));
         jButton3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -282,10 +315,10 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
         jLabel3.setText("Peserta Lulus");
         kartuTotal1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, -1, -1));
 
-        lblLulus.setFont(new java.awt.Font("Inter", 1, 36)); // NOI18N
-        lblLulus.setForeground(new java.awt.Color(0, 140, 60));
-        lblLulus.setText("0");
-        kartuTotal1.add(lblLulus, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, -1, -1));
+        lblPesertaLulus.setFont(new java.awt.Font("Inter", 1, 36)); // NOI18N
+        lblPesertaLulus.setForeground(new java.awt.Color(0, 140, 60));
+        lblPesertaLulus.setText("0");
+        kartuTotal1.add(lblPesertaLulus, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, -1, -1));
 
         jPanel2.setBackground(new java.awt.Color(255, 235, 235));
         jPanel2.setPreferredSize(new java.awt.Dimension(60, 60));
@@ -306,13 +339,13 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
         tabelSeleksi.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "No", "ID Seleksi", "ID Peserta", "Nama Peserta", "Jenis Seleksi", "Aksi"
+                "No", "ID Seleksi", "ID Peserta", "Nama Peserta", "Jenis Seleksi", "Tgl Seleksi", "Nilai", "Percobaan", "Status", "Aksi"
             }
         ));
         jScrollPane1.setViewportView(tabelSeleksi);
@@ -329,7 +362,7 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> cbFilter;
+    private javax.swing.JComboBox<String> cbFilterStatus;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
@@ -346,8 +379,8 @@ public class panelManajemenSeleksi extends javax.swing.JPanel {
     private javax.swing.JPanel kartuTotal;
     private javax.swing.JPanel kartuTotal1;
     private javax.swing.JPanel kartuTotal2;
-    private javax.swing.JLabel lblGugur;
-    private javax.swing.JLabel lblLulus;
+    private javax.swing.JLabel lblGugurPermanen;
+    private javax.swing.JLabel lblPesertaLulus;
     private javax.swing.JLabel lblTotalData;
     private javax.swing.JLabel lblTotalSeleksi;
     private javax.swing.JPanel panelTabel;

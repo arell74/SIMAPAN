@@ -682,7 +682,6 @@ public class PanelLaporan extends javax.swing.JPanel {
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             java.io.File fileToSave = fileChooser.getSelectedFile();
             
-            // Pastikan format akhirnya .pdf
             String filePath = fileToSave.getAbsolutePath();
             if (!filePath.toLowerCase().endsWith(".pdf")) {
                 filePath += ".pdf";
@@ -692,9 +691,8 @@ public class PanelLaporan extends javax.swing.JPanel {
                 // 1. SEMBUNYIKAN TOMBOL DAN KESELURUHAN PANEL TABEL
                 btnReset.setVisible(false);
                 btnEkspor.setVisible(false);
-                panelTabel.setVisible(false); // Sembunyikan panel pembungkus tabel secara utuh
+                panelTabel.setVisible(false);
 
-                // 2. MOTRET PANEL & AUTO-CROP
                 int fullWidth = this.getWidth();
                 int fullHeight = this.getHeight();
                 
@@ -703,15 +701,10 @@ public class PanelLaporan extends javax.swing.JPanel {
                 this.printAll(g2d); 
                 g2d.dispose();
 
-                // MUNCULKAN KEMBALI UI SECEPAT MUNGKIN SEBELUM USER SADAR
                 btnReset.setVisible(true);
                 btnEkspor.setVisible(true);
                 panelTabel.setVisible(true);
-
-                // --- TRIK RAHASIA: MEMOTONG BAGIAN KOSONG (CROP) ---
-                // Kita potong gambar dari atas (y=0) sampai batas mulainya panelTabel
                 int batasCropBawah = panelTabel.getY(); 
-                // Pastikan nilai crop tidak melebihi tinggi asli
                 if (batasCropBawah == 0) batasCropBawah = fullHeight / 2; 
                 BufferedImage croppedImage = imageCapture.getSubimage(0, 0, fullWidth, batasCropBawah);
 
@@ -740,14 +733,11 @@ public class PanelLaporan extends javax.swing.JPanel {
                 
                 document.add(new com.itextpdf.text.Paragraph(" ")); 
 
-                // Masukkan gambar yang sudah di-crop
                 Image pdfImage = Image.getInstance(croppedImage, null);
-                // Sesuaikan skala agar fit di kertas tanpa terdistorsi
                 pdfImage.scaleToFit(document.getPageSize().getWidth() - 60, document.getPageSize().getHeight() - 150);
                 pdfImage.setAlignment(Image.ALIGN_CENTER);
                 document.add(pdfImage);
 
-                // Tambahkan Teks Ringkasan Eksekutif di bawah grafik
                 document.add(new com.itextpdf.text.Paragraph(" "));
                 String teksRingkasan = "Ringkasan Eksekutif:\n" +
                                        "Berdasarkan visualisasi data di atas, laporan ini merepresentasikan distribusi kelulusan " +
@@ -758,9 +748,7 @@ public class PanelLaporan extends javax.swing.JPanel {
                 ringkasan.setAlignment(com.itextpdf.text.Element.ALIGN_JUSTIFIED);
                 document.add(ringkasan);
 
-
-                // --- HALAMAN 2: NATIVE PDF TABLE (LAMPIRAN) ---
-                document.newPage(); // Pindah halaman
+                document.newPage();
 
                 com.itextpdf.text.Paragraph judulTabel = new com.itextpdf.text.Paragraph("Lampiran: Rincian Data Keberangkatan Peserta", fontJudul);
                 judulTabel.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
@@ -800,7 +788,6 @@ public class PanelLaporan extends javax.swing.JPanel {
                     "Ekspor Sukses", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (Exception e) {
-                // Antisipasi Error: Kembalikan UI seperti semula
                 btnReset.setVisible(true);
                 btnEkspor.setVisible(true);
                 panelTabel.setVisible(true); 

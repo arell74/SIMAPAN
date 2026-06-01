@@ -78,13 +78,30 @@ public class DataStore {
         daftarPeserta.add(pst5);
         
 //        Seleksi
-        daftarSeleksi.add(new Seleksi("SEL001", pst3, "Seleksi Bahasa Jepang", "06 Oktober 2025", 75, "Lulus"));
-        daftarSeleksi.add(new Seleksi("SEL002", pst3, "Seleksi Wawancara", "12 Oktober 2025", 55, "Mengulang"));
+        daftarSeleksi.add(new Seleksi("SEL-OLD1", pst3, "Seleksi Berkas & Administrasi", "20/09/2025", 70, "Lulus"));
 
-        // Data dummy untuk peserta lain
-        daftarSeleksi.add(new Seleksi("SEL003", pst1, "Tes Fisik & Kesamaptaan", "20 Mei 2026", 85, "Lulus"));
-        daftarSeleksi.add(new Seleksi("SEL004", pst2, "Wawancara User (Kaigo)", "22 Mei 2026", 90, "Lulus"));
-       
+        daftarSeleksi.add(new Seleksi("SEL-OLD2", pst5, "Seleksi Berkas & Administrasi", "15/09/2025", 80, "Lulus"));
+        daftarSeleksi.add(new Seleksi("SEL-OLD3", pst5, "Tes Fisik & Kesamaptaan", "01/10/2025", 60, "Tidak Lulus"));
+
+
+        // --- DATA SELEKSI UTAMA / TERAKHIR (Sesuai Tampilan Tabel Kamu) ---
+        // Format: (idSeleksi, objekPeserta, jenisSeleksi, tanggalSeleksi, nilai, statusHasil)
+        
+        // 1. Azril Algiffari (PST001)
+        daftarSeleksi.add(new Seleksi("SEL001", pst1, "Seleksi Bahasa Jepang", "01/10/2025", 85, "Lulus"));
+        
+        // 2. Tania Elliyanti (PST002)
+        daftarSeleksi.add(new Seleksi("SEL002", pst2, "Seleksi Wawancara User", "01/10/2025", 78, "Lulus"));
+        
+        // 3. Akram Pratama Putra (PST003) - Ini menjadi percobaan ke-2
+        daftarSeleksi.add(new Seleksi("SEL003", pst3, "Seleksi Bahasa Jepang", "05/10/2025", 55, "Tidak Lulus"));
+        
+        // 4. Muhamad Farel Fauzan (PST004)
+        daftarSeleksi.add(new Seleksi("SEL004", pst4, "Seleksi Kemampuan Kerja", "10/10/2025", 92, "Lulus"));
+        
+        // 5. PST005 - Ini menjadi percobaan ke-3 (Gugur)
+        daftarSeleksi.add(new Seleksi("SEL005", pst5, "Seleksi Bahasa Jepang", "12/10/2025", 40, "Gugur Permanen"));
+        
     }
 
     // Fungsi khusus untuk mengambil HANYA instruktur (digunakan untuk ComboBox di form Tambah Peserta)
