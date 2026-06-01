@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package Views;
+package Views.admin;
 
 import DataStore.DataStore;
 import Model.Seleksi;
@@ -51,21 +51,28 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
 
             @Override
             public void onEdit(int baris) {
-                // KITA GUNAKAN FUNGSI INI UNTUK TOMBOL "INPUT"
-                // Ambil ID Peserta dari kolom ke-3 (Indeks 2)
                 String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString(); 
                 
-                // Cari frame induk
-                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelManajemenSeleksi.this);
-                if (parentWindow instanceof java.awt.Frame) {
+                // 2. Cari objek Peserta aslinya dari DataStore
+                Model.Peserta pesertaTerpilih = null;
+                for (Model.Peserta p : DataStore.daftarPeserta) {
+                    if (p.getIdPeserta().equals(idPeserta)) {
+                        pesertaTerpilih = p;
+                        break;
+                    }
+                }
+                
+                // 3. Panggil Form Input Seleksi
+                if (pesertaTerpilih != null) {
                     
-                    // PANGGIL FORM INPUT SELEKSI (Sembari mengirim ID Peserta)
-                    FormInputSeleksi inputForm = new FormInputSeleksi((java.awt.Frame) parentWindow, true, idPeserta);
-                    inputForm.setVisible(true); // Form terbuka dan sistem "menunggu" di baris ini
+                    // Gunakan PanelManajemenSeleksi.this agar lemparan induknya tepat sasaran
+                    FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, PanelManajemenSeleksi.this);
+                    form.setVisible(true); 
                     
-                    // OTOMATIS REFRESH SETELAH FORM INPUT DITUTUP
-                    loadTableData("");
-                    loadStatistics();
+                    // CATATAN PENTING:
+                    // Tidak perlu menaruh loadTableData() di sini.
+                    // Biarkan form pop-up terbuka. Saat user menekan tombol "Simpan" di pop-up,
+                    // form tersebut yang akan memanggil fungsi refresh milik induknya.
                 }
             }
 
@@ -275,6 +282,11 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
         jButton3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
         jButton3.setText("Input Seleksi");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(800, 20, -1, 34));
 
         add(pnlToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 156, 930, 70));
@@ -358,6 +370,36 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
 
         add(panelTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 225, 930, 370));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // 1. Cek apakah ada baris tabel yang dipilih
+        int barisTerpilih = tabelSeleksi.getSelectedRow();
+        
+        if (barisTerpilih == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Pilih data peserta di tabel terlebih dahulu untuk menambah seleksi!", 
+                "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // 2. Ambil ID Peserta dari tabel (Asumsi ID Peserta ada di kolom indeks ke-2)
+        String idPeserta = tabelSeleksi.getValueAt(barisTerpilih, 2).toString();
+        
+        // 3. Cari objek Peserta aslinya dari DataStore
+        Model.Peserta pesertaTerpilih = null;
+        for (Model.Peserta p : DataStore.daftarPeserta) {
+            if (p.getIdPeserta().equals(idPeserta)) {
+                pesertaTerpilih = p;
+                break;
+            }
+        }
+        
+        // 4. Buka Form Input dan "lempar" data peserta serta halaman ini (this) ke dalamnya
+        if (pesertaTerpilih != null) {
+            FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, this);
+            form.setVisible(true);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

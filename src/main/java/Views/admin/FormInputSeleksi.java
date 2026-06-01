@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package Views;
+package Views.admin;
 
 import DataStore.DataStore;
 import Model.Peserta;
@@ -19,69 +19,43 @@ public class FormInputSeleksi extends javax.swing.JDialog {
      * Creates new form FormInputSeleksi
      */
     private Peserta pesertaAktif;
-    
-    public FormInputSeleksi(java.awt.Frame parent, boolean modal, String idPeserta) {
-        super(parent, modal);
-        initComponents();
-        txtIdSeleksi.setEditable(false);
-        
-        setupComboBox();
-        loadDataPeserta(idPeserta);
-    }
-    
-    private void setupComboBox() {
-        // Asumsi nama ComboBox: cbSpesialisasi dan cbStatusKelulusan
-        cbSpesialisasi.removeAllItems();
-        cbSpesialisasi.addItem("Seleksi Bahasa Jepang");
-        cbSpesialisasi.addItem("Seleksi Wawancara");
-        cbSpesialisasi.addItem("Tes Fisik & Kesamaptaan");
-        cbSpesialisasi.addItem("Wawancara User (Manufaktur)");
-        cbSpesialisasi.addItem("Wawancara User (Kaigo)");
+    private PanelManajemenSeleksi panelInduk; // Untuk memanggil fungsi refresh
 
-        cbStatusKelulusan.removeAllItems();
-        cbStatusKelulusan.addItem("Lulus");
-        cbStatusKelulusan.addItem("Mengulang");
-        cbStatusKelulusan.addItem("Gugur Permanen");
+    public FormInputSeleksi(Peserta peserta, PanelManajemenSeleksi panelInduk) {
+        initComponents();
+        this.setLocationRelativeTo(null); // Agar muncul di tengah layar
+        
+        this.pesertaAktif = peserta;
+        this.panelInduk = panelInduk;
+        
+        siapkanDataLayar();
     }
     
-    private void loadDataPeserta(String idPeserta) {
-        // 1. Cari objek Peserta
-        for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta().equals(idPeserta)) {
-                pesertaAktif = p;
-                break;
+    private void siapkanDataLayar() {
+        // 1. Tampilkan Data Statis Peserta
+        lblNamaPeserta.setText(pesertaAktif.getNamaLengkap());
+        lblInfoPeserta.setText(pesertaAktif.getIdPeserta() + "   Level " + pesertaAktif.getLevelBahasa());
+        
+        // 2. Hitung ini percobaan ke berapa
+        int jumlahPercobaan = 0;
+        for (Seleksi s : DataStore.daftarSeleksi) {
+            if (s.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
+                jumlahPercobaan++;
             }
         }
-
-        if (pesertaAktif != null) {
-            // Set Header Info
-            lblNamaPeserta.setText(pesertaAktif.getNamaLengkap());
-            // Gabungkan ID dan Level Bahasa (mengakali desain "Level N3 Level N3")
-            lblInfoPeserta.setText(pesertaAktif.getIdPeserta() + "   Level " + pesertaAktif.getLevelBahasa());
-
-            // 2. Hitung jumlah riwayat seleksi sebelumnya
-            int riwayatSebelumnya = 0;
-            for (Seleksi s : DataStore.daftarSeleksi) {
-                if (s.getPeserta().getIdPeserta().equals(idPeserta)) {
-                    riwayatSebelumnya++;
-                }
-            }
-
-            // 3. Logika Percobaan (Maksimal 3x)
-            int maksimalPercobaan = 3;
-            int percobaanSekarang = riwayatSebelumnya + 1;
-            int sisaPercobaan = maksimalPercobaan - percobaanSekarang;
-
-            if (percobaanSekarang > maksimalPercobaan) {
-                lblPercobaan.setText("Kesempatan Habis!");
-                lblPercobaan.setForeground(java.awt.Color.RED);
-                btnSimpan.setEnabled(false); // Kunci tombol simpan jika jatah habis
-            } else {
-                lblPercobaan.setText(percobaanSekarang + " dari " + maksimalPercobaan + " - sisa " + sisaPercobaan);
-            }
-
-            int nextId = DataStore.daftarSeleksi.size() + 1;
-            txtIdSeleksi.setText(String.format("SEL%03d", nextId));
+        
+        int percobaanSekarang = jumlahPercobaan + 1;
+        int sisa = 3 - percobaanSekarang; // Asumsi maksimal 3x coba
+        
+        lblPercobaan.setText(percobaanSekarang + " dari 3 - Sisa " + Math.max(0, sisa));
+        
+        // 3. Buatkan ID Seleksi Otomatis (Opsional, mempermudah user)
+        txtIdSeleksi.setText("SEL" + (DataStore.daftarSeleksi.size() + 1));
+        
+        // Matikan tombol simpan jika sudah melebihi batas 3x
+        if (percobaanSekarang > 3) {
+            btnSimpan.setEnabled(false);
+            lblPercobaan.setText("Batas Maksimal Percobaan Habis!");
         }
     }
    

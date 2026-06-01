@@ -2,13 +2,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Views;
+package Views.admin;
 
 import DataStore.DataStore;
 import Model.Instruktur;
 import Model.Peserta;
-import Model.Program;
-import java.awt.Frame;
+import java.awt.Color;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
@@ -16,84 +21,41 @@ import javax.swing.JOptionPane;
  *
  * @author arelssi
  */
-public class FormEditPeserta extends javax.swing.JFrame {
+    public class FormTambahPeserta extends javax.swing.JFrame {
 
-    /**
-     * Creates new form FormEditPeserta
-     */
-    private Peserta pesertaEdit;
-    
-    public FormEditPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
+        //ID Otomatis
+    private String generateIdPeserta() {
+        int ukuranData = DataStore.daftarPeserta.size();
+        return String.format("PST%03d", ukuranData + 1);
+    }
+
+    private void loadComboBoxInstruktur() {
+        cmbInstruktur.removeAllItems();
+        for (Instruktur ins : DataStore.getHanyaInstruktur()) {
+            cmbInstruktur.addItem(ins);
+        }
+    }
+
+    public FormTambahPeserta(java.awt.Frame parent, boolean modal) {
         initComponents();
-        setLocationRelativeTo(null);
+        setSize(560, 620);
+        pack();
+        setLocationRelativeTo(parent);
+        setResizable(false);
+        setTitle("Tambah Peserta Baru");
+        
+        txtIdPeserta.setText(generateIdPeserta());
         txtIdPeserta.setEditable(false);
         
-        loadComboBoxData();
+        loadComboBoxInstruktur();
         cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3"}));
+        // Status Pembayaran
         cmbStatusBayar.setModel(new DefaultComboBoxModel<>(new String[]{"Belum Lunas", "Lunas"}));
         cmbAgama.setModel(new DefaultComboBoxModel<>(new String[]{"Islam", "Kristen", "Hindu", "Katholik", "Budha"}));
         cmbJenisKelamin.setModel(new DefaultComboBoxModel<>(new String[]{"Laki-laki", "Perempuan"}));
         cmbProgram.setModel(new DefaultComboBoxModel<>(new String[]{"Manufaktur", "Caregiver", "Pertanian"}));
         
-        tampilkanDataPeserta(idPeserta);
     }
-    
-    private void loadComboBoxData() {
-        cmbInstruktur.removeAllItems();
-        cmbProgram.removeAllItems();
-        
-        for (Instruktur ins : DataStore.getHanyaInstruktur()) {
-            cmbInstruktur.addItem(ins);
-        }
-        
-        for (Program prg : DataStore.daftarProgram) {
-            cmbProgram.addItem(prg.getIdProgram() + " - " + prg.getNamaProgram());
-        }
-    }
-    
-    private void tampilkanDataPeserta(String id) {
-        for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta().equals(id)) {
-                this.pesertaEdit = p;
-                break;
-            }
-        }
-
-        if (pesertaEdit != null) {
-            txtIdPeserta.setText(pesertaEdit.getIdPeserta());
-            txtNik.setText(pesertaEdit.getNik());
-            txtNamaLengkap.setText(pesertaEdit.getNamaLengkap());
-            txtTanggalLahir.setText(pesertaEdit.getTanggalLahir());
-            txtNoHp.setText(pesertaEdit.getNoHp());
-            txtAlamat.setText(pesertaEdit.getAlamat());
-    
-            cmbJenisKelamin.setSelectedItem(pesertaEdit.getJenisKelamin());
-            cmbAgama.setSelectedItem(pesertaEdit.getAgama());
-            cmbLevelBahasa.setSelectedItem(pesertaEdit.getLevelBahasa());
-            cmbStatusBayar.setSelectedItem(pesertaEdit.getStatusPembayaran());
-            
-            for (int i = 0; i < cmbInstruktur.getItemCount(); i++) {
-                Instruktur insItem = (Instruktur) cmbInstruktur.getItemAt(i);
-                if (insItem.getIdInstruktur().equals(pesertaEdit.getInstrukturDamping().getIdInstruktur())) {
-                    cmbInstruktur.setSelectedIndex(i);
-                    break;
-                }
-            }
-
-            for (int i = 0; i < cmbProgram.getItemCount(); i++) {
-                String prgItem = cmbProgram.getItemAt(i).toString();
-                if (prgItem.contains(pesertaEdit.getProgram())) {
-                    cmbProgram.setSelectedIndex(i);
-                    break;
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Data peserta tidak ditemukan!");
-            this.dispose();
-        }
-    }
-    
-
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -140,7 +102,7 @@ public class FormEditPeserta extends javax.swing.JFrame {
         cmbStatusBayar = new javax.swing.JComboBox<>();
         footer = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
-        jButton2 = new javax.swing.JButton();
+        btnBatal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -157,13 +119,13 @@ public class FormEditPeserta extends javax.swing.JFrame {
 
         jLabel2.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel2.setText("Edit Peserta");
+        jLabel2.setText("Tambah Peserta Baru");
         jLabel2.setPreferredSize(new java.awt.Dimension(280, 22));
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 200, 200));
-        jLabel3.setText("Pastikan seluruh data peserta sudah benar");
+        jLabel3.setText("Isi seluruh data peserta dengan benar");
         jLabel3.setPreferredSize(new java.awt.Dimension(300, 16));
         jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
 
@@ -317,22 +279,22 @@ public class FormEditPeserta extends javax.swing.JFrame {
         jSeparator3.setPreferredSize(new java.awt.Dimension(560, 2));
         footer.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
-        jButton2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(80, 80, 80));
-        jButton2.setText("Batal");
-        jButton2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210)));
-        jButton2.setPreferredSize(new java.awt.Dimension(100, 34));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        btnBatal.setForeground(new java.awt.Color(80, 80, 80));
+        btnBatal.setText("Batal");
+        btnBatal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210)));
+        btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnBatalActionPerformed(evt);
             }
         });
-        footer.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 10, -1, -1));
+        footer.add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(316, 12, -1, -1));
 
         btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
         btnSimpan.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
         btnSimpan.setForeground(new java.awt.Color(255, 255, 255));
-        btnSimpan.setText("Simpan Perubahan");
+        btnSimpan.setText("Simpan");
         btnSimpan.setBorderPainted(false);
         btnSimpan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSimpan.setFocusPainted(false);
@@ -342,7 +304,7 @@ public class FormEditPeserta extends javax.swing.JFrame {
                 btnSimpanActionPerformed(evt);
             }
         });
-        footer.add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(394, 12, 150, -1));
+        footer.add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(426, 12, -1, -1));
 
         getContentPane().add(footer, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 560, -1, -1));
 
@@ -353,7 +315,7 @@ public class FormEditPeserta extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
         int konfirm = javax.swing.JOptionPane.showConfirmDialog(
             this,
             "Data yang diisi akan hilang. Yakin ingin membatalkan?",
@@ -364,43 +326,85 @@ public class FormEditPeserta extends javax.swing.JFrame {
         if (konfirm == javax.swing.JOptionPane.YES_OPTION) {
             this.dispose();
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnBatalActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-//        validasi
         if (txtNik.getText().trim().isEmpty() || txtNamaLengkap.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "NIK dan Nama tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Harap isi NIK dan Nama Lengkap dengan benar!", 
+                "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            pesertaEdit.setNik(txtNik.getText()); 
-            pesertaEdit.setNamaLengkap(txtNamaLengkap.getText());
-            pesertaEdit.setTanggalLahir(txtTanggalLahir.getText()); 
-            pesertaEdit.setJenisKelamin(cmbJenisKelamin.getSelectedItem().toString()); 
-            pesertaEdit.setNoHp(txtNoHp.getText());
-            pesertaEdit.setAgama(cmbAgama.getSelectedItem().toString()); 
-            pesertaEdit.setAlamat(txtAlamat.getText());
-            pesertaEdit.setLevelBahasa(cmbLevelBahasa.getSelectedItem().toString());
-            pesertaEdit.setStatusPembayaran(cmbStatusBayar.getSelectedItem().toString());
+            String id = txtIdPeserta.getText();
+            String nik = txtNik.getText();
+            String nama = txtNamaLengkap.getText();
+            String tglLahir = txtTanggalLahir.getText();
+            String jk = cmbJenisKelamin.getSelectedItem().toString();
+            String noHp = txtNoHp.getText();
+            String agama = cmbAgama.getSelectedItem().toString();
+            String alamat = txtAlamat.getText();
+            String program = cmbProgram.getSelectedItem().toString();
+            String level = cmbLevelBahasa.getSelectedItem().toString();
+            String bayar = cmbStatusBayar.getSelectedItem().toString();
 
-            Instruktur instrukturBaru = (Instruktur) cmbInstruktur.getSelectedItem();
-            pesertaEdit.setInstrukturDamping(instrukturBaru);
-            
-            String programString = cmbProgram.getSelectedItem().toString();
-            String idProgramBaru = programString.substring(0, 6); 
-            pesertaEdit.setProgram(idProgramBaru);
+            Instruktur instrukturPilihan = (Instruktur) cmbInstruktur.getSelectedItem();
 
-            JOptionPane.showMessageDialog(this, "Data berhasil diperbarui!");
-            this.dispose();
+            Peserta pesertaBaru = new Peserta(
+                id, nik, nama, tglLahir, jk, noHp, agama, alamat, 
+                program, instrukturPilihan, level, bayar
+            );
+
+            DataStore.daftarPeserta.add(pesertaBaru);
+
+            JOptionPane.showMessageDialog(this, "Data Peserta Baru Berhasil Disimpan!");
+            this.dispose(); 
             
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Terjadi kesalahan saat menyimpan data: " + e.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSimpanActionPerformed
 
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(FormTambahPeserta.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(FormTambahPeserta.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(FormTambahPeserta.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(FormTambahPeserta.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new FormTambahPeserta(new javax.swing.JFrame(), true).setVisible(true);
+            }
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
     private javax.swing.JComboBox<String> cmbAgama;
     private javax.swing.JComboBox cmbInstruktur;
@@ -410,7 +414,6 @@ public class FormEditPeserta extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cmbStatusBayar;
     private javax.swing.JPanel footer;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

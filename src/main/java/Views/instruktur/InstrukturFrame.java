@@ -4,7 +4,8 @@
  */
 package Views.instruktur;
 
-import Views.*;
+import Views.admin.FormLogin;
+import Views.admin.FormTambahPeserta;
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -277,14 +278,14 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
         jLabel9.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(40, 40, 40));
-        jLabel9.setText("Admin LPK");
+        jLabel9.setText("Instruktur");
         jLabel9.setPreferredSize(new java.awt.Dimension(160, 16));
         panelHeadr.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 30, -1, -1));
 
         jPanel1.setBackground(new java.awt.Color(255, 235, 235));
 
         jLabel10.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15)); // NOI18N
-        jLabel10.setText("A");
+        jLabel10.setText("I");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);

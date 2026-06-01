@@ -9,7 +9,7 @@ import Model.Instruktur;
 import Model.Pengguna;
 import Model.Peserta;
 import Util.TabelUtil;
-import Views.FormTambahInstruktur;
+import Views.admin.FormTambahInstruktur;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -214,7 +214,7 @@ public class PanelInputNilai extends javax.swing.JPanel {
 
         jComboBox1.setBackground(new java.awt.Color(80, 80, 80));
         jComboBox1.setForeground(new java.awt.Color(255, 255, 255));
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "MNH 1", "MNH 2", "IRODORI" }));
         panelToolbar.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 13, 160, 30));
 
         jLabel1.setText("Materi");

@@ -473,7 +473,7 @@
             <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="28" green="28" red="28" type="rgb"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Admin LPK"/>
+            <Property name="text" type="java.lang.String" value="Instruktur"/>
             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[160, 16]"/>
             </Property>
@@ -522,7 +522,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="JetBrainsMono NF ExtraBold" size="15" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="A"/>
+                <Property name="text" type="java.lang.String" value="I"/>
               </Properties>
             </Component>
           </SubComponents>

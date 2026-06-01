@@ -7,7 +7,7 @@
  *
  * @author arelssi
  */
-import Views.FormLogin;
+import Views.admin.FormLogin;
 import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.SwingUtilities;
 

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Views;
+package Views.admin;
 
 import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import java.awt.Color;
@@ -337,7 +337,7 @@ public class FormLogin extends javax.swing.JFrame {
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
                 if (user.getRole().equals("ADMIN")) {
-                    Views.AdminFrame adminDashboard = new Views.AdminFrame(); 
+                    Views.admin.AdminFrame adminDashboard = new Views.admin.AdminFrame(); 
                     adminDashboard.setVisible(true);
                 } else if (user.getRole().equals("INSTRUKTUR")) {
                     Model.Instruktur ins = (Model.Instruktur) user;

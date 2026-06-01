@@ -21,13 +21,11 @@ public class Dokumen {
         this.tanggalBerangkat = tanggalBerangkat;
     }
 
-    // Getter
     public String getIdDokumen() { return idDokumen; }
     public Peserta getPeserta() { return peserta; }
     public String getNoPaspor() { return noPaspor; }
     public String getTanggalBerangkat() { return tanggalBerangkat; }
 
-    // Setter
     public void setNoPaspor(String noPaspor) { this.noPaspor = noPaspor; }
     public void setTanggalBerangkat(String tanggalBerangkat) { this.tanggalBerangkat = tanggalBerangkat; }
 }

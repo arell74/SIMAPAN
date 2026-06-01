@@ -2,126 +2,122 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package Views;
+package Views.admin;
 
+import Model.Program;
 import DataStore.DataStore;
-import Model.Peserta;
 import Util.TombolAksiEditor;
 import Util.TombolAksiRenderer;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author arelssi
  */
-public class PanelDataPeserta extends javax.swing.JPanel {
+public class PanelDataProgram extends javax.swing.JPanel {
 
     /**
-     * Creates new form DataPeserta
+     * Creates new form PanelProgram
      */
-
-    public PanelDataPeserta() {
-        initComponents();
-        setupTable();
-        loadTableData(""); 
-    }
-
     private void setupTable() {
-        tabelPeserta.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
-        tabelPeserta.getTableHeader().setBackground(new Color(122, 0, 0));
-        tabelPeserta.getTableHeader().setForeground(Color.WHITE);
-        tabelPeserta.setRowHeight(36);
-        
-        tabelPeserta.getColumnModel().getColumn(6).setCellRenderer(new TombolAksiRenderer());
-        tabelPeserta.getColumnModel().getColumn(6).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
-            @Override
-            public void onDetail(int baris) {
-                String id = tabelPeserta.getValueAt(baris, 1).toString();
-        
-                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelDataPeserta.this);
-                if (parentWindow instanceof java.awt.Frame) {
-                    FormDetailPeserta detailForm = new FormDetailPeserta((java.awt.Frame) parentWindow, true, id);
-                    detailForm.setVisible(true);
-                }
-            }
+        // Styling Header
+        tabelProgram.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
+        tabelProgram.getTableHeader().setBackground(new Color(122, 0, 0));
+        tabelProgram.getTableHeader().setForeground(Color.WHITE);
+        tabelProgram.getTableHeader().setOpaque(false);
+        tabelProgram.setRowHeight(36);
+        tabelProgram.setSelectionBackground(new Color(255, 230, 230));
 
-            @Override
-            public void onEdit(int baris) {
-                String id = tabelPeserta.getValueAt(baris, 1).toString();
-        
-                java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(PanelDataPeserta.this);
+        // 1. PASANG RENDERER DAN EDITOR KE KOLOM AKSI (Indeks ke-6)
+        tabelProgram.getColumnModel().getColumn(6).setCellRenderer(new TombolAksiRenderer());
+        tabelProgram.getColumnModel().getColumn(6).setCellEditor(
+            new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
                 
-                if (parentWindow instanceof java.awt.Frame) {
-                    FormEditPeserta editForm = new FormEditPeserta((java.awt.Frame) parentWindow, true, id);
-                    editForm.setVisible(true); 
-                    
-                    loadTableData(""); 
+                @Override
+                public void onDetail(int baris) {
+                    String id = tabelProgram.getValueAt(baris, 1).toString();
+                    JOptionPane.showMessageDialog(PanelDataProgram.this, "Lihat Detail Program: " + id);
                 }
-            }
 
-            @Override
-            public void onHapus(int baris) {
-                hapusData(baris);
-            }
-        }));
+                @Override
+                public void onEdit(int baris) {
+                    String id = tabelProgram.getValueAt(baris, 1).toString();
+                    JOptionPane.showMessageDialog(PanelDataProgram.this, "Edit Data Program: " + id);
+                }
+
+                @Override
+                public void onHapus(int baris) {
+                    hapusData(baris);
+                }
+            })
+        );
     }
-
+    
+    private void hapusData(int baris) {
+        String idProgram = tabelProgram.getValueAt(baris, 1).toString();
+        String nama = tabelProgram.getValueAt(baris, 2).toString();
+        
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Apakah Anda yakin ingin menghapus program " + nama + "?", 
+            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Hapus dari memori In-Memory DataStore
+            boolean sukses = DataStore.daftarProgram.removeIf(prg -> prg.getIdProgram().equals(idProgram));
+            
+            if (sukses) {
+                JOptionPane.showMessageDialog(this, "Data Program Berhasil Dihapus!");
+                loadTableData(""); // Refresh tabel
+            } else {
+                JOptionPane.showMessageDialog(this, "Gagal menghapus program!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
     private void loadTableData(String keyword) {
-        DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
-        model.setRowCount(0);
+        DefaultTableModel model = (DefaultTableModel) tabelProgram.getModel();
+        model.setRowCount(0); // Kosongkan tabel
 
         int no = 1;
         
-        for (Peserta p : DataStore.daftarPeserta) {
+        for (Program prg : DataStore.daftarProgram) {
+            
+            // Logika Search berdasarkan ID atau Nama Program
             boolean match = keyword.isEmpty() || 
-                            p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
-                            p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
+                            prg.getNamaProgram().toLowerCase().contains(keyword.toLowerCase()) || 
+                            prg.getIdProgram().toLowerCase().contains(keyword.toLowerCase());
 
             if (match) {
                 model.addRow(new Object[]{
                     no++,
-                    p.getIdPeserta(),
-                    p.getNamaLengkap(),
-                    p.getNik(),
-                    p.getProgram(),
-                    p.getStatusSeleksi(),
-                    ""
+                    prg.getIdProgram(),
+                    prg.getNamaProgram(),
+                    prg.getBidangUsaha(),
+                    "Rp " + String.format("%,.0f", prg.getBiaya()), // Format angka ke Rupiah
+                    prg.getKuota(),
+                    "" // Kolom Aksi
                 });
             }
         }
-
-        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
+        
+        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data program");
         
         try {
-            Util.TabelUtil.autoResizeKolom(tabelPeserta);
-        } catch (Exception e) {
-            System.out.println("TabelUtil error/belum ada: " + e.getMessage());
-        }
+            Util.TabelUtil.autoResizeKolom(tabelProgram);
+        } catch (Exception e) {}
     }
-
-    private void hapusData(int baris) {
-        String idPeserta = tabelPeserta.getValueAt(baris, 1).toString();
-        String nama = tabelPeserta.getValueAt(baris, 2).toString();
+    
+    public PanelDataProgram() {
+        initComponents();
+        setPreferredSize(new java.awt.Dimension(980, 616));
+        setBackground(new java.awt.Color(245, 245, 245));
         
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Yakin ingin menghapus data " + nama + "?", 
-            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-            
-        if (confirm == JOptionPane.YES_OPTION) {
-            boolean sukses = DataStore.daftarPeserta.removeIf(p -> p.getIdPeserta().equals(idPeserta));
-            
-            if (sukses) {
-                JOptionPane.showMessageDialog(this, "Data berhasil dihapus!");
-                
-                loadTableData(""); 
-            } else {
-                JOptionPane.showMessageDialog(this, "Data gagal dihapus atau ID tidak ditemukan!");
-            }
-        }
+        setupTable();
+        
+        loadTableData("");
     }
 
     /**
@@ -134,26 +130,29 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     private void initComponents() {
 
         panelToolbar = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         btnTambah = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
-        jLabel3 = new javax.swing.JLabel();
         panelTabel = new javax.swing.JPanel();
         scrollTabel = new javax.swing.JScrollPane();
-        tabelPeserta = new javax.swing.JTable();
+        tabelProgram = new javax.swing.JTable();
         lblTotalData = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         panelToolbar.setBackground(new java.awt.Color(255, 255, 255));
-        panelToolbar.setPreferredSize(new java.awt.Dimension(980, 56));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jLabel3.setText("C");
+        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
+        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
+
         jTextField1.setPreferredSize(new java.awt.Dimension(280, 30));
-        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
+        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(46, 14, -1, -1));
 
         jButton1.setBackground(new java.awt.Color(80, 80, 80));
         jButton1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -175,7 +174,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         btnTambah.setBackground(new java.awt.Color(122, 0, 0));
         btnTambah.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
         btnTambah.setForeground(new java.awt.Color(255, 255, 255));
-        btnTambah.setText("Tambah Peserta");
+        btnTambah.setText("Tambah Program");
         btnTambah.setPreferredSize(new java.awt.Dimension(148, 30));
         btnTambah.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -190,22 +189,16 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jSeparator3.setPreferredSize(new java.awt.Dimension(980, 2));
         panelToolbar.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
-        jLabel3.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/search.png")); // NOI18N
-        jLabel3.setText("C");
-        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
-        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
-
         add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         panelTabel.setBackground(new java.awt.Color(255, 255, 255));
         panelTabel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        panelTabel.setPreferredSize(new java.awt.Dimension(948, 460));
         panelTabel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         scrollTabel.setPreferredSize(new java.awt.Dimension(948, 460));
 
-        tabelPeserta.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        tabelPeserta.setModel(new javax.swing.table.DefaultTableModel(
+        tabelProgram.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        tabelProgram.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null},
@@ -213,7 +206,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 {null, null, null, null, null, null, null}
             },
             new String [] {
-                "No.", "ID Peserta", "Nama Lengkap", "NIK", "Program", "Status Seleksi", "Aksi"
+                "No.", "ID Program", "Nama Program", "Bidang Usaha", "Biaya", "Kuota", "Aksi"
             }
         ) {
             Class[] types = new Class [] {
@@ -224,20 +217,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 return types [columnIndex];
             }
         });
-        tabelPeserta.setRowHeight(36);
-        tabelPeserta.setSelectionBackground(new java.awt.Color(255, 230, 230));
-        tabelPeserta.setSelectionForeground(new java.awt.Color(122, 0, 0));
-        tabelPeserta.setShowHorizontalLines(true);
-        scrollTabel.setViewportView(tabelPeserta);
-        if (tabelPeserta.getColumnModel().getColumnCount() > 0) {
-            tabelPeserta.getColumnModel().getColumn(0).setPreferredWidth(40);
-            tabelPeserta.getColumnModel().getColumn(1).setPreferredWidth(80);
-            tabelPeserta.getColumnModel().getColumn(2).setPreferredWidth(140);
-            tabelPeserta.getColumnModel().getColumn(3).setPreferredWidth(110);
-            tabelPeserta.getColumnModel().getColumn(4).setPreferredWidth(110);
-            tabelPeserta.getColumnModel().getColumn(5).setPreferredWidth(85);
-            tabelPeserta.getColumnModel().getColumn(6).setPreferredWidth(100);
-        }
+        tabelProgram.setRowHeight(36);
+        tabelProgram.setSelectionBackground(new java.awt.Color(255, 230, 230));
+        tabelProgram.setSelectionForeground(new java.awt.Color(122, 0, 0));
+        tabelProgram.setShowHorizontalLines(true);
+        scrollTabel.setViewportView(tabelProgram);
 
         panelTabel.add(scrollTabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -251,8 +235,8 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-        FormTambahPeserta form = new FormTambahPeserta(null, true);
-        form.setVisible(true);
+//        FormTambahSeleksi form = new FormTambahSeleksi(null, true);
+//        form.setVisible(true);
     }//GEN-LAST:event_btnTambahActionPerformed
 
 
@@ -268,6 +252,6 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     private javax.swing.JPanel panelTabel;
     private javax.swing.JPanel panelToolbar;
     private javax.swing.JScrollPane scrollTabel;
-    private javax.swing.JTable tabelPeserta;
+    private javax.swing.JTable tabelProgram;
     // End of variables declaration//GEN-END:variables
 }
