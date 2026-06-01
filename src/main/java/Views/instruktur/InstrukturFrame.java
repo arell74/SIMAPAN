@@ -15,6 +15,7 @@ import javax.swing.JPanel;
  * @author arelssi
  */
 public class InstrukturFrame extends javax.swing.JFrame {
+    private String idInstruktur;
     private void showPanel(JPanel panel) {
             mainContent.removeAll(); 
 
@@ -44,7 +45,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
             activeBtn.setForeground(foregroundActive);
         }
         
-    public InstrukturFrame() {
+    public InstrukturFrame(String idInstruktur) {
         initComponents();
         setSize(1200, 680);
             pack();
@@ -52,10 +53,12 @@ public class InstrukturFrame extends javax.swing.JFrame {
             setResizable(false);
             setTitle("SIMAPAN - Role Instruktur");
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            
+            this.idInstruktur = idInstruktur;
 
             lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", 
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
-            showPanel(new PanelDashboardInstruktur());
+            showPanel(new Views.instruktur.PanelDashboardInstruktur(this.idInstruktur));
     }
 
     /**
@@ -103,8 +106,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
-        jLabel28 = new javax.swing.JLabel();
         scrollPane1 = new java.awt.ScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelPeserta = new javax.swing.JTable();
@@ -393,18 +394,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
         mainContent.add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, 920, -1));
 
-        jLabel27.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
-        jLabel27.setForeground(new java.awt.Color(25, 25, 25));
-        jLabel27.setText("Daftar Peserta Terbaru");
-        jLabel27.setPreferredSize(new java.awt.Dimension(280, 20));
-        mainContent.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 148, -1, -1));
-
-        jLabel28.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
-        jLabel28.setForeground(new java.awt.Color(150, 150, 150));
-        jLabel28.setText("Menampilkan seluruh peserta yang terdaftar");
-        jLabel28.setPreferredSize(new java.awt.Dimension(360, 16));
-        mainContent.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 170, -1, -1));
-
         tabelPeserta.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         tabelPeserta.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -487,7 +476,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Dashboard");
         lblHalamanSub.setText("Selamat datang, Admin LPK");
 
-        showPanel(new PanelDashboardAdmin());
+        showPanel(new Views.instruktur.PanelDashboardInstruktur(idInstruktur));
         setActiveButton(btnDashboard);
     }//GEN-LAST:event_btnDashboardActionPerformed
 
@@ -501,9 +490,9 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
     private void btnPesertaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesertaActionPerformed
         lblHalamanJudul.setText("Data Peserta");
-        lblHalamanSub.setText("Kelola seluruh data peserta pemagangan");
+        lblHalamanSub.setText("Lihat data kelas peserta pemagangan");
 
-        showPanel(new PanelDataPeserta());
+        showPanel(new Views.instruktur.PanelDataPeserta());
         setActiveButton(btnPeserta);
     }//GEN-LAST:event_btnPesertaActionPerformed
 
@@ -589,7 +578,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new InstrukturFrame().setVisible(true);
+                new InstrukturFrame("INS001").setVisible(true);
             }
         });
     }
@@ -611,8 +600,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;

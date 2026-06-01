@@ -4,6 +4,11 @@
  */
 package Views.instruktur;
 
+import DataStore.DataStore;
+import Model.Instruktur;
+import Model.Peserta;
+import Model.Seleksi;
+
 /**
  *
  * @author arelssi
@@ -13,8 +18,152 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
     /**
      * Creates new form PanelDashboardInstruktur
      */
-    public PanelDashboardInstruktur() {
+    private String idInstrukturAktif;
+    public PanelDashboardInstruktur(String idInstruktur) {
         initComponents();
+        
+        this.idInstrukturAktif = idInstruktur;
+        System.out.println("DEBUG: ID Instruktur yang masuk ke panel adalah -> " + idInstruktur);
+        
+        loadDataDashboard();
+        loadJadwalDinamis();
+        setupTablePresensi();
+    }
+    
+    private void setupTablePresensi() {
+        tabelPresensi.setRowHeight(35);
+        
+        // Buat ComboBox untuk pilihan absensi di dalam tabel
+        javax.swing.JComboBox<String> cbKehadiran = new javax.swing.JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
+        
+        // Masukkan ComboBox ke kolom ke-5 (Indeks 4) dari tabel presensi
+        // Pastikan tabel di NetBeans Design memiliki 5 kolom!
+        tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new javax.swing.DefaultCellEditor(cbKehadiran));
+        
+        loadTabelPresensi();
+    }
+    
+    private void loadTabelPresensi() {
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tabelPresensi.getModel();
+        model.setRowCount(0);
+        
+        int no = 1;
+        // Looping peserta yang masuk ke kelas instruktur ini
+        for (Model.Peserta p : DataStore.daftarPeserta) {
+            // Filter hanya siswa yang kelasnya sama dengan kelas instruktur (Misal: Kelas A)
+            if ("Kelas A".equals(p.getKelas())) { 
+                model.addRow(new Object[]{
+                    no++,
+                    p.getIdPeserta(),
+                    p.getNamaLengkap(),
+                    p.getLevelBahasa(),
+                    "Hadir" // Nilai default saat tabel dimuat
+                });
+            }
+        }
+    }
+    
+    private void loadDataDashboard() {
+        Model.Instruktur instruktur = null;
+        
+        for (Model.Pengguna pgn : DataStore.daftarPengguna) {
+            
+            // Cek apakah Pengguna yang sedang dibaca ini adalah sebuah Instruktur
+            if (pgn instanceof Model.Instruktur) {
+                
+                // Lakukan Casting
+                Model.Instruktur ins = (Model.Instruktur) pgn;
+                
+                // LOGIKA ANTI-ERROR: Cek apakah ID yang dikirim cocok dengan ID Instruktur ATAU cocok dengan Username/ID Pengguna
+                boolean cocokIDInstruktur = ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif);
+                
+                // Catatan: Ganti getIdPengguna() dengan method getter username di class Pengguna kamu (misal getId(), getUsername(), dll)
+                boolean cocokUsername = ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif);
+                
+                if (cocokIDInstruktur || cocokUsername) { 
+                    idInstrukturAktif = ins.getIdInstruktur();
+                    break;
+                }
+            }
+        }
+
+        if (instruktur != null) {
+            // Update Teks Banner
+            lblNamaInstruktur.setText(instruktur.getNamaLengkap());
+            
+            // Sekarang getSpe  sialisasi() tidak akan error karena 'instruktur' sudah berwujud kelas Instruktur
+            lblSpesialisasi.setText("Instruktur aktif - " + instruktur.getSpesialisasi());
+            
+            lblInfoInstruktur.setText(instruktur.getIdInstruktur() + " - KELAS A - LEVEL JLPT N1");
+            
+            // 2. Hitung Statistik (Siswa, Jadwal, Rata-rata)
+            int jumlahSiswa = 0;
+            int akumulasiNilai = 0;
+            int jumlahNilai = 0;
+            int jumlahJadwal = 0; // Kalau kamu punya DataStore.daftarJadwal
+            
+            // Misal: Hitung siswa yang ada di "Kelas A" (kelas si instruktur)
+            for (Peserta p : DataStore.daftarPeserta) {
+                // Asumsi ada atribut getKelas() di model Peserta
+                if ("Kelas A".equals(p.getKelas())) { 
+                    jumlahSiswa++;
+                    
+                    // Hitung rata-rata nilai siswa ini dari riwayat seleksi/nilai
+                    for (Seleksi s : DataStore.daftarSeleksi) {
+                        if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                            akumulasiNilai += s.getNilai();
+                            jumlahNilai++;
+                        }
+                    }
+                }
+            }
+            
+            // Update Kartu Statistik
+            lblTotalSiswa.setText(String.valueOf(jumlahSiswa));
+            // Misal jadwal di-hardcode 6 sesuai desain, atau hitung dari array Jadwal jika ada
+            lblTotalJadwal.setText("6"); 
+            
+            int rataRata = (jumlahNilai > 0) ? (akumulasiNilai / jumlahNilai) : 0;
+            lblRataNilai.setText(String.valueOf(rataRata));
+            
+            // Update Tanggal Hari Ini di Label
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id", "ID"));
+            String tglSekarang = sdf.format(new java.util.Date());
+            lblTanggalPresensi.setText(tglSekarang);
+//            lblTopDate.setText(tglSekarang);
+        }
+    }
+
+    private void loadJadwalDinamis() {
+        pnlWadahJadwal.removeAll();
+        int jumlahJadwal = 0;
+
+        for (Model.Jadwal j : DataStore.daftarJadwal) {
+            if (j.getIdInstruktur().equals(idInstrukturAktif)) {
+                
+                jumlahJadwal++; 
+                CardJadwal kartu = new CardJadwal();
+                kartu.setJadwalData(
+                    j.getJamMulai(), 
+                    j.getHari(), 
+                    j.getNamaMateri(), 
+                    "Kelas " + j.getNamaKelas() + " - " + j.getDurasi() + " Menit", 
+                    j.getStatusJadwal()
+                );
+                
+                kartu.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+
+                pnlWadahJadwal.add(kartu);
+                pnlWadahJadwal.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10)));
+            }
+        }
+        
+        lblTotalJadwal.setText(String.valueOf(jumlahJadwal)); 
+
+        pnlWadahJadwal.add(javax.swing.Box.createVerticalGlue());
+
+        pnlWadahJadwal.revalidate();
+        pnlWadahJadwal.repaint();
     }
 
     /**
@@ -28,42 +177,31 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tabelPresensi = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        lblTanggalPresensi = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
+        pnlJadwal = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jPanel6 = new javax.swing.JPanel();
-        jPanel9 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jPanel8 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
-        jPanel10 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
-        jPanel11 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
-        jPanel12 = new javax.swing.JPanel();
-        jLabel15 = new javax.swing.JLabel();
-        jPanel13 = new javax.swing.JPanel();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel17 = new javax.swing.JLabel();
-        jPanel14 = new javax.swing.JPanel();
-        jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        jPanel15 = new javax.swing.JPanel();
-        jLabel20 = new javax.swing.JLabel();
+        pnlWadahJadwal = new javax.swing.JPanel();
+        panelKartu1 = new javax.swing.JPanel();
+        lblSpesialisasi = new javax.swing.JLabel();
+        lblNamaInstruktur = new javax.swing.JLabel();
+        lblInfoInstruktur = new javax.swing.JLabel();
+        jPanel16 = new javax.swing.JPanel();
+        lblTotalSiswa = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jPanel17 = new javax.swing.JPanel();
+        lblTotalJadwal = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
+        jPanel18 = new javax.swing.JPanel();
+        lblRataNilai = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -71,7 +209,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
 
         jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tabelPresensi.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
                 {null, null, null, null, null},
@@ -82,12 +220,12 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                 "No", "ID", "Nama", "Level", "Kehadiran"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setMaxWidth(40);
-            jTable1.getColumnModel().getColumn(1).setMaxWidth(70);
-            jTable1.getColumnModel().getColumn(2).setMaxWidth(190);
-            jTable1.getColumnModel().getColumn(3).setMaxWidth(50);
+        jScrollPane1.setViewportView(tabelPresensi);
+        if (tabelPresensi.getColumnModel().getColumnCount() > 0) {
+            tabelPresensi.getColumnModel().getColumn(0).setMaxWidth(40);
+            tabelPresensi.getColumnModel().getColumn(1).setMaxWidth(70);
+            tabelPresensi.getColumnModel().getColumn(2).setMaxWidth(190);
+            tabelPresensi.getColumnModel().getColumn(3).setMaxWidth(50);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -103,7 +241,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 123, 430, 430));
+        add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, 430, 330));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -111,8 +249,8 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
         jLabel1.setText("Presensi Hari ini");
 
-        jLabel2.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel2.setText("Senin, 01 Juni 2026");
+        lblTanggalPresensi.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        lblTanggalPresensi.setText("Senin, 01 Juni 2026");
 
         jPanel3.setBackground(new java.awt.Color(255, 210, 210));
         jPanel3.setForeground(new java.awt.Color(255, 210, 210));
@@ -143,7 +281,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
+                    .addComponent(lblTanggalPresensi)
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -158,11 +296,11 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)))
-                .addContainerGap(54, Short.MAX_VALUE))
+                        .addComponent(lblTanggalPresensi)))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
-        add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 20, 430, 100));
+        add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 140, 430, 70));
 
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
         jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
@@ -194,215 +332,126 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                 .addContainerGap(24, Short.MAX_VALUE))
         );
 
-        add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 20, 430, 70));
+        add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 140, 430, 70));
 
-        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        pnlJadwal.setBackground(new java.awt.Color(255, 255, 255));
+        pnlJadwal.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
 
-        jPanel6.setBackground(new java.awt.Color(240, 240, 240));
-        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        pnlWadahJadwal.setBackground(new java.awt.Color(240, 240, 240));
+        pnlWadahJadwal.setLayout(new javax.swing.BoxLayout(pnlWadahJadwal, javax.swing.BoxLayout.Y_AXIS));
+        jScrollPane2.setViewportView(pnlWadahJadwal);
 
-        jPanel9.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        jPanel9.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel6.setFont(new java.awt.Font("Inter", 1, 18)); // NOI18N
-        jLabel6.setText("08 : 00");
-        jPanel9.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
-
-        jLabel7.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
-        jLabel7.setForeground(new java.awt.Color(100, 100, 100));
-        jLabel7.setText("Senin");
-        jPanel9.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 50, -1, -1));
-
-        jPanel7.setBackground(new java.awt.Color(0, 255, 0));
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-
-        jPanel9.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 40, 10, 10));
-
-        jLabel8.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel8.setText("Kelas A  - 120");
-        jPanel9.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 50, -1, -1));
-
-        jLabel9.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
-        jLabel9.setText("Minna No Nihonggo Bab 1");
-        jPanel9.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
-
-        jPanel8.setBackground(new java.awt.Color(100, 255, 100));
-        jPanel8.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel10.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(20, 20, 20));
-        jLabel10.setText("Selesai");
-        jPanel8.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 9, -1, -1));
-
-        jPanel9.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 30, 60, 30));
-
-        jPanel6.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 428, 91));
-
-        jPanel10.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        jPanel10.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel11.setFont(new java.awt.Font("Inter", 1, 18)); // NOI18N
-        jLabel11.setText("08 : 00");
-        jPanel10.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
-
-        jLabel12.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
-        jLabel12.setForeground(new java.awt.Color(100, 100, 100));
-        jLabel12.setText("Kamis");
-        jPanel10.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 50, -1, -1));
-
-        jPanel11.setBackground(new java.awt.Color(0, 0, 255));
-
-        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
-        jPanel11.setLayout(jPanel11Layout);
-        jPanel11Layout.setHorizontalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-        jPanel11Layout.setVerticalGroup(
-            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-
-        jPanel10.add(jPanel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 40, 10, 10));
-
-        jLabel13.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel13.setText("Kelas A  - 120");
-        jPanel10.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 50, -1, -1));
-
-        jLabel14.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
-        jLabel14.setText("Minna No Nihonggo Bab 1");
-        jPanel10.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
-
-        jPanel12.setBackground(new java.awt.Color(100, 100, 255));
-        jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel15.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel15.setForeground(new java.awt.Color(20, 20, 20));
-        jLabel15.setText("Hari ini");
-        jPanel12.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 9, -1, -1));
-
-        jPanel10.add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 30, 60, 30));
-
-        jPanel6.add(jPanel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 188, 428, 91));
-
-        jPanel13.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel13.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        jPanel13.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel16.setFont(new java.awt.Font("Inter", 1, 18)); // NOI18N
-        jLabel16.setText("08 : 00");
-        jPanel13.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
-
-        jLabel17.setFont(new java.awt.Font("Inter", 0, 13)); // NOI18N
-        jLabel17.setForeground(new java.awt.Color(100, 100, 100));
-        jLabel17.setText("Rabu");
-        jPanel13.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 50, -1, -1));
-
-        jPanel14.setBackground(new java.awt.Color(255, 0, 0));
-
-        javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
-        jPanel14.setLayout(jPanel14Layout);
-        jPanel14Layout.setHorizontalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-        jPanel14Layout.setVerticalGroup(
-            jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-
-        jPanel13.add(jPanel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 40, 10, 10));
-
-        jLabel18.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel18.setText("Kelas A  - 90");
-        jPanel13.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 50, -1, -1));
-
-        jLabel19.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
-        jLabel19.setText("Minna No Nihonggo Bab 1");
-        jPanel13.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
-
-        jPanel15.setBackground(new java.awt.Color(255, 100, 100));
-        jPanel15.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel20.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel20.setForeground(new java.awt.Color(20, 20, 20));
-        jLabel20.setText("Hari ini");
-        jPanel15.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(13, 9, -1, -1));
-
-        jPanel13.add(jPanel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 30, 60, 30));
-
-        jPanel6.add(jPanel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 94, 428, 91));
-
-        jScrollPane2.setViewportView(jPanel6);
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout pnlJadwalLayout = new javax.swing.GroupLayout(pnlJadwal);
+        pnlJadwal.setLayout(pnlJadwalLayout);
+        pnlJadwalLayout.setHorizontalGroup(
+            pnlJadwalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
         );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
+        pnlJadwalLayout.setVerticalGroup(
+            pnlJadwalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlJadwalLayout.createSequentialGroup()
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 460, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 90, 430, 460));
+        add(pnlJadwal, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 210, 430, 360));
+
+        panelKartu1.setBackground(new java.awt.Color(122, 0, 0));
+        panelKartu1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
+        panelKartu1.setPreferredSize(new java.awt.Dimension(210, 100));
+        panelKartu1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        lblSpesialisasi.setForeground(new java.awt.Color(130, 130, 130));
+        lblSpesialisasi.setText("Instruktur aktif - Bahasa Jepang Dasar");
+        lblSpesialisasi.setPreferredSize(new java.awt.Dimension(140, 16));
+        panelKartu1.add(lblSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 250, -1));
+
+        lblNamaInstruktur.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
+        lblNamaInstruktur.setForeground(new java.awt.Color(255, 255, 255));
+        lblNamaInstruktur.setText("Dian Priatna Kusuma S.P.d");
+        lblNamaInstruktur.setPreferredSize(new java.awt.Dimension(100, 36));
+        panelKartu1.add(lblNamaInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 380, -1));
+
+        lblInfoInstruktur.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        lblInfoInstruktur.setForeground(new java.awt.Color(240, 170, 170));
+        lblInfoInstruktur.setText("INS001 - KELAS A - LEVEL JLPT N1");
+        lblInfoInstruktur.setPreferredSize(new java.awt.Dimension(140, 16));
+        panelKartu1.add(lblInfoInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 210, -1));
+
+        jPanel16.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel16.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblTotalSiswa.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        lblTotalSiswa.setForeground(new java.awt.Color(122, 0, 0));
+        lblTotalSiswa.setText("6");
+        jPanel16.add(lblTotalSiswa, new org.netbeans.lib.awtextra.AbsoluteConstraints(36, 4, 54, -1));
+
+        jLabel24.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel24.setText("Siswa ");
+        jPanel16.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
+
+        panelKartu1.add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 15, 90, 70));
+
+        jPanel17.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel17.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblTotalJadwal.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        lblTotalJadwal.setForeground(new java.awt.Color(122, 0, 0));
+        lblTotalJadwal.setText("6");
+        jPanel17.add(lblTotalJadwal, new org.netbeans.lib.awtextra.AbsoluteConstraints(36, 4, 54, -1));
+
+        jLabel26.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel26.setText("Jadwal");
+        jPanel17.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
+
+        panelKartu1.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 15, -1, 70));
+
+        jPanel18.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel18.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        lblRataNilai.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        lblRataNilai.setForeground(new java.awt.Color(122, 0, 0));
+        lblRataNilai.setText("70");
+        jPanel18.add(lblRataNilai, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 54, -1));
+
+        jLabel28.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel28.setText("Rata-rata");
+        jPanel18.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
+
+        panelKartu1.add(jPanel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 15, 90, 70));
+
+        add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, 920, -1));
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel10;
-    private javax.swing.JPanel jPanel11;
-    private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel lblInfoInstruktur;
+    private javax.swing.JLabel lblNamaInstruktur;
+    private javax.swing.JLabel lblRataNilai;
+    private javax.swing.JLabel lblSpesialisasi;
+    private javax.swing.JLabel lblTanggalPresensi;
+    private javax.swing.JLabel lblTotalJadwal;
+    private javax.swing.JLabel lblTotalSiswa;
+    private javax.swing.JPanel panelKartu1;
+    private javax.swing.JPanel pnlJadwal;
+    private javax.swing.JPanel pnlWadahJadwal;
+    private javax.swing.JTable tabelPresensi;
     // End of variables declaration//GEN-END:variables
 }

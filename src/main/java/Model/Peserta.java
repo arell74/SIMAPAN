@@ -20,6 +20,7 @@ public class Peserta {
     private Instruktur instrukturDamping;
     private String levelBahasa;
     private String statusPembayaran;
+    private String kelas = "Belum Ditentukan";
     
     private String statusSeleksi;        
     private String statusKeberangkatan;
@@ -154,6 +155,14 @@ public class Peserta {
 
     public void setStatusKeberangkatan(String statusKeberangkatan) {
         this.statusKeberangkatan = statusKeberangkatan;
+    }
+    
+    public String getKelas() {
+        return kelas;
+    }
+
+    public void setKelas(String kelas) {
+        this.kelas = kelas;
     }
     
 }
