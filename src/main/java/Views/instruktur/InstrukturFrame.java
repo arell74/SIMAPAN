@@ -32,7 +32,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         private Color foregroundDefault = new Color(255,210,210);
 
         private void setActiveButton(JButton activeBtn) {
-        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnManajemenSeleksi, btnDokumenK, btnLihatLaporan};
+        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnManajemenSeleksi, btnLihatLaporan};
 
         for (JButton btn : sidebarButtons) {
             btn.setBackground(colorDefault);
@@ -81,7 +81,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         btnManajemenSeleksi = new javax.swing.JButton();
-        btnDokumenK = new javax.swing.JButton();
         btnLihatLaporan = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
         btnLogout = new javax.swing.JButton();
@@ -217,22 +216,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
         });
         sidebar.add(btnManajemenSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, -1, -1));
 
-        btnDokumenK.setBackground(new java.awt.Color(122, 0, 0));
-        btnDokumenK.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        btnDokumenK.setForeground(new java.awt.Color(255, 210, 210));
-        btnDokumenK.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/google-docs.png")); // NOI18N
-        btnDokumenK.setText("Input Nilai");
-        btnDokumenK.setBorderPainted(false);
-        btnDokumenK.setFocusPainted(false);
-        btnDokumenK.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnDokumenK.setPreferredSize(new java.awt.Dimension(220, 42));
-        btnDokumenK.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDokumenKActionPerformed(evt);
-            }
-        });
-        sidebar.add(btnDokumenK, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, -1, -1));
-
         btnLihatLaporan.setBackground(new java.awt.Color(122, 0, 0));
         btnLihatLaporan.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnLihatLaporan.setForeground(new java.awt.Color(255, 210, 210));
@@ -248,7 +231,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
                 btnLihatLaporanActionPerformed(evt);
             }
         });
-        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 370, -1, -1));
+        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, -1, -1));
 
         jSeparator4.setForeground(new java.awt.Color(255, 160, 160));
         jSeparator4.setPreferredSize(new java.awt.Dimension(220, 8));
@@ -481,10 +464,10 @@ public class InstrukturFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDashboardActionPerformed
 
     private void btnInstrukturActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInstrukturActionPerformed
-        lblHalamanJudul.setText("Data Instruktur");
-        lblHalamanSub.setText("Kelola seluruh data Instruktur");
+        lblHalamanJudul.setText("Data Jadwal");
+        lblHalamanSub.setText("Kelola seluruh data Jadwal");
 
-        showPanel(new PanelDataInstruktur());
+        showPanel(new Views.instruktur.PanelJadwalKelas(this.idInstruktur));
         setActiveButton(btnInstruktur);
     }//GEN-LAST:event_btnInstrukturActionPerformed
 
@@ -492,7 +475,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Data Peserta");
         lblHalamanSub.setText("Lihat data kelas peserta pemagangan");
 
-        showPanel(new Views.instruktur.PanelDataPeserta());
+        showPanel(new Views.instruktur.PanelDataPeserta(idInstruktur));
         setActiveButton(btnPeserta);
     }//GEN-LAST:event_btnPesertaActionPerformed
 
@@ -524,14 +507,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
             this.dispose();
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
-
-    private void btnDokumenKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDokumenKActionPerformed
-        lblHalamanJudul.setText("Dokumen & Keberangkatan");
-        lblHalamanSub.setText("Kelola Dokumen dan Keberangkatan Peserta");
-
-        showPanel(new PanelDokumenBerangkat());
-        setActiveButton(btnDokumenK);
-    }//GEN-LAST:event_btnDokumenKActionPerformed
 
     private void btnLihatLaporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLihatLaporanActionPerformed
         lblHalamanJudul.setText("Lihat Laporan");
@@ -585,7 +560,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
-    private javax.swing.JButton btnDokumenK;
     private javax.swing.JButton btnInstruktur;
     private javax.swing.JButton btnLihatLaporan;
     private javax.swing.JButton btnLogout;
