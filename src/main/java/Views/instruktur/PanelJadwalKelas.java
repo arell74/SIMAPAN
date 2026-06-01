@@ -8,6 +8,7 @@ import DataStore.DataStore;
 import Model.Instruktur;
 import Model.Jadwal;
 import Model.Pengguna;
+import Util.TabelUtil;
 import Util.TombolAksiEditor;
 import Util.TombolAksiRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -34,12 +35,15 @@ public class PanelJadwalKelas extends javax.swing.JPanel {
     }
     
     private void setupTable() {
-        // Mengatur tinggi baris tabel agar tidak terlalu rapat
         tabelJadwal.setRowHeight(40);
+        TabelUtil.autoResizeKolom(tabelJadwal);
+        javax.swing.table.JTableHeader header = tabelJadwal.getTableHeader();
         
-        // Asumsi: Jika nanti kamu punya class tombol aksi untuk mengedit status jadwal
-//         tabelJadwal.getColumnModel().getColumn(7).setCellRenderer(new TombolAksiRenderer());
-//         tabelJadwal.getColumnModel().getColumn(7).setCellEditor(new TombolAksiEditor());
+        header.setBackground(new java.awt.Color(122, 0, 0));
+        header.setForeground(java.awt.Color.WHITE);
+        
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setOpaque(true);
     }
     
     private void loadTableData() {

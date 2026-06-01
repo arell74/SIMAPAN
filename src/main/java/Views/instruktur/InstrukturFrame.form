@@ -292,7 +292,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="2" name="/home/arelssi/Downloads/approval.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Input Seleksi"/>
+            <Property name="text" type="java.lang.String" value="Input Nilai"/>
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
               <Color id="Hand Cursor"/>
@@ -326,7 +326,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="2" name="/home/arelssi/Downloads/bar-chart (1).png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Rekap Nilai &amp; Absen"/>
+            <Property name="text" type="java.lang.String" value="Rekap Peserta"/>
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
               <Color id="Hand Cursor"/>

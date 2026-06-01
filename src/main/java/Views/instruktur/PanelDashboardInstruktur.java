@@ -8,6 +8,7 @@ import DataStore.DataStore;
 import Model.Instruktur;
 import Model.Peserta;
 import Model.Seleksi;
+import Util.TabelUtil;
 
 /**
  *
@@ -36,11 +37,18 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         // Buat ComboBox untuk pilihan absensi di dalam tabel
         javax.swing.JComboBox<String> cbKehadiran = new javax.swing.JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
         
-        // Masukkan ComboBox ke kolom ke-5 (Indeks 4) dari tabel presensi
-        // Pastikan tabel di NetBeans Design memiliki 5 kolom!
         tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new javax.swing.DefaultCellEditor(cbKehadiran));
         
         loadTabelPresensi();
+        
+        TabelUtil.autoResizeKolom(tabelPresensi);
+        javax.swing.table.JTableHeader header = tabelPresensi.getTableHeader();
+        
+        header.setBackground(new java.awt.Color(122, 0, 0));
+        header.setForeground(java.awt.Color.WHITE);
+        
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setOpaque(true);
     }
     
     private void loadTabelPresensi() {

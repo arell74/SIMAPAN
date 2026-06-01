@@ -337,10 +337,9 @@ public class FormLogin extends javax.swing.JFrame {
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
                 if (user.getRole().equals("ADMIN")) {
-                    AdminFrame adminDashboard = new AdminFrame();
+                    Views.AdminFrame adminDashboard = new Views.AdminFrame(); 
                     adminDashboard.setVisible(true);
                 } else if (user.getRole().equals("INSTRUKTUR")) {
-                    
                     Model.Instruktur ins = (Model.Instruktur) user;
                     String idYangLogin = ins.getIdInstruktur(); 
                     

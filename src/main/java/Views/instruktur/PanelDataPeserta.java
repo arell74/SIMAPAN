@@ -9,6 +9,7 @@ import Model.Instruktur;
 import Model.Pengguna;
 import Model.Peserta;
 import Model.Seleksi;
+import Util.TabelUtil;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -88,8 +89,14 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     
     private void setupTable() {
         tabelPeserta.setRowHeight(40);
-        // Jika kamu menggunakan TombolAksiRenderer untuk kolom terakhir (Aksi):
-        // tabelPeserta.getColumnModel().getColumn(8).setCellRenderer(new TombolAksiRenderer());
+        TabelUtil.autoResizeKolom(tabelPeserta);
+        javax.swing.table.JTableHeader header = tabelPeserta.getTableHeader();
+        
+        header.setBackground(new java.awt.Color(122, 0, 0));
+        header.setForeground(java.awt.Color.WHITE);
+        
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setOpaque(true);
     }
 
     private void loadTableData(String keyword) {

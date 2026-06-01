@@ -203,7 +203,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         btnManajemenSeleksi.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnManajemenSeleksi.setForeground(new java.awt.Color(255, 210, 210));
         btnManajemenSeleksi.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/approval.png")); // NOI18N
-        btnManajemenSeleksi.setText("Input Seleksi");
+        btnManajemenSeleksi.setText("Input Nilai");
         btnManajemenSeleksi.setBorderPainted(false);
         btnManajemenSeleksi.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnManajemenSeleksi.setFocusPainted(false);
@@ -220,7 +220,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         btnLihatLaporan.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnLihatLaporan.setForeground(new java.awt.Color(255, 210, 210));
         btnLihatLaporan.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
-        btnLihatLaporan.setText("Rekap Nilai & Absen");
+        btnLihatLaporan.setText("Rekap Peserta");
         btnLihatLaporan.setBorderPainted(false);
         btnLihatLaporan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnLihatLaporan.setFocusPainted(false);
@@ -485,10 +485,10 @@ public class InstrukturFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_btnTambahPesertaActionPerformed
 
     private void btnManajemenSeleksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManajemenSeleksiActionPerformed
-        lblHalamanJudul.setText("Manajemen Seleksi");
-        lblHalamanSub.setText("Kelola Manajemen Seleksi Peserta");
+        lblHalamanJudul.setText("Manajemen Nilai");
+        lblHalamanSub.setText("Kelola Nilai Peserta dari Materi");
 
-        showPanel(new PanelManajemenSeleksi());
+        showPanel(new PanelInputNilai(idInstruktur));
         setActiveButton(btnManajemenSeleksi);
     }//GEN-LAST:event_btnManajemenSeleksiActionPerformed
 
@@ -510,9 +510,9 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
     private void btnLihatLaporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLihatLaporanActionPerformed
         lblHalamanJudul.setText("Lihat Laporan");
-        lblHalamanSub.setText("Lihat Laporan");
+        lblHalamanSub.setText("Lihat Laporan Peserta");
 
-        showPanel(new PanelLaporan());
+        showPanel(new PanelLaporanInstruktur(idInstruktur));
         setActiveButton(btnLihatLaporan);
     }//GEN-LAST:event_btnLihatLaporanActionPerformed
 
