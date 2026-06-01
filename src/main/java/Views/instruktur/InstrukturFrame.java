@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Views;
+package Views.instruktur;
 
+import Views.*;
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,7 +14,7 @@ import javax.swing.JPanel;
  *
  * @author arelssi
  */
-public class AdminFrame extends javax.swing.JFrame {
+public class InstrukturFrame extends javax.swing.JFrame {
     private void showPanel(JPanel panel) {
             mainContent.removeAll(); 
 
@@ -30,7 +31,7 @@ public class AdminFrame extends javax.swing.JFrame {
         private Color foregroundDefault = new Color(255,210,210);
 
         private void setActiveButton(JButton activeBtn) {
-        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnProgram, btnManajemenSeleksi, btnDokumenK, btnLihatLaporan};
+        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnManajemenSeleksi, btnDokumenK, btnLihatLaporan};
 
         for (JButton btn : sidebarButtons) {
             btn.setBackground(colorDefault);
@@ -43,18 +44,18 @@ public class AdminFrame extends javax.swing.JFrame {
             activeBtn.setForeground(foregroundActive);
         }
         
-    public AdminFrame() {
+    public InstrukturFrame() {
         initComponents();
         setSize(1200, 680);
             pack();
             setLocationRelativeTo(null);
             setResizable(false);
-            setTitle("SIMAPAN - Role Admin");
+            setTitle("SIMAPAN - Role Instruktur");
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", 
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
-            showPanel(new PanelDashboardAdmin());
+            showPanel(new PanelDashboardInstruktur());
     }
 
     /**
@@ -74,13 +75,10 @@ public class AdminFrame extends javax.swing.JFrame {
         btnDashboard = new javax.swing.JButton();
         btnInstruktur = new javax.swing.JButton();
         btnPeserta = new javax.swing.JButton();
-        btnProgram = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         btnManajemenSeleksi = new javax.swing.JButton();
         btnDokumenK = new javax.swing.JButton();
-        jSeparator3 = new javax.swing.JSeparator();
-        jLabel5 = new javax.swing.JLabel();
         btnLihatLaporan = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
         btnLogout = new javax.swing.JButton();
@@ -93,25 +91,18 @@ public class AdminFrame extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         mainContent = new javax.swing.JPanel();
         panelKartu1 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         lblTotalPeserta = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
-        panelKartu2 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
-        lblPesertaLulus = new javax.swing.JLabel();
-        jLabel18 = new javax.swing.JLabel();
-        panelKartu3 = new javax.swing.JPanel();
-        jLabel19 = new javax.swing.JLabel();
-        lblPesertaGugur = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
-        jLabel22 = new javax.swing.JLabel();
-        panelkartu4 = new javax.swing.JPanel();
-        jLabel23 = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        lblTotalInstruktur = new javax.swing.JLabel();
-        jLabel26 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
         jLabel27 = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
         scrollPane1 = new java.awt.ScrollPane();
@@ -169,7 +160,7 @@ public class AdminFrame extends javax.swing.JFrame {
         btnInstruktur.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnInstruktur.setForeground(new java.awt.Color(255, 210, 210));
         btnInstruktur.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/teacher.png")); // NOI18N
-        btnInstruktur.setText(" Data Instruktur");
+        btnInstruktur.setText(" Jadwal Kelas");
         btnInstruktur.setBorderPainted(false);
         btnInstruktur.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnInstruktur.setFocusPainted(false);
@@ -186,7 +177,7 @@ public class AdminFrame extends javax.swing.JFrame {
         btnPeserta.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnPeserta.setForeground(new java.awt.Color(255, 210, 210));
         btnPeserta.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/group (2).png")); // NOI18N
-        btnPeserta.setText(" Data Peserta");
+        btnPeserta.setText(" Data Peserta Kelas");
         btnPeserta.setBorderPainted(false);
         btnPeserta.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnPeserta.setFocusPainted(false);
@@ -199,37 +190,20 @@ public class AdminFrame extends javax.swing.JFrame {
         });
         sidebar.add(btnPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 158, -1, -1));
 
-        btnProgram.setBackground(new java.awt.Color(122, 0, 0));
-        btnProgram.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        btnProgram.setForeground(new java.awt.Color(255, 210, 210));
-        btnProgram.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/briefcase (1).png")); // NOI18N
-        btnProgram.setText(" Data Program");
-        btnProgram.setBorderPainted(false);
-        btnProgram.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnProgram.setFocusPainted(false);
-        btnProgram.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnProgram.setPreferredSize(new java.awt.Dimension(220, 42));
-        btnProgram.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnProgramActionPerformed(evt);
-            }
-        });
-        sidebar.add(btnProgram, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 242, -1, -1));
-
         jSeparator2.setForeground(new java.awt.Color(160, 30, 30));
         jSeparator2.setPreferredSize(new java.awt.Dimension(220, 8));
-        sidebar.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, 150, 20));
+        sidebar.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 250, 150, 20));
 
         jLabel4.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 160, 160));
-        jLabel4.setText("SELEKSI & KEBERANGKATAN");
-        sidebar.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 304, -1, -1));
+        jLabel4.setText("AKADEMIK");
+        sidebar.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
 
         btnManajemenSeleksi.setBackground(new java.awt.Color(122, 0, 0));
         btnManajemenSeleksi.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnManajemenSeleksi.setForeground(new java.awt.Color(255, 210, 210));
         btnManajemenSeleksi.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/approval.png")); // NOI18N
-        btnManajemenSeleksi.setText(" Manajemen Seleksi");
+        btnManajemenSeleksi.setText("Input Seleksi");
         btnManajemenSeleksi.setBorderPainted(false);
         btnManajemenSeleksi.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnManajemenSeleksi.setFocusPainted(false);
@@ -240,13 +214,13 @@ public class AdminFrame extends javax.swing.JFrame {
                 btnManajemenSeleksiActionPerformed(evt);
             }
         });
-        sidebar.add(btnManajemenSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 324, -1, -1));
+        sidebar.add(btnManajemenSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, -1, -1));
 
         btnDokumenK.setBackground(new java.awt.Color(122, 0, 0));
         btnDokumenK.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnDokumenK.setForeground(new java.awt.Color(255, 210, 210));
         btnDokumenK.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/google-docs.png")); // NOI18N
-        btnDokumenK.setText(" Dokumen & Berangkat");
+        btnDokumenK.setText("Input Nilai");
         btnDokumenK.setBorderPainted(false);
         btnDokumenK.setFocusPainted(false);
         btnDokumenK.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -256,23 +230,13 @@ public class AdminFrame extends javax.swing.JFrame {
                 btnDokumenKActionPerformed(evt);
             }
         });
-        sidebar.add(btnDokumenK, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 366, -1, -1));
-
-        jSeparator3.setForeground(new java.awt.Color(160, 30, 30));
-        jSeparator3.setPreferredSize(new java.awt.Dimension(220, 8));
-        sidebar.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 414, 120, 20));
-
-        jLabel5.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(255, 160, 160));
-        jLabel5.setText("LAPORAN");
-        jLabel5.setPreferredSize(new java.awt.Dimension(160, 14));
-        sidebar.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 428, -1, -1));
+        sidebar.add(btnDokumenK, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, -1, -1));
 
         btnLihatLaporan.setBackground(new java.awt.Color(122, 0, 0));
         btnLihatLaporan.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnLihatLaporan.setForeground(new java.awt.Color(255, 210, 210));
         btnLihatLaporan.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
-        btnLihatLaporan.setText(" Lihat Laporan");
+        btnLihatLaporan.setText("Rekap Nilai & Absen");
         btnLihatLaporan.setBorderPainted(false);
         btnLihatLaporan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnLihatLaporan.setFocusPainted(false);
@@ -283,7 +247,7 @@ public class AdminFrame extends javax.swing.JFrame {
                 btnLihatLaporanActionPerformed(evt);
             }
         });
-        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 448, -1, -1));
+        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 370, -1, -1));
 
         jSeparator4.setForeground(new java.awt.Color(255, 160, 160));
         jSeparator4.setPreferredSize(new java.awt.Dimension(220, 8));
@@ -317,7 +281,7 @@ public class AdminFrame extends javax.swing.JFrame {
 
         lblHalamanSub.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         lblHalamanSub.setForeground(new java.awt.Color(140, 140, 140));
-        lblHalamanSub.setText("Selamat datang, Admin LPK");
+        lblHalamanSub.setText("Selamat datang, Instruktur");
         lblHalamanSub.setPreferredSize(new java.awt.Dimension(280, 24));
         panelHeadr.add(lblHalamanSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 36, -1, -1));
 
@@ -362,128 +326,72 @@ public class AdminFrame extends javax.swing.JFrame {
         mainContent.setPreferredSize(new java.awt.Dimension(980, 616));
         mainContent.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        panelKartu1.setBackground(new java.awt.Color(255, 255, 255));
+        panelKartu1.setBackground(new java.awt.Color(122, 0, 0));
         panelKartu1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
         panelKartu1.setPreferredSize(new java.awt.Dimension(210, 100));
         panelKartu1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel13.setFont(new java.awt.Font("Inter", 0, 22)); // NOI18N
-        jLabel13.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/user-solid (1) (1).png")); // NOI18N
-        jLabel13.setText("s");
-        jLabel13.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 60, 60));
-
         jLabel14.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jLabel14.setForeground(new java.awt.Color(130, 130, 130));
-        jLabel14.setText("Total Peserta");
+        jLabel14.setText("Instruktur aktif - Bahasa Jepang Dasar");
         jLabel14.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+        panelKartu1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 250, -1));
 
         lblTotalPeserta.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
-        lblTotalPeserta.setForeground(new java.awt.Color(122, 0, 0));
-        lblTotalPeserta.setText("10");
+        lblTotalPeserta.setForeground(new java.awt.Color(255, 255, 255));
+        lblTotalPeserta.setText("Dian Priatna Kusuma S.P.d");
         lblTotalPeserta.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu1.add(lblTotalPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+        panelKartu1.add(lblTotalPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 380, -1));
 
         jLabel16.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel16.setForeground(new java.awt.Color(170, 170, 170));
-        jLabel16.setText("Peserta Terdaftar");
+        jLabel16.setForeground(new java.awt.Color(240, 170, 170));
+        jLabel16.setText("INS001 - KELAS A - LEVEL JLPT N1");
         jLabel16.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
+        panelKartu1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 210, -1));
 
-        mainContent.add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, -1, -1));
+        jPanel2.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        panelKartu2.setBackground(new java.awt.Color(255, 255, 255));
-        panelKartu2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        panelKartu2.setPreferredSize(new java.awt.Dimension(210, 100));
-        panelKartu2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel11.setFont(new java.awt.Font("Inter", 0, 22)); // NOI18N
-        jLabel11.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/check-solid (1).png")); // NOI18N
-        jLabel11.setText("jLabel11");
-        jLabel11.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu2.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
+        jLabel7.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel7.setText("6");
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(36, 4, 54, -1));
 
         jLabel12.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel12.setForeground(new java.awt.Color(130, 130, 130));
-        jLabel12.setText("Peserta Lulus");
-        jLabel12.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+        jLabel12.setText("Siswa ");
+        jPanel2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
 
-        lblPesertaLulus.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
-        lblPesertaLulus.setForeground(new java.awt.Color(0, 140, 60));
-        lblPesertaLulus.setText("3");
-        lblPesertaLulus.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu2.add(lblPesertaLulus, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+        panelKartu1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 15, 90, 70));
 
-        jLabel18.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel18.setForeground(new java.awt.Color(170, 170, 170));
-        jLabel18.setText("lulus seleksi");
-        jLabel18.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
+        jPanel3.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        mainContent.add(panelKartu2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 24, -1, -1));
+        jLabel6.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        jLabel6.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel6.setText("6");
+        jPanel3.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(36, 4, 54, -1));
 
-        panelKartu3.setBackground(new java.awt.Color(255, 255, 255));
-        panelKartu3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        panelKartu3.setPreferredSize(new java.awt.Dimension(210, 100));
-        panelKartu3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jLabel13.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel13.setText("Jadwal");
+        jPanel3.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
 
-        jLabel19.setFont(new java.awt.Font("Inter", 1, 36)); // NOI18N
-        jLabel19.setForeground(new java.awt.Color(255, 0, 0));
-        jLabel19.setText("X");
-        jLabel19.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelKartu3.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
+        panelKartu1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 15, -1, 70));
 
-        lblPesertaGugur.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
-        lblPesertaGugur.setForeground(new java.awt.Color(200, 0, 0));
-        lblPesertaGugur.setText("0");
-        lblPesertaGugur.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelKartu3.add(lblPesertaGugur, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+        jPanel4.setBackground(new java.awt.Color(240, 210, 210));
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel21.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel21.setForeground(new java.awt.Color(130, 130, 130));
-        jLabel21.setText("Peserta Gugur");
-        jLabel21.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu3.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+        jLabel8.setFont(new java.awt.Font("Inter", 1, 24)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(122, 0, 0));
+        jLabel8.setText("70");
+        jPanel4.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 0, 54, -1));
 
-        jLabel22.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel22.setForeground(new java.awt.Color(170, 170, 170));
-        jLabel22.setText("gugur permanen");
-        jLabel22.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelKartu3.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
+        jLabel11.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        jLabel11.setText("Rata-rata");
+        jPanel4.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
 
-        mainContent.add(panelKartu3, new org.netbeans.lib.awtextra.AbsoluteConstraints(476, 24, -1, -1));
+        panelKartu1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 15, 90, 70));
 
-        panelkartu4.setBackground(new java.awt.Color(255, 255, 255));
-        panelkartu4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        panelkartu4.setPreferredSize(new java.awt.Dimension(210, 100));
-        panelkartu4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel23.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/profile (3) (1).png")); // NOI18N
-        jLabel23.setText("J");
-        jLabel23.setPreferredSize(new java.awt.Dimension(36, 36));
-        panelkartu4.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, -1, -1));
-
-        jLabel24.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jLabel24.setForeground(new java.awt.Color(130, 130, 130));
-        jLabel24.setText("Total Instruktur");
-        jLabel24.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelkartu4.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
-
-        lblTotalInstruktur.setFont(new java.awt.Font("Inter", 1, 28)); // NOI18N
-        lblTotalInstruktur.setForeground(new java.awt.Color(0, 100, 100));
-        lblTotalInstruktur.setText("5");
-        lblTotalInstruktur.setPreferredSize(new java.awt.Dimension(100, 36));
-        panelkartu4.add(lblTotalInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, -1, -1));
-
-        jLabel26.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel26.setForeground(new java.awt.Color(170, 170, 170));
-        jLabel26.setText("instruktur aktif");
-        jLabel26.setPreferredSize(new java.awt.Dimension(140, 16));
-        panelkartu4.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, -1, -1));
-
-        mainContent.add(panelkartu4, new org.netbeans.lib.awtextra.AbsoluteConstraints(702, 24, -1, -1));
+        mainContent.add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, 920, -1));
 
         jLabel27.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
         jLabel27.setForeground(new java.awt.Color(25, 25, 25));
@@ -599,13 +507,10 @@ public class AdminFrame extends javax.swing.JFrame {
         setActiveButton(btnPeserta);
     }//GEN-LAST:event_btnPesertaActionPerformed
 
-    private void btnProgramActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProgramActionPerformed
-        lblHalamanJudul.setText("Data Program");
-        lblHalamanSub.setText("Kelola Data Program");
-
-        showPanel(new PanelDataProgram());
-        setActiveButton(btnProgram);
-    }//GEN-LAST:event_btnProgramActionPerformed
+    private void btnTambahPesertaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahPesertaActionPerformed
+        FormTambahPeserta form = new FormTambahPeserta(this, true);
+        form.setVisible(true);
+    }//GEN-LAST:event_btnTambahPesertaActionPerformed
 
     private void btnManajemenSeleksiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManajemenSeleksiActionPerformed
         lblHalamanJudul.setText("Manajemen Seleksi");
@@ -647,11 +552,6 @@ public class AdminFrame extends javax.swing.JFrame {
         setActiveButton(btnLihatLaporan);
     }//GEN-LAST:event_btnLihatLaporanActionPerformed
 
-    private void btnTambahPesertaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahPesertaActionPerformed
-        FormTambahPeserta form = new FormTambahPeserta(this, true);
-        form.setVisible(true);
-    }//GEN-LAST:event_btnTambahPesertaActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -669,21 +569,27 @@ public class AdminFrame extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AdminFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AdminFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AdminFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AdminFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new AdminFrame().setVisible(true);
+                new InstrukturFrame().setVisible(true);
             }
         });
     }
@@ -696,7 +602,6 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
-    private javax.swing.JButton btnProgram;
     private javax.swing.JButton btnTambahPeserta;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -705,39 +610,30 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lblHalamanJudul;
     private javax.swing.JLabel lblHalamanSub;
-    private javax.swing.JLabel lblPesertaGugur;
-    private javax.swing.JLabel lblPesertaLulus;
     private javax.swing.JLabel lblTanggal;
-    private javax.swing.JLabel lblTotalInstruktur;
     private javax.swing.JLabel lblTotalPeserta;
     private javax.swing.JPanel mainContent;
     private javax.swing.JPanel panelHeadr;
     private javax.swing.JPanel panelKartu1;
-    private javax.swing.JPanel panelKartu2;
-    private javax.swing.JPanel panelKartu3;
-    private javax.swing.JPanel panelkartu4;
     private java.awt.ScrollPane scrollPane1;
     private javax.swing.JPanel sidebar;
     private javax.swing.JTable tabelPeserta;

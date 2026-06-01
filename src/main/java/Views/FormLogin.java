@@ -340,9 +340,8 @@ public class FormLogin extends javax.swing.JFrame {
                     AdminFrame adminDashboard = new AdminFrame();
                     adminDashboard.setVisible(true);
                 } else if (user.getRole().equals("INSTRUKTUR")) {
-                     InstrukturFrame instrukturFrame = new InstrukturFrame();
-                     instrukturFrame.setVisible(true);
-                    javax.swing.JOptionPane.showMessageDialog(this, "Mengarahkan ke halaman Instruktur...");
+                    Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame();
+                    instrukturDashboard.setVisible(true);
                 }
                 this.dispose();
                 break;

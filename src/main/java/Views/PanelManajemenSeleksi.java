@@ -102,8 +102,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
         DefaultTableModel model = (DefaultTableModel) tabelSeleksi.getModel();
         model.setRowCount(0);
         
-        // Ambil filter dari dropdown (Misal: cbFilterStatus)
-        String filter = cbFilterStatus.getSelectedItem() != null ? cbFilterStatus.getSelectedItem().toString() : "Semua Status";
+        String filter = cbFilterStatus.getSelectedItem() != null ? cbFilterStatus.getSelectedItem().toString() : "Semua";
         int no = 1;
 
         // 1. Loop semua daftar Peserta
@@ -140,7 +139,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
             String teksPercobaan = jumlahPercobaan + " / 3";
 
             // 4. Terapkan Filter Status Dropdown
-            boolean matchStatus = filter.equals("Semua Status") || status.equalsIgnoreCase(filter);
+            boolean matchStatus = filter.equals("Semua") || status.equalsIgnoreCase(filter);
             
             if (matchStatus) {
                 model.addRow(new Object[]{
@@ -153,7 +152,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
                     nilaiStr,
                     teksPercobaan,
                     status,
-                    "" // Kolom Aksi
+                    ""
                 });
             }
         }
