@@ -45,9 +45,6 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
                 @Override
                 public void onDetail(int baris) {
                     String id = tabelInstruktur.getValueAt(baris, 1).toString();
-                    // Nanti buat FormDetailInstruktur
-                    // FormDetailInstruktur detail = new FormDetailInstruktur((java.awt.Frame) SwingUtilities.getWindowAncestor(PanelDataInstruktur.this), true, id);
-                    // detail.setVisible(true);
                     JOptionPane.showMessageDialog(PanelDataInstruktur.this, "Menampilkan detail instruktur: " + id);
                 }
 
@@ -67,7 +64,7 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
     }
 
     // Method untuk Load Data ke JTable
-    private void loadTableData(String keyword) {
+    public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelInstruktur.getModel();
         model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
 
@@ -264,8 +261,7 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-        FormTambahInstruktur form = new FormTambahInstruktur(
-            (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), true);
+        FormTambahInstruktur form = new FormTambahInstruktur(PanelDataInstruktur.this);
         form.setVisible(true);
     }//GEN-LAST:event_btnTambahActionPerformed
 

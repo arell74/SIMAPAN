@@ -182,7 +182,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         jLabel8.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(30, 30, 30));
-        jLabel8.setText("Spesialisasi");
+        jLabel8.setText("Bidang");
         jLabel8.setPreferredSize(new java.awt.Dimension(160, 14));
         panelBody.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 170, -1, -1));
 
@@ -194,7 +194,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         cbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
-        cbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "manuvaktur", "caregiver" }));
         cbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
         panelBody.add(cbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, -1, -1));
 
@@ -207,7 +207,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         jPanel1.add(lblNamaPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 10, -1, -1));
 
         jLabel10.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel10.setText("Level N3");
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 35, -1, -1));
 
         lblInfoPeserta.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
@@ -215,7 +214,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         jPanel1.add(lblInfoPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 35, -1, -1));
 
         jLabel13.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel13.setText("Level N3");
         jPanel1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(175, 35, -1, -1));
 
         lblPercobaan.setFont(new java.awt.Font("Inter", 1, 14)); // NOI18N
@@ -252,7 +250,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         cbStatusKelulusan.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbStatusKelulusan.setForeground(new java.awt.Color(30, 30, 30));
-        cbStatusKelulusan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbStatusKelulusan.setPreferredSize(new java.awt.Dimension(480, 34));
         panelBody.add(cbStatusKelulusan, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 290, 230, -1));
 

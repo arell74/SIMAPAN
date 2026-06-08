@@ -9,7 +9,6 @@
  */
 import Views.admin.FormLogin;
 import com.formdev.flatlaf.FlatLightLaf;
-import javax.swing.SwingUtilities;
 
 
 public class Main {

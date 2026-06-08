@@ -28,7 +28,6 @@ public class PanelDashboardAdmin extends javax.swing.JPanel {
                 gugur++;
             }
         }
-
         int totalInstruktur = DataStore.getHanyaInstruktur().size();
         lblTotalPeserta.setText(String.valueOf(totalPeserta));
         lblPesertaLulus.setText(String.valueOf(lulus));

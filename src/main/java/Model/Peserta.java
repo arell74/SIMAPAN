@@ -25,8 +25,11 @@ public class Peserta {
     private String statusSeleksi;        
     private String statusKeberangkatan;
 
-    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, String jenisKelamin, String noHp, String agama, String alamat, 
-                   String program, Instruktur instrukturDamping, String levelBahasa, String statusPembayaran) {
+    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, 
+                   String jenisKelamin, String noHp, String agama, String alamat, 
+                   String program, Instruktur instrukturDamping, String levelBahasa, 
+                   String statusPembayaran, String statusSeleksi, String statusKeberangkatan) {
+                   
         this.idPeserta = idPeserta;
         this.nik = nik;
         this.namaLengkap = namaLengkap;
@@ -39,10 +42,20 @@ public class Peserta {
         this.instrukturDamping = instrukturDamping;
         this.levelBahasa = levelBahasa;
         this.statusPembayaran = statusPembayaran;
-        
-        // Default Status Awal
-        this.statusSeleksi = "Belum Seleksi";
-        this.statusKeberangkatan = "Belum Berangkat";
+        this.statusSeleksi = statusSeleksi;
+        this.statusKeberangkatan = statusKeberangkatan;
+    }
+    
+    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, 
+                   String jenisKelamin, String noHp, String agama, String alamat, 
+                   String program, Instruktur instrukturDamping, String levelBahasa, 
+                   String statusPembayaran) {
+                   
+        // Panggil cetakan 1 dari dalam cetakan 2 menggunakan 'this' agar tidak capek ngetik ulang
+        // Nilai "Belum Mulai" dan "Belum Berangkat" akan jadi nilai default-nya
+        this(idPeserta, nik, namaLengkap, tanggalLahir, jenisKelamin, noHp, agama, 
+             alamat, program, instrukturDamping, levelBahasa, statusPembayaran, 
+             "Belum Mulai", "Belum Berangkat");
     }
 
     public String getIdPeserta() {

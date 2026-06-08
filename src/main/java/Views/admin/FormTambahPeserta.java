@@ -22,7 +22,8 @@ import javax.swing.JOptionPane;
  * @author arelssi
  */
     public class FormTambahPeserta extends javax.swing.JFrame {
-
+        
+    private Views.admin.PanelDataPeserta panelInduk;
         //ID Otomatis
     private String generateIdPeserta() {
         int ukuranData = DataStore.daftarPeserta.size();
@@ -43,6 +44,8 @@ import javax.swing.JOptionPane;
         setLocationRelativeTo(parent);
         setResizable(false);
         setTitle("Tambah Peserta Baru");
+        
+        this.panelInduk = panelInduk;
         
         txtIdPeserta.setText(generateIdPeserta());
         txtIdPeserta.setEditable(false);
@@ -85,7 +88,6 @@ import javax.swing.JOptionPane;
         txtIdPeserta = new javax.swing.JTextField();
         txtNik = new javax.swing.JTextField();
         txtNamaLengkap = new javax.swing.JTextField();
-        txtTanggalLahir = new javax.swing.JTextField();
         txtNoHp = new javax.swing.JTextField();
         txtAlamat = new javax.swing.JTextField();
         cmbJenisKelamin = new javax.swing.JComboBox<>();
@@ -100,6 +102,7 @@ import javax.swing.JOptionPane;
         cmbInstruktur = new javax.swing.JComboBox();
         cmbLevelBahasa = new javax.swing.JComboBox<>();
         cmbStatusBayar = new javax.swing.JComboBox<>();
+        jDateTanggalLahir = new com.toedter.calendar.JDateChooser();
         footer = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
         btnBatal = new javax.swing.JButton();
@@ -200,6 +203,11 @@ import javax.swing.JOptionPane;
         txtNik.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         txtNik.setForeground(new java.awt.Color(60, 60, 60));
         txtNik.setPreferredSize(new java.awt.Dimension(250, 34));
+        txtNik.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNikKeyTyped(evt);
+            }
+        });
         panelBody.add(txtNik, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 60, -1, -1));
 
         txtNamaLengkap.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
@@ -207,15 +215,14 @@ import javax.swing.JOptionPane;
         txtNamaLengkap.setPreferredSize(new java.awt.Dimension(520, 34));
         panelBody.add(txtNamaLengkap, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 118, -1, -1));
 
-        txtTanggalLahir.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
-        txtTanggalLahir.setForeground(new java.awt.Color(60, 60, 60));
-        txtTanggalLahir.setText("YYYY-MM-DD");
-        txtTanggalLahir.setPreferredSize(new java.awt.Dimension(240, 34));
-        panelBody.add(txtTanggalLahir, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 176, -1, -1));
-
         txtNoHp.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         txtNoHp.setForeground(new java.awt.Color(60, 60, 60));
         txtNoHp.setPreferredSize(new java.awt.Dimension(240, 34));
+        txtNoHp.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNoHpKeyTyped(evt);
+            }
+        });
         panelBody.add(txtNoHp, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 234, -1, -1));
 
         txtAlamat.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
@@ -268,6 +275,7 @@ import javax.swing.JOptionPane;
         cmbStatusBayar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cmbStatusBayar.setPreferredSize(new java.awt.Dimension(250, 34));
         panelBody.add(cmbStatusBayar, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 442, -1, -1));
+        panelBody.add(jDateTanggalLahir, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 176, 240, 30));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, -1, 490));
 
@@ -329,44 +337,102 @@ import javax.swing.JOptionPane;
     }//GEN-LAST:event_btnBatalActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        if (txtNik.getText().trim().isEmpty() || txtNamaLengkap.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "Harap isi NIK dan Nama Lengkap dengan benar!", 
-                "Peringatan", JOptionPane.WARNING_MESSAGE);
+        String idPeserta = txtIdPeserta.getText();
+        String nik = txtNik.getText().trim();
+        String namaLengkap = txtNamaLengkap.getText().trim();
+        String jenisKelamin = cmbJenisKelamin.getSelectedItem().toString();
+        String noHp = txtNoHp.getText().trim();
+        String agama = cmbAgama.getSelectedItem().toString();
+        String alamat = txtAlamat.getText().trim();
+        
+        String levelBahasa = cmbLevelBahasa.getSelectedItem().toString();
+        String statusBayar = cmbStatusBayar.getSelectedItem().toString();
+
+        java.util.Date tanggalTerpilih = jDateTanggalLahir.getDate();
+        
+        if (tanggalTerpilih == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Pilih tanggal lahir terlebih dahulu dari ikon kalender!", "Peringatan", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        String tanggalLahirString = sdf.format(tanggalTerpilih);
+
+        // Validasi Input
+        if (nik.isEmpty() || namaLengkap.isEmpty() || noHp.isEmpty() || alamat.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Mohon lengkapi semua data pribadi yang kosong!", "Peringatan", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        try {
-            String id = txtIdPeserta.getText();
-            String nik = txtNik.getText();
-            String nama = txtNamaLengkap.getText();
-            String tglLahir = txtTanggalLahir.getText();
-            String jk = cmbJenisKelamin.getSelectedItem().toString();
-            String noHp = txtNoHp.getText();
-            String agama = cmbAgama.getSelectedItem().toString();
-            String alamat = txtAlamat.getText();
-            String program = cmbProgram.getSelectedItem().toString();
-            String level = cmbLevelBahasa.getSelectedItem().toString();
-            String bayar = cmbStatusBayar.getSelectedItem().toString();
-
-            Instruktur instrukturPilihan = (Instruktur) cmbInstruktur.getSelectedItem();
-
-            Peserta pesertaBaru = new Peserta(
-                id, nik, nama, tglLahir, jk, noHp, agama, alamat, 
-                program, instrukturPilihan, level, bayar
-            );
-
-            DataStore.daftarPeserta.add(pesertaBaru);
-
-            JOptionPane.showMessageDialog(this, "Data Peserta Baru Berhasil Disimpan!");
-            this.dispose(); 
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, 
-                "Terjadi kesalahan saat menyimpan data: " + e.getMessage(), 
-                "Error", JOptionPane.ERROR_MESSAGE);
+        String namaInstrukturDipilih = cmbInstruktur.getSelectedItem().toString();
+        Model.Instruktur instrukturPilihan = null;
+        
+        for (Model.Pengguna p : DataStore.daftarPengguna) {
+            if (p instanceof Model.Instruktur) {
+                Model.Instruktur ins = (Model.Instruktur) p;
+                if (namaInstrukturDipilih.contains(ins.getNamaLengkap())) {
+                    instrukturPilihan = ins;
+                    break;
+                }
+            }
         }
+        
+        String programDipilih = cmbProgram.getSelectedItem().toString();
+        Model.Peserta pesertaBaru = new Model.Peserta(
+            idPeserta, 
+            nik, 
+            namaLengkap, 
+            tanggalLahirString, 
+            jenisKelamin, 
+            noHp, 
+            agama,             
+            alamat, 
+            programDipilih,     
+            instrukturPilihan, 
+            levelBahasa, 
+            statusBayar, 
+            "Belum Mulai",  
+            "Belum Berangkat"
+        );
+        
+        DataStore.daftarPeserta.add(pesertaBaru);
+        
+        if (panelInduk != null) {
+            panelInduk.loadTableData(""); 
+        }
+        
+        javax.swing.JOptionPane.showMessageDialog(this, "Peserta Baru Berhasil Ditambahkan!");
+        this.dispose();
+    
     }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void txtNikKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNikKeyTyped
+        char c = evt.getKeyChar();
+        
+        if (!Character.isDigit(c)) {
+            evt.consume();
+        }
+        
+        if (txtNik.getText().length() >= 16) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtNikKeyTyped
+
+    private void txtNoHpKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNoHpKeyTyped
+        char c = evt.getKeyChar();
+        
+        if (!Character.isDigit(c)) {
+            evt.consume();
+        }
+        
+        if (txtNik.getText().length() >= 14) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtNoHpKeyTyped
 
     /**
      * @param args the command line arguments
@@ -414,6 +480,7 @@ import javax.swing.JOptionPane;
     private javax.swing.JComboBox<String> cmbStatusBayar;
     private javax.swing.JPanel footer;
     private javax.swing.JButton jButton1;
+    private com.toedter.calendar.JDateChooser jDateTanggalLahir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -441,6 +508,5 @@ import javax.swing.JOptionPane;
     private javax.swing.JTextField txtNamaLengkap;
     private javax.swing.JTextField txtNik;
     private javax.swing.JTextField txtNoHp;
-    private javax.swing.JTextField txtTanggalLahir;
     // End of variables declaration//GEN-END:variables
 }

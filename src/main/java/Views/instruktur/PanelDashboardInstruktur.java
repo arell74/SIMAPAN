@@ -9,6 +9,18 @@ import Model.Instruktur;
 import Model.Peserta;
 import Model.Seleksi;
 import Util.TabelUtil;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import javax.swing.Box;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 /**
  *
@@ -32,40 +44,34 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
     }
     
     private void setupTablePresensi() {
-        tabelPresensi.setRowHeight(35);
-        
-        // Buat ComboBox untuk pilihan absensi di dalam tabel
-        javax.swing.JComboBox<String> cbKehadiran = new javax.swing.JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
-        
-        tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new javax.swing.DefaultCellEditor(cbKehadiran));
-        
-        loadTabelPresensi();
-        
-        TabelUtil.autoResizeKolom(tabelPresensi);
-        javax.swing.table.JTableHeader header = tabelPresensi.getTableHeader();
-        
-        header.setBackground(new java.awt.Color(122, 0, 0));
-        header.setForeground(java.awt.Color.WHITE);
-        
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
-        header.setOpaque(true);
-    }
+         tabelPresensi.setRowHeight(35);
+         JComboBox<String> cbKehadiran = new JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
+         tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(cbKehadiran));
+
+         loadTabelPresensi();
+
+         TabelUtil.autoResizeKolom(tabelPresensi);
+
+         JTableHeader header = tabelPresensi.getTableHeader();
+         header.setBackground(new Color(122, 0, 0));
+         header.setForeground(Color.WHITE);
+         header.setFont(new Font("Inter", Font.BOLD, 13)); 
+         header.setOpaque(true);
+     }
     
     private void loadTabelPresensi() {
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tabelPresensi.getModel();
+        DefaultTableModel model = (DefaultTableModel) tabelPresensi.getModel();
         model.setRowCount(0);
         
         int no = 1;
-        // Looping peserta yang masuk ke kelas instruktur ini
         for (Model.Peserta p : DataStore.daftarPeserta) {
-            // Filter hanya siswa yang kelasnya sama dengan kelas instruktur (Misal: Kelas A)
             if ("Kelas A".equals(p.getKelas())) { 
                 model.addRow(new Object[]{
                     no++,
                     p.getIdPeserta(),
                     p.getNamaLengkap(),
                     p.getLevelBahasa(),
-                    "Hadir" // Nilai default saat tabel dimuat
+                    "Hadir"
                 });
             }
         }
@@ -75,49 +81,43 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         Model.Instruktur instruktur = null;
         
         for (Model.Pengguna pgn : DataStore.daftarPengguna) {
-            
             // Cek apakah Pengguna yang sedang dibaca ini adalah sebuah Instruktur
             if (pgn instanceof Model.Instruktur) {
                 
                 // Lakukan Casting
                 Model.Instruktur ins = (Model.Instruktur) pgn;
                 
-                // LOGIKA ANTI-ERROR: Cek apakah ID yang dikirim cocok dengan ID Instruktur ATAU cocok dengan Username/ID Pengguna
+                // LOGIKA ANTI-ERROR: Cek ID Instruktur atau Username
                 boolean cocokIDInstruktur = ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif);
-                
-                // Catatan: Ganti getIdPengguna() dengan method getter username di class Pengguna kamu (misal getId(), getUsername(), dll)
                 boolean cocokUsername = ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif);
                 
                 if (cocokIDInstruktur || cocokUsername) { 
                     idInstrukturAktif = ins.getIdInstruktur();
+                    instruktur = ins; // PERBAIKAN: Simpan objek yang ketemu ke variabel utama!
                     break;
                 }
             }
         }
 
         if (instruktur != null) {
-            // Update Teks Banner
+            
+            // 1. Update Teks Banner & Profil
             lblNamaInstruktur.setText(instruktur.getNamaLengkap());
+            lblSpesialisasi.setText("Instruktur aktif - " + instruktur.getSpesialisasi()); // PERBAIKAN: Typo spasi dihapus
             
-            // Sekarang getSpe  sialisasi() tidak akan error karena 'instruktur' sudah berwujud kelas Instruktur
-            lblSpesialisasi.setText("Instruktur aktif - " + instruktur.getSpesialisasi());
-            
+            // Opsional: Jika kelas diampu dan level JLPT ada di model Instruktur, panggil dinamis
             lblInfoInstruktur.setText(instruktur.getIdInstruktur() + " - KELAS A - LEVEL JLPT N1");
             
             // 2. Hitung Statistik (Siswa, Jadwal, Rata-rata)
             int jumlahSiswa = 0;
             int akumulasiNilai = 0;
             int jumlahNilai = 0;
-            int jumlahJadwal = 0; // Kalau kamu punya DataStore.daftarJadwal
             
-            // Misal: Hitung siswa yang ada di "Kelas A" (kelas si instruktur)
-            for (Peserta p : DataStore.daftarPeserta) {
-                // Asumsi ada atribut getKelas() di model Peserta
+            for (Model.Peserta p : DataStore.daftarPeserta) {
                 if ("Kelas A".equals(p.getKelas())) { 
                     jumlahSiswa++;
                     
-                    // Hitung rata-rata nilai siswa ini dari riwayat seleksi/nilai
-                    for (Seleksi s : DataStore.daftarSeleksi) {
+                    for (Model.Seleksi s : DataStore.daftarSeleksi) {
                         if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
                             akumulasiNilai += s.getNilai();
                             jumlahNilai++;
@@ -126,19 +126,16 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                 }
             }
             
-            // Update Kartu Statistik
             lblTotalSiswa.setText(String.valueOf(jumlahSiswa));
-            // Misal jadwal di-hardcode 6 sesuai desain, atau hitung dari array Jadwal jika ada
-            lblTotalJadwal.setText("6"); 
             
             int rataRata = (jumlahNilai > 0) ? (akumulasiNilai / jumlahNilai) : 0;
             lblRataNilai.setText(String.valueOf(rataRata));
             
-            // Update Tanggal Hari Ini di Label
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id", "ID"));
-            String tglSekarang = sdf.format(new java.util.Date());
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID"));
+            String tglSekarang = sdf.format(new Date());
             lblTanggalPresensi.setText(tglSekarang);
-//            lblTopDate.setText(tglSekarang);
+            
+            // lblTopDate.setText(tglSekarang);
         }
     }
 
@@ -150,6 +147,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
             if (j.getIdInstruktur().equals(idInstrukturAktif)) {
                 
                 jumlahJadwal++; 
+                // Asumsi CardJadwal adalah custom component yang sudah kamu buat
                 CardJadwal kartu = new CardJadwal();
                 kartu.setJadwalData(
                     j.getJamMulai(), 
@@ -159,17 +157,16 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
                     j.getStatusJadwal()
                 );
                 
-                kartu.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+                kartu.setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 pnlWadahJadwal.add(kartu);
-                pnlWadahJadwal.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10)));
+                pnlWadahJadwal.add(Box.createRigidArea(new Dimension(0, 10)));
             }
         }
         
         lblTotalJadwal.setText(String.valueOf(jumlahJadwal)); 
 
-        pnlWadahJadwal.add(javax.swing.Box.createVerticalGlue());
-
+        pnlWadahJadwal.add(Box.createVerticalGlue());
         pnlWadahJadwal.revalidate();
         pnlWadahJadwal.repaint();
     }

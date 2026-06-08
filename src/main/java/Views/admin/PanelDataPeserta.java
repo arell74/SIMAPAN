@@ -70,7 +70,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         }));
     }
 
-    private void loadTableData(String keyword) {
+    public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
         model.setRowCount(0);
 
@@ -134,7 +134,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     private void initComponents() {
 
         panelToolbar = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        txtCari = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         btnTambah = new javax.swing.JButton();
@@ -152,14 +152,24 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         panelToolbar.setPreferredSize(new java.awt.Dimension(980, 56));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextField1.setPreferredSize(new java.awt.Dimension(280, 30));
-        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
+        txtCari.setPreferredSize(new java.awt.Dimension(280, 30));
+        txtCari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCariActionPerformed(evt);
+            }
+        });
+        panelToolbar.add(txtCari, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
 
         jButton1.setBackground(new java.awt.Color(80, 80, 80));
         jButton1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("Cari");
         jButton1.setPreferredSize(new java.awt.Dimension(70, 30));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         panelToolbar.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(334, 14, -1, -1));
 
         jButton2.setBackground(new java.awt.Color(240, 240, 240));
@@ -170,6 +180,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButton2.setFocusPainted(false);
         jButton2.setPreferredSize(new java.awt.Dimension(70, 30));
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
         panelToolbar.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(412, 14, -1, -1));
 
         btnTambah.setBackground(new java.awt.Color(122, 0, 0));
@@ -255,6 +270,19 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         form.setVisible(true);
     }//GEN-LAST:event_btnTambahActionPerformed
 
+    private void txtCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCariActionPerformed
+        
+    }//GEN-LAST:event_txtCariActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        loadTableData(txtCari.getText());
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        txtCari.setText("");
+        loadTableData("");
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnTambah;
@@ -263,11 +291,11 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel lblTotalData;
     private javax.swing.JPanel panelTabel;
     private javax.swing.JPanel panelToolbar;
     private javax.swing.JScrollPane scrollTabel;
     private javax.swing.JTable tabelPeserta;
+    private javax.swing.JTextField txtCari;
     // End of variables declaration//GEN-END:variables
 }

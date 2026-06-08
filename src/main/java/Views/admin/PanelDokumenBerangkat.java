@@ -92,8 +92,6 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
                                   dok.getPeserta().getStatusKeberangkatan().equalsIgnoreCase(filterStatus);
 
             if (textMatch && statusMatch) {
-                // Untuk mengambil nama Program, kita ambil ID Program dari Peserta, lalu dicarikan ke DataStore
-                // (Cara cepat: Kita asumsikan Peserta sudah menyimpan ID Programnya)
                 
                 model.addRow(new Object[]{
                     no++,
@@ -108,6 +106,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
                 });
             }
         }
+        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
         
         try { TabelUtil.autoResizeKolom(tabelDokumen); } catch (Exception e) {}
     }
@@ -330,12 +329,12 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
         txtCari.setText("");
-        cbFilter.setSelectedIndex(0); // Set ke "Semua"
+        cbFilter.setSelectedIndex(0);
         loadTableData("");
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
-        loadTableData(txtCari.getText());   
+        loadTableData(txtCari.getText());
     }//GEN-LAST:event_btnCariActionPerformed
 
     private void cbFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFilterActionPerformed

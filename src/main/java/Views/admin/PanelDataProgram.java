@@ -77,7 +77,7 @@ public class PanelDataProgram extends javax.swing.JPanel {
         }
     }
     
-    private void loadTableData(String keyword) {
+    public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelProgram.getModel();
         model.setRowCount(0); // Kosongkan tabel
 
@@ -130,13 +130,13 @@ public class PanelDataProgram extends javax.swing.JPanel {
     private void initComponents() {
 
         panelToolbar = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         btnTambah = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
+        jLabel3 = new javax.swing.JLabel();
         panelTabel = new javax.swing.JPanel();
         scrollTabel = new javax.swing.JScrollPane();
         tabelProgram = new javax.swing.JTable();
@@ -147,12 +147,8 @@ public class PanelDataProgram extends javax.swing.JPanel {
         panelToolbar.setBackground(new java.awt.Color(255, 255, 255));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setText("C");
-        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
-        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
-
         jTextField1.setPreferredSize(new java.awt.Dimension(280, 30));
-        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(46, 14, -1, -1));
+        panelToolbar.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(56, 14, 270, -1));
 
         jButton1.setBackground(new java.awt.Color(80, 80, 80));
         jButton1.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -188,6 +184,11 @@ public class PanelDataProgram extends javax.swing.JPanel {
 
         jSeparator3.setPreferredSize(new java.awt.Dimension(980, 2));
         panelToolbar.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/search.png")); // NOI18N
+        jLabel3.setText("C");
+        jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
+        panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
 
         add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -235,8 +236,8 @@ public class PanelDataProgram extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-//        FormTambahSeleksi form = new FormTambahSeleksi(null, true);
-//        form.setVisible(true);
+        FormTambahProgram form = new FormTambahProgram(this);
+        form.setVisible(true);
     }//GEN-LAST:event_btnTambahActionPerformed
 
 

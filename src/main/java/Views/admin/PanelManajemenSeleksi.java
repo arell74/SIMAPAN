@@ -5,12 +5,8 @@
 package Views.admin;
 
 import DataStore.DataStore;
-import Model.Seleksi;
-import Util.TabelUtil;
 import Util.TombolAksiEditor;
 import Util.TombolAksiRenderer;
-import java.awt.Color;
-import java.awt.Font;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -163,6 +159,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
                 });
             }
         }
+        lblTotalData.setText("Menampilkan " + model.getRowCount() + " data seleksi");
     }
 
     // --- LOGIKA HAPUS DATA ---
@@ -270,9 +267,19 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
         jButton1.setBackground(new java.awt.Color(80, 80, 80));
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("Cari");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 20, -1, 34));
 
         jButton2.setText("Reset");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 20, 90, 34));
 
         cbFilterStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Semua" }));
@@ -400,6 +407,15 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
             form.setVisible(true);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        loadTableData(txtCari.getText());
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        txtCari.setText("");
+        loadTableData("");
+    }//GEN-LAST:event_jButton2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

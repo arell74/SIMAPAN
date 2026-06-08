@@ -4,6 +4,10 @@
  */
 package Views.admin;
 
+import DataStore.DataStore;
+import Model.Instruktur;
+import Model.Pengguna;
+
 /**
  *
  * @author arelssi
@@ -13,8 +17,10 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
     /**
      * Creates new form FormTambahInstruktur
      */
-    public FormTambahInstruktur(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    
+    private Views.admin.PanelDataInstruktur panelInduk;
+    
+    public FormTambahInstruktur(Views.admin.PanelDataInstruktur panelInduk) {
         initComponents();
         setSize(520, 490);
         pack();
@@ -22,6 +28,30 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         setResizable(false);
         setTitle("Tambah Instruktur Baru");
         setModal(true);
+        
+        this.panelInduk = panelInduk;
+        
+        siapkanForm();
+    }
+    
+    private void siapkanForm() {
+        int jumlahInstruktur = 0;
+        for (Pengguna p : DataStore.daftarPengguna) {
+            if (p instanceof Instruktur) {
+                jumlahInstruktur++;
+            }
+        }
+        
+        String idBaru = String.format("INS%03d", (jumlahInstruktur + 1)); 
+        
+        txtIdInstruktur.setText(idBaru);
+        txtIdInstruktur.setEditable(false);
+        
+        // 2. (Opsional) Jika item Combobox belum diset di layar Design, 
+        // kamu bisa mengaturnya di sini menggunakan 
+        cbSpesialisasi.addItem("Budaya Jepang");
+        cbSpesialisasi.addItem("Bahasa Jepang");
+        cbSpesialisasi.addItem("JLPT");
     }
 
     /**
@@ -45,16 +75,16 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtIdInstruktur = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        txtNamaInstruktur = new javax.swing.JTextField();
+        txtNoTelp = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        cmbSpesialisasi = new javax.swing.JComboBox<>();
-        cmbLevelJLPT = new javax.swing.JComboBox<>();
-        cmbKelas = new javax.swing.JComboBox<>();
+        cbSpesialisasi = new javax.swing.JComboBox<>();
+        cbLevelJLPT = new javax.swing.JComboBox<>();
+        cbKelasDiampu = new javax.swing.JComboBox<>();
         panelFooter = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
         btnBatal = new javax.swing.JButton();
@@ -134,15 +164,20 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         txtIdInstruktur.setPreferredSize(new java.awt.Dimension(220, 34));
         panelBody.add(txtIdInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
 
-        jTextField2.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jTextField2.setForeground(new java.awt.Color(30, 30, 30));
-        jTextField2.setPreferredSize(new java.awt.Dimension(480, 34));
-        panelBody.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 118, -1, -1));
+        txtNamaInstruktur.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        txtNamaInstruktur.setForeground(new java.awt.Color(30, 30, 30));
+        txtNamaInstruktur.setPreferredSize(new java.awt.Dimension(480, 34));
+        panelBody.add(txtNamaInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 118, -1, -1));
 
-        jTextField3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        jTextField3.setForeground(new java.awt.Color(30, 30, 30));
-        jTextField3.setPreferredSize(new java.awt.Dimension(230, 34));
-        panelBody.add(jTextField3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
+        txtNoTelp.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        txtNoTelp.setForeground(new java.awt.Color(30, 30, 30));
+        txtNoTelp.setPreferredSize(new java.awt.Dimension(230, 34));
+        txtNoTelp.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNoTelpKeyTyped(evt);
+            }
+        });
+        panelBody.add(txtNoTelp, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
 
         jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(122, 0, 0));
@@ -171,23 +206,22 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         jLabel10.setPreferredSize(new java.awt.Dimension(160, 14));
         panelBody.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 254, -1, -1));
 
-        cmbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        cmbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
-        cmbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
-        panelBody.add(cmbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 212, -1, -1));
+        cbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        cbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
+        cbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
+        panelBody.add(cbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 212, -1, -1));
 
-        cmbLevelJLPT.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        cmbLevelJLPT.setForeground(new java.awt.Color(30, 30, 30));
-        cmbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbLevelJLPT.setPreferredSize(new java.awt.Dimension(220, 34));
-        panelBody.add(cmbLevelJLPT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+        cbLevelJLPT.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        cbLevelJLPT.setForeground(new java.awt.Color(30, 30, 30));
+        cbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5" }));
+        cbLevelJLPT.setPreferredSize(new java.awt.Dimension(220, 34));
+        panelBody.add(cbLevelJLPT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
 
-        cmbKelas.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        cmbKelas.setForeground(new java.awt.Color(30, 30, 30));
-        cmbKelas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cmbKelas.setPreferredSize(new java.awt.Dimension(230, 34));
-        panelBody.add(cmbKelas, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
+        cbKelasDiampu.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+        cbKelasDiampu.setForeground(new java.awt.Color(30, 30, 30));
+        cbKelasDiampu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Reguler", "Mandiri", "GTOG" }));
+        cbKelasDiampu.setPreferredSize(new java.awt.Dimension(230, 34));
+        panelBody.add(cbKelasDiampu, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, -1, -1));
 
@@ -215,6 +249,11 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         btnSimpan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSimpan.setFocusPainted(false);
         btnSimpan.setPreferredSize(new java.awt.Dimension(116, 34));
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanActionPerformed(evt);
+            }
+        });
         panelFooter.add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 12, -1, -1));
 
         getContentPane().add(panelFooter, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 432, -1, -1));
@@ -222,54 +261,103 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtNoTelpKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNoTelpKeyTyped
+        char c = evt.getKeyChar();
+        if (!Character.isDigit(c)) {
+            evt.consume();
+        }
+    }//GEN-LAST:event_txtNoTelpKeyTyped
+
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        String idInstruktur = txtIdInstruktur.getText();
+        String namaInstruktur = txtNamaInstruktur.getText().trim();
+        String noTelp = txtNoTelp.getText().trim();
+        
+        String spesialisasi = cbSpesialisasi.getSelectedItem().toString();
+        String levelJLPT = cbLevelJLPT.getSelectedItem().toString();
+        String kelasDiampu = cbKelasDiampu.getSelectedItem().toString();
+        
+        // 2. Validasi Input Kosong
+        if (namaInstruktur.isEmpty() || noTelp.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Nama Instruktur dan No. Telp tidak boleh kosong!", "Peringatan", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        
+        Instruktur instrukturBaru = new Instruktur(
+            idInstruktur,      
+            "12345",        
+            namaInstruktur,  
+            idInstruktur,     
+            noTelp,          
+            spesialisasi,      
+            levelJLPT,     
+            kelasDiampu       
+        );
+        
+        // 4. Masukkan ke dalam DataStore
+        DataStore.daftarPengguna.add(instrukturBaru);
+        
+        // 5. Lapor ke Markas (Refresh Tabel)
+        if (panelInduk != null) {
+            panelInduk.loadTableData(""); // Memanggil fungsi refresh milik PanelDataInstruktur
+        }
+        
+        // 6. Notifikasi sukses dan tutup form
+        javax.swing.JOptionPane.showMessageDialog(this, "Instruktur Baru Berhasil Ditambahkan!");
+        this.dispose();
+    }//GEN-LAST:event_btnSimpanActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                FormTambahInstruktur dialog = new FormTambahInstruktur(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(FormTambahInstruktur.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the dialog */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                FormTambahInstruktur dialog = new FormTambahInstruktur(new javax.swing.JFrame(), true);
+//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+//                    @Override
+//                    public void windowClosing(java.awt.event.WindowEvent e) {
+//                        System.exit(0);
+//                    }
+//                });
+//                dialog.setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
-    private javax.swing.JComboBox<String> cmbKelas;
-    private javax.swing.JComboBox<String> cmbLevelJLPT;
-    private javax.swing.JComboBox<String> cmbSpesialisasi;
+    private javax.swing.JComboBox<String> cbKelasDiampu;
+    private javax.swing.JComboBox<String> cbLevelJLPT;
+    private javax.swing.JComboBox<String> cbSpesialisasi;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -285,11 +373,11 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JPanel panelBody;
     private javax.swing.JPanel panelFooter;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JTextField txtIdInstruktur;
+    private javax.swing.JTextField txtNamaInstruktur;
+    private javax.swing.JTextField txtNoTelp;
     // End of variables declaration//GEN-END:variables
 }

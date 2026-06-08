@@ -36,7 +36,7 @@ public class DataStore {
 //        Instruktur
         Instruktur ins1 = new Instruktur("dian_p", "dian123", "Dian Priatna Kusuma, S.PD.", "INS001", "08123...", "Kaiwa", "N2", "Mandiri");
         Instruktur ins2 = new Instruktur("yamada_s", "yamada123", "Yamada Sensei", "INS002", "08199...", "Kanji", "N1", "Reguler");
-        Instruktur ins3 = new Instruktur("farelfwzn", "farel123", "Muhamad Farel Fauzan", "INS003", "08199...", "Budaya JP", "N1", "Reguler");
+        Instruktur ins3 = new Instruktur("zani", "zani123", "Utsukushii Zani", "INS003", "08199...", "Budaya JP", "N1", "Reguler");
         daftarPengguna.add(ins1);
         daftarPengguna.add(ins2);
         daftarPengguna.add(ins3);
@@ -90,19 +90,9 @@ public class DataStore {
         daftarSeleksi.add(new Seleksi("SEL-OLD3", pst5, "Tes Fisik & Kesamaptaan", "01/10/2025", 60, "Tidak Lulus"));
 
 
-        // --- DATA SELEKSI UTAMA / TERAKHIR (Sesuai Tampilan Tabel Kamu) ---
-        // Format: (idSeleksi, objekPeserta, jenisSeleksi, tanggalSeleksi, nilai, statusHasil)
-        
-        // 1. Azril Algiffari (PST001)
         daftarSeleksi.add(new Seleksi("SEL001", pst1, "Seleksi Bahasa Jepang", "01/10/2025", 85, "Lulus"));
-        
-        // 2. Tania Elliyanti (PST002)
         daftarSeleksi.add(new Seleksi("SEL002", pst2, "Seleksi Wawancara User", "01/10/2025", 78, "Lulus"));
-        
-        // 3. Akram Pratama Putra (PST003) - Ini menjadi percobaan ke-2
         daftarSeleksi.add(new Seleksi("SEL003", pst3, "Seleksi Bahasa Jepang", "05/10/2025", 55, "Tidak Lulus"));
-        
-        // 4. Muhamad Farel Fauzan (PST004)
         daftarSeleksi.add(new Seleksi("SEL004", pst4, "Seleksi Kemampuan Kerja", "10/10/2025", 92, "Lulus"));
         
         // 5. PST005 - Ini menjadi percobaan ke-3 (Gugur)
@@ -117,11 +107,9 @@ public class DataStore {
     }
         
         
-    // Fungsi khusus untuk mengambil HANYA instruktur (digunakan untuk ComboBox di form Tambah Peserta)
     public static ArrayList<Instruktur> getHanyaInstruktur() {
         ArrayList<Instruktur> listInstruktur = new ArrayList<>();
         for (Pengguna p : daftarPengguna) {
-            // Cek apakah objek pengguna ini adalah Instruktur
             if (p instanceof Instruktur) {
                 listInstruktur.add((Instruktur) p);
             }
