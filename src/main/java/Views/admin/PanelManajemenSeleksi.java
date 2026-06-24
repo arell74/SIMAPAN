@@ -7,8 +7,11 @@ package Views.admin;
 import DataStore.DataStore;
 import Util.TombolAksiEditor;
 import Util.TombolAksiRenderer;
+import java.awt.Color;
+import java.awt.Font;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -34,7 +37,10 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
     
     private void setupTable() {
         // Styling tabel standar...
-        tabelSeleksi.setRowHeight(40);
+        tabelSeleksi.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
+        tabelSeleksi.getTableHeader().setBackground(new Color(122, 0, 0));
+        tabelSeleksi.getTableHeader().setForeground(Color.WHITE);
+        tabelSeleksi.setRowHeight(36);
         
         // Asumsi kolom "Aksi" berada di indeks ke-9 (Kolom ke-10)
         tabelSeleksi.getColumnModel().getColumn(9).setCellRenderer(new TombolAksiRenderer());
@@ -42,8 +48,14 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
             
             @Override
             public void onDetail(int baris) {
-                // Logika melihat detail riwayat (opsional, mungkin memanggil FormDetailPeserta)
-            }
+                String id = tabelSeleksi.getValueAt(baris, 1).toString();
+                    FormDetailSeleksi form = new FormDetailSeleksi(
+                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelManajemenSeleksi.this),
+                        true,
+                        id
+                    );
+                    form.setVisible(true);
+                }
 
             @Override
             public void onEdit(int baris) {
@@ -65,10 +77,6 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
                     FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, PanelManajemenSeleksi.this);
                     form.setVisible(true); 
                     
-                    // CATATAN PENTING:
-                    // Tidak perlu menaruh loadTableData() di sini.
-                    // Biarkan form pop-up terbuka. Saat user menekan tombol "Simpan" di pop-up,
-                    // form tersebut yang akan memanggil fungsi refresh milik induknya.
                 }
             }
 
@@ -101,7 +109,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
     }
 
     // --- LOGIKA TABEL DENGAN MULTI-FILTER ---
-    private void loadTableData(String keyword) {
+    public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelSeleksi.getModel();
         model.setRowCount(0);
         
@@ -367,6 +375,9 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
             }
         ));
         jScrollPane1.setViewportView(tabelSeleksi);
+        if (tabelSeleksi.getColumnModel().getColumnCount() > 0) {
+            tabelSeleksi.getColumnModel().getColumn(0).setMaxWidth(30);
+        }
 
         panelTabel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 37, 928, 332));
 

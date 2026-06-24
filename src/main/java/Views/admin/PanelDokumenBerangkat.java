@@ -12,6 +12,7 @@ import Util.TombolAksiRenderer;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -32,15 +33,19 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
     }
     
     private void setupComboBoxFilter() {
-        // 1. Hapus opsi bawaan NetBeans (Item 1, Item 2, dst)
         cbFilter.removeAllItems();
-        
-        // 2. Tambahkan opsi sesuai dengan status yang ada di DataStore
-        // Pastikan huruf besar/kecilnya sama persis!
         cbFilter.addItem("Semua");
         cbFilter.addItem("Siap Berangkat");
         cbFilter.addItem("Menunggu Dokumen");
         cbFilter.addItem("Belum Berangkat");
+        
+        cbFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (cbFilter.getSelectedItem() != null) {
+                    loadTableData("");
+                }
+            }
+        });
     }
     
     private void setupTable() {
@@ -56,10 +61,34 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
                 
                 @Override
                 public void onDetail(int baris) {
+                    String id = tabelDokumen.getValueAt(baris, 1).toString();
+                    FormDetailDokumen form = new FormDetailDokumen(
+                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelDokumenBerangkat.this),
+                        true,
+                        id
+                    );
+                    form.setVisible(true);
                 }
 
                 @Override
                 public void onEdit(int baris) {
+                    // 1. Ambil ID Dokumen dari kolom indeks ke-1
+                    String idDokumen = tabelDokumen.getValueAt(baris, 1).toString();
+                    
+                    // 2. Cari objek Dokumen aslinya di DataStore
+                    Dokumen dokumenTerpilih = null;
+                    for (Dokumen dok : DataStore.daftarDokumen) {
+                        if (dok.getIdDokumen().equals(idDokumen)) {
+                            dokumenTerpilih = dok;
+                            break;
+                        }
+                    }
+                    
+                    // 3. Buka pop-up dan bawa "Walkie-Talkie" beserta datanya
+                    if (dokumenTerpilih != null) {
+                        FormInputDokumen form = new FormInputDokumen(PanelDokumenBerangkat.this, dokumenTerpilih);
+                        form.setVisible(true);
+                    }
                 }
 
                 @Override
@@ -70,9 +99,24 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
             })
         );
     }
+    
+    private String kalkulasiKelengkapan(Model.Dokumen dok) {
+        int jumlahLengkap = 0;
+
+        if (dok.getNoPaspor() != null && !dok.getNoPaspor().trim().isEmpty() && !dok.getNoPaspor().equals("-")) jumlahLengkap++;
+        if (dok.getNikKtp() != null && !dok.getNikKtp().trim().isEmpty() && !dok.getNikKtp().equals("-")) jumlahLengkap++;
+        if (dok.getHasilMcu() != null && !dok.getHasilMcu().trim().isEmpty() && !dok.getHasilMcu().equals("-")) jumlahLengkap++;
+        if (dok.getNoVisa() != null && !dok.getNoVisa().trim().isEmpty() && !dok.getNoVisa().equals("-")) jumlahLengkap++;
+
+        if (jumlahLengkap == 4) {
+            return "Lengkap";
+        } else {
+            return jumlahLengkap + "/4 Berkas";
+        }
+    }
 
     // --- LOGIKA MENAMPILKAN & MENCARI DATA ---
-    private void loadTableData(String keyword) {
+    public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelDokumen.getModel();
         model.setRowCount(0); 
 
@@ -99,7 +143,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
                     dok.getPeserta().getIdPeserta(),
                     dok.getPeserta().getNamaLengkap(),
                     dok.getPeserta().getProgram(), // Menampilkan ID Program (Bisa dikembangkan untuk mencari namanya)
-                    dok.getNoPaspor(),
+                    kalkulasiKelengkapan(dok),
                     dok.getTanggalBerangkat(),
                     dok.getPeserta().getStatusKeberangkatan(), // Menarik status dari objek Peserta
                     "" // Kolom Aksi
@@ -112,19 +156,23 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
     }
 
     // --- LOGIKA MENGHITUNG KARTU STATISTIK ---
-    private void loadStatistics() {
-        int totalLulus = DataStore.daftarDokumen.size();
+    public void loadStatistics() {
+        int totalLulus = 0;
         int dokumenLengkap = 0;
         int siapBerangkat = 0;
+        for (Model.Peserta p : DataStore.daftarPeserta) {
+            if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
+                totalLulus++;
+            }
+        }
 
-        for (Dokumen dok : DataStore.daftarDokumen) {
-            // Cek Dokumen Lengkap (Paspor sudah diinput)
-            if (!dok.getNoPaspor().equalsIgnoreCase("Belum diinput") && !dok.getNoPaspor().isEmpty()) {
+        for (Model.Dokumen dok : DataStore.daftarDokumen) {
+            
+            if ("Lengkap".equals(kalkulasiKelengkapan(dok))) {
                 dokumenLengkap++;
             }
-            
-            // Cek Siap Berangkat
-            if (dok.getPeserta().getStatusKeberangkatan().equalsIgnoreCase("Siap Berangkat")) {
+
+            if (dok.getPeserta() != null && "Siap Berangkat".equalsIgnoreCase(dok.getPeserta().getStatusKeberangkatan())) {
                 siapBerangkat++;
             }
         }
@@ -240,6 +288,11 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         jButton3.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         jButton3.setForeground(new java.awt.Color(255, 255, 255));
         jButton3.setText("Input Dokumen");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
         pnlToolbar.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 20, -1, 34));
 
         add(pnlToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 156, 930, 70));
@@ -315,6 +368,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         jScrollPane1.setViewportView(tabelDokumen);
         if (tabelDokumen.getColumnModel().getColumnCount() > 0) {
             tabelDokumen.getColumnModel().getColumn(0).setMaxWidth(50);
+            tabelDokumen.getColumnModel().getColumn(8).setMinWidth(90);
         }
 
         PanelDokumenKeberangkatan.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1, 37, 928, 332));
@@ -344,6 +398,33 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
     private void txtCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCariActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCariActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        int barisTerpilih = tabelDokumen.getSelectedRow();
+        
+        if (barisTerpilih == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Silakan klik/pilih salah satu data peserta di tabel terlebih dahulu!", "Peringatan", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String idDokumen = tabelDokumen.getValueAt(barisTerpilih, 1).toString();
+        
+        Dokumen dokumenTerpilih = null;
+        for (Dokumen dok : DataStore.daftarDokumen) {
+            if (dok.getIdDokumen().equals(idDokumen)) {
+                dokumenTerpilih = dok;
+                break;
+            }
+        }
+        if (dokumenTerpilih != null) {
+            FormInputDokumen form = new FormInputDokumen(PanelDokumenBerangkat.this, dokumenTerpilih);
+            form.setVisible(true);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Aduh, data dokumen tidak ditemukan di memori!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

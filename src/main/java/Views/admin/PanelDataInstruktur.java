@@ -45,14 +45,24 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
                 @Override
                 public void onDetail(int baris) {
                     String id = tabelInstruktur.getValueAt(baris, 1).toString();
-                    JOptionPane.showMessageDialog(PanelDataInstruktur.this, "Menampilkan detail instruktur: " + id);
+                    FormDetailInstruktur form = new FormDetailInstruktur(
+                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelDataInstruktur.this),
+                        true,
+                        id
+                    );
+                    form.setVisible(true);
                 }
 
                 @Override
                 public void onEdit(int baris) {
-                    String id = tabelInstruktur.getValueAt(baris, 1).toString();
-                    // Nanti panggil FormEditInstruktur
-                    JOptionPane.showMessageDialog(PanelDataInstruktur.this, "Edit instruktur: " + id);
+                    String idTarget = tabelInstruktur.getValueAt(baris, 1).toString().trim(); 
+                    FormEditInstruktur formEdit = new FormEditInstruktur(
+                        (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(PanelDataInstruktur.this), 
+                        true, 
+                        idTarget, 
+                        PanelDataInstruktur.this
+                    );
+                    formEdit.setVisible(true);
                 }
 
                 @Override

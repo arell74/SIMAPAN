@@ -11,6 +11,7 @@ import Util.TombolAksiRenderer;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -38,14 +39,19 @@ public class PanelDataProgram extends javax.swing.JPanel {
                 
                 @Override
                 public void onDetail(int baris) {
-                    String id = tabelProgram.getValueAt(baris, 1).toString();
-                    JOptionPane.showMessageDialog(PanelDataProgram.this, "Lihat Detail Program: " + id);
+                    
                 }
 
                 @Override
                 public void onEdit(int baris) {
-                    String id = tabelProgram.getValueAt(baris, 1).toString();
-                    JOptionPane.showMessageDialog(PanelDataProgram.this, "Edit Data Program: " + id);
+                    String idTarget = tabelProgram.getValueAt(baris, 1).toString().trim(); 
+                    FormEditProgram formEdit = new FormEditProgram(
+                        (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(PanelDataProgram.this), 
+                        true, 
+                        idTarget, 
+                        PanelDataProgram.this
+                    );
+                    formEdit.setVisible(true);
                 }
 
                 @Override

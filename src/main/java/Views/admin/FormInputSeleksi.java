@@ -38,7 +38,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         
         // 2. Hitung ini percobaan ke berapa
         int jumlahPercobaan = 0;
-        for (Seleksi s : DataStore.daftarSeleksi) {
+        for (Model.Seleksi s : DataStore.daftarSeleksi) {
             if (s.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
                 jumlahPercobaan++;
             }
@@ -47,15 +47,30 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         int percobaanSekarang = jumlahPercobaan + 1;
         int sisa = 3 - percobaanSekarang; // Asumsi maksimal 3x coba
         
-        lblPercobaan.setText(percobaanSekarang + " dari 3 - Sisa " + Math.max(0, sisa));
+        lblPercobaan.setText(percobaanSekarang + " dari 3 - Sisa " + Math.max(0, sisa + 1)); 
+        // Catatan: sisa saya tambah 1 di Math.max agar saat percobaan ke-3 (terakhir), sisanya tampil 0, bukan -1.
         
-        // 3. Buatkan ID Seleksi Otomatis (Opsional, mempermudah user)
+        // 3. Buatkan ID Seleksi Otomatis
         txtIdSeleksi.setText("SEL" + (DataStore.daftarSeleksi.size() + 1));
         
-        // Matikan tombol simpan jika sudah melebihi batas 3x
+        // 4. VALIDASI BATAS MAKSIMAL PERCOBAAN
         if (percobaanSekarang > 3) {
+            // Matikan tombol simpan
             btnSimpan.setEnabled(false);
             lblPercobaan.setText("Batas Maksimal Percobaan Habis!");
+            lblPercobaan.setForeground(new java.awt.Color(200, 0, 0)); // Ubah teks jadi merah
+            
+            // KUNCI SEMUA INPUTAN AGAR TIDAK BISA DIKLIK/DIKETIK
+            txtTanggalSeleksi.setEnabled(false);
+            txtNilaiSeleksi.setEnabled(false);
+            cbSpesialisasi.setEnabled(false);
+            cbStatusKelulusan.setEnabled(false);
+            
+            // Opsional: Beri warna background abu-abu agar visualnya jelas sedang terkunci
+            txtTanggalSeleksi.setBackground(new java.awt.Color(230, 230, 230));
+            txtNilaiSeleksi.setBackground(new java.awt.Color(230, 230, 230));
+            cbSpesialisasi.setBackground(new java.awt.Color(230, 230, 230));
+            cbStatusKelulusan.setBackground(new java.awt.Color(230, 230, 230));
         }
     }
    
@@ -194,7 +209,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         cbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
-        cbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "manuvaktur", "caregiver" }));
+        cbSpesialisasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "manuvaktur", "caregiver", "pertanian", "pelautan" }));
         cbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
         panelBody.add(cbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, -1, -1));
 
@@ -250,6 +265,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         cbStatusKelulusan.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbStatusKelulusan.setForeground(new java.awt.Color(30, 30, 30));
+        cbStatusKelulusan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "lulus", "mengulang" }));
         cbStatusKelulusan.setPreferredSize(new java.awt.Dimension(480, 34));
         panelBody.add(cbStatusKelulusan, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 290, 230, -1));
 

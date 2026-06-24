@@ -32,6 +32,8 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
      * Creates new form PanelDashboardInstruktur
      */
     private String idInstrukturAktif;
+    private Model.Instruktur instrukturAktif;
+    
     public PanelDashboardInstruktur(String idInstruktur) {
         initComponents();
         
@@ -39,8 +41,8 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         System.out.println("DEBUG: ID Instruktur yang masuk ke panel adalah -> " + idInstruktur);
         
         loadDataDashboard();
-        loadJadwalDinamis();
         setupTablePresensi();
+        loadJadwalDinamis();
     }
     
     private void setupTablePresensi() {
@@ -63,59 +65,81 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         DefaultTableModel model = (DefaultTableModel) tabelPresensi.getModel();
         model.setRowCount(0);
         
+        if (instrukturAktif == null) return; 
+        
+        // 1. Ambil teks dari kolom pencarian, ubah ke huruf kecil semua agar pencarian tidak sensitif huruf besar/kecil
+        String keyword = txtCari.getText().trim().toLowerCase();
+        
         int no = 1;
         for (Model.Peserta p : DataStore.daftarPeserta) {
-            if ("Kelas A".equals(p.getKelas())) { 
-                model.addRow(new Object[]{
-                    no++,
-                    p.getIdPeserta(),
-                    p.getNamaLengkap(),
-                    p.getLevelBahasa(),
-                    "Hadir"
-                });
+            
+            // 2. Filter utama: pastikan ini adalah anak didik dari instruktur yang sedang login
+            if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) { 
+                
+                // 3. Logika Pencarian
+                boolean cocok = true;
+                
+                // Jika kolom pencarian tidak kosong, maka lakukan pengecekan
+                if (!keyword.isEmpty()) {
+                    String id = p.getIdPeserta().toLowerCase();
+                    String nama = p.getNamaLengkap().toLowerCase();
+                    
+                    // Jika teks yang dicari TIDAK ADA di ID dan TIDAK ADA di Nama, lewati data ini
+                    if (!id.contains(keyword) && !nama.contains(keyword)) {
+                        cocok = false;
+                    }
+                }
+                
+                // 4. Masukkan ke tabel jika cocok
+                if (cocok) {
+                    model.addRow(new Object[]{
+                        no++,
+                        p.getIdPeserta(),
+                        p.getNamaLengkap(),
+                        p.getLevelBahasa(),
+                        p.getKehadiranHariIni() 
+                    });
+                }
             }
         }
     }
     
     private void loadDataDashboard() {
-        Model.Instruktur instruktur = null;
-        
+        // Cari instruktur berdasarkan ID/Username
         for (Model.Pengguna pgn : DataStore.daftarPengguna) {
-            // Cek apakah Pengguna yang sedang dibaca ini adalah sebuah Instruktur
             if (pgn instanceof Model.Instruktur) {
-                
-                // Lakukan Casting
                 Model.Instruktur ins = (Model.Instruktur) pgn;
-                
-                // LOGIKA ANTI-ERROR: Cek ID Instruktur atau Username
                 boolean cocokIDInstruktur = ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif);
                 boolean cocokUsername = ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif);
                 
                 if (cocokIDInstruktur || cocokUsername) { 
-                    idInstrukturAktif = ins.getIdInstruktur();
-                    instruktur = ins; // PERBAIKAN: Simpan objek yang ketemu ke variabel utama!
+                    this.idInstrukturAktif = ins.getIdInstruktur();
+                    this.instrukturAktif = ins; // Simpan ke variabel global
                     break;
                 }
             }
         }
 
-        if (instruktur != null) {
+        if (instrukturAktif != null) {
+            // 1. Update Teks Banner & Profil secara DINAMIS
+            lblNamaInstruktur.setText(instrukturAktif.getNamaLengkap());
+            lblSpesialisasi.setText("Instruktur aktif - " + instrukturAktif.getSpesialisasi()); 
             
-            // 1. Update Teks Banner & Profil
-            lblNamaInstruktur.setText(instruktur.getNamaLengkap());
-            lblSpesialisasi.setText("Instruktur aktif - " + instruktur.getSpesialisasi()); // PERBAIKAN: Typo spasi dihapus
+            // Mengambil kelas dan level JLPT dinamis dari model Instruktur
+            String kelas = instrukturAktif.getKelasDiampu() != null ? instrukturAktif.getKelasDiampu() : "Belum Ada Kelas";
+            String level = instrukturAktif.getLevelJlpt() != null ? instrukturAktif.getLevelJlpt() : "-";
+            lblInfoInstruktur.setText(instrukturAktif.getIdInstruktur() + " - KELAS " + kelas.toUpperCase() + " - LEVEL JLPT " + level);
             
-            // Opsional: Jika kelas diampu dan level JLPT ada di model Instruktur, panggil dinamis
-            lblInfoInstruktur.setText(instruktur.getIdInstruktur() + " - KELAS A - LEVEL JLPT N1");
-            
-            // 2. Hitung Statistik (Siswa, Jadwal, Rata-rata)
+            // 2. Hitung Statistik (Siswa, Rata-rata)
             int jumlahSiswa = 0;
             int akumulasiNilai = 0;
             int jumlahNilai = 0;
             
             for (Model.Peserta p : DataStore.daftarPeserta) {
-                if ("Kelas A".equals(p.getKelas())) { 
-                    jumlahSiswa++;
+                
+                if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) { 
+                    
+                    jumlahSiswa++; // Hitung sebagai siswanya instruktur ini
                     
                     for (Model.Seleksi s : DataStore.daftarSeleksi) {
                         if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
@@ -127,15 +151,11 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
             }
             
             lblTotalSiswa.setText(String.valueOf(jumlahSiswa));
-            
             int rataRata = (jumlahNilai > 0) ? (akumulasiNilai / jumlahNilai) : 0;
             lblRataNilai.setText(String.valueOf(rataRata));
             
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd MMMM yyyy", new Locale("id", "ID"));
-            String tglSekarang = sdf.format(new Date());
-            lblTanggalPresensi.setText(tglSekarang);
-            
-            // lblTopDate.setText(tglSekarang);
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id", "ID"));
+            lblTanggalPresensi.setText(sdf.format(new java.util.Date()));
         }
     }
 
@@ -183,6 +203,8 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabelPresensi = new javax.swing.JTable();
+        txtCari = new javax.swing.JTextField();
+        btnCari = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         lblTanggalPresensi = new javax.swing.JLabel();
@@ -207,6 +229,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jPanel18 = new javax.swing.JPanel();
         lblRataNilai = new javax.swing.JLabel();
         jLabel28 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -233,17 +256,43 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
             tabelPresensi.getColumnModel().getColumn(3).setMaxWidth(50);
         }
 
+        txtCari.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtCariKeyReleased(evt);
+            }
+        });
+
+        btnCari.setBackground(new java.awt.Color(102, 102, 102));
+        btnCari.setForeground(new java.awt.Color(255, 255, 255));
+        btnCari.setText("Cari");
+        btnCari.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCariActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(txtCari, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCari, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtCari, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                    .addComponent(btnCari, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 472, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, 430, 330));
@@ -396,7 +445,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jLabel24.setText("Siswa ");
         jPanel16.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
 
-        panelKartu1.add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 15, 90, 70));
+        panelKartu1.add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 10, 90, 70));
 
         jPanel17.setBackground(new java.awt.Color(240, 210, 210));
         jPanel17.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -410,7 +459,7 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jLabel26.setText("Jadwal");
         jPanel17.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
 
-        panelKartu1.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 15, -1, 70));
+        panelKartu1.add(jPanel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 10, -1, 70));
 
         jPanel18.setBackground(new java.awt.Color(240, 210, 210));
         jPanel18.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -424,13 +473,65 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         jLabel28.setText("Rata-rata");
         jPanel18.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
 
-        panelKartu1.add(jPanel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 15, 90, 70));
+        panelKartu1.add(jPanel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 10, 90, 70));
 
         add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 24, 920, -1));
+
+        jButton1.setBackground(new java.awt.Color(122, 0, 0));
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("Simpan");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 550, 110, -1));
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        if (tabelPresensi.isEditing()) {
+            tabelPresensi.getCellEditor().stopCellEditing();
+        }
+
+        DefaultTableModel model = (DefaultTableModel) tabelPresensi.getModel();
+        int jumlahBaris = model.getRowCount();
+        int tersimpan = 0;
+
+        // Looping seluruh baris di tabel
+        for (int i = 0; i < jumlahBaris; i++) {
+            // Kolom 1 adalah ID Peserta, Kolom 4 adalah Status Kehadiran
+            String idPesertaTabel = model.getValueAt(i, 1).toString();
+            String statusKehadiran = model.getValueAt(i, 4).toString();
+
+            // Cari peserta di DataStore dan update kehadirannya
+            for (Model.Peserta p : DataStore.daftarPeserta) {
+                if (p.getIdPeserta().equals(idPesertaTabel)) {
+                    p.setKehadiranHariIni(statusKehadiran);
+                    tersimpan++;
+                    break;
+                }
+            }
+        }
+
+        // Tampilkan pesan sukses
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Berhasil menyimpan presensi untuk " + tersimpan + " siswa hari ini!", 
+            "Simpan Sukses", 
+            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void btnCariActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariActionPerformed
+        loadTabelPresensi();
+    }//GEN-LAST:event_btnCariActionPerformed
+
+    private void txtCariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCariKeyReleased
+        loadTabelPresensi();
+    }//GEN-LAST:event_txtCariKeyReleased
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCari;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel26;
@@ -458,5 +559,6 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
     private javax.swing.JPanel pnlJadwal;
     private javax.swing.JPanel pnlWadahJadwal;
     private javax.swing.JTable tabelPresensi;
+    private javax.swing.JTextField txtCari;
     // End of variables declaration//GEN-END:variables
 }

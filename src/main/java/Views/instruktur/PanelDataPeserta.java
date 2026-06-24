@@ -106,17 +106,14 @@ public class PanelDataPeserta extends javax.swing.JPanel {
 
         for (Peserta p : DataStore.daftarPeserta) {
             
-            // FILTER 1: Pastikan siswa ini diajar oleh instruktur yang sedang login
             if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idInstrukturAktif)) {
                 
-                // FILTER 2: Fitur Pencarian (Berdasarkan ID atau Nama)
                 boolean matchText = keyword.isEmpty() || 
                                     p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
                                     p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
                 
-                if (!matchText) continue; // Lewati jika tidak cocok dengan pencarian
+                if (!matchText) continue;
 
-                // Kalkulasi Rata-rata Individu Siswa
                 int akumulasiIndividu = 0;
                 int jumlahUjian = 0;
                 for (Seleksi s : DataStore.daftarSeleksi) {
@@ -127,10 +124,8 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 }
                 String rataNilaiIndividu = (jumlahUjian > 0) ? String.valueOf(akumulasiIndividu / jumlahUjian) : "-";
 
-                // Dummy Kehadiran (Bisa kamu ganti nanti jika sudah ada modul presensi)
                 String persentaseHadir = "100%"; 
 
-                // Masukkan ke tabel
                 model.addRow(new Object[]{
                     no++,
                     p.getIdPeserta(),
@@ -139,8 +134,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                     rataNilaiIndividu,
                     persentaseHadir,
                     p.getStatusSeleksi(),
-                    p.getStatusPembayaran(), // "Lunas" / "Belum Lunas" sesuai constructor DataStore
-                    "" // Kolom Aksi (Bisa disisipkan tombol 'Detail' nantinya)
+                    p.getStatusPembayaran()
                 });
             }
         }
@@ -242,17 +236,17 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         tabelPeserta.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         tabelPeserta.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "No.", "ID Peserta", "Nama Lengkap", "Level", "Rata Nilai", "Kehadiran", "Seleksi", "Bayar", "Aksi"
+                "No.", "ID Peserta", "Nama Lengkap", "Level", "Rata Nilai", "Kehadiran", "Seleksi", "Bayar"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -313,7 +307,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jLabel12.setText("Siswa ");
         jPanel2.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
 
-        panelKartu1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 15, 90, 70));
+        panelKartu1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 10, 90, 70));
 
         jPanel3.setBackground(new java.awt.Color(240, 210, 210));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -327,7 +321,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jLabel13.setText("Lulus Seleksi");
         jPanel3.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 40, -1, -1));
 
-        panelKartu1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 15, -1, 70));
+        panelKartu1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, -1, 70));
 
         jPanel4.setBackground(new java.awt.Color(240, 210, 210));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -341,7 +335,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jLabel11.setText("Rata Nilai");
         jPanel4.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
 
-        panelKartu1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 15, 90, 70));
+        panelKartu1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 10, 90, 70));
 
         add(panelKartu1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 950, -1));
     }// </editor-fold>//GEN-END:initComponents

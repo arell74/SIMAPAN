@@ -18,6 +18,10 @@ public abstract class Pengguna {
     public String getNamaLengkap() { return namaLengkap; }
     public String getRole() { return role; }
 
+    public void setNamaLengkap(String namaLengkap) {
+        this.namaLengkap = namaLengkap;
+    }
+
     public boolean validasiLogin(String u, String p) {
         return this.username.equals(u) && this.password.equals(p);
     }

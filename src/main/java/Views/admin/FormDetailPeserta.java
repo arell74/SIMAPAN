@@ -24,6 +24,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     /**
      * Creates new form FromEditPeserta
      */
+    private String idPesertaAktif;
     public FormDetailPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
         initComponents();
         setSize(790, 517);
@@ -31,6 +32,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("Form Detail Peserta");
+        this.idPesertaAktif = idPeserta;
         panelRiwayatSeleksi.setLayout(new BoxLayout(panelRiwayatSeleksi, BoxLayout.Y_AXIS));
         
         loadDataIdentitas(idPeserta);
@@ -519,6 +521,11 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         btnSimpan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSimpan.setFocusPainted(false);
         btnSimpan.setPreferredSize(new java.awt.Dimension(116, 34));
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 450, -1, -1));
 
         btnTutup.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -545,6 +552,19 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     private void btnTutupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTutupActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnTutupActionPerformed
+
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        FormEditPeserta formEdit = new FormEditPeserta(
+            this,           
+            true,        
+            idPesertaAktif  
+        );
+        
+        formEdit.setVisible(true);
+        
+        loadDataIdentitas(idPesertaAktif);
+        loadRiwayatSeleksi(idPesertaAktif); 
+    }//GEN-LAST:event_btnSimpanActionPerformed
 
     /**
      * @param args the command line arguments

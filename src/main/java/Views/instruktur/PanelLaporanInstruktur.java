@@ -86,9 +86,9 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
 
         // 1. Amankan ID Asli Instruktur
         String idAsli = idInstrukturAktif;
-        for (Pengguna pgn : DataStore.daftarPengguna) {
-            if (pgn instanceof Instruktur) {
-                Instruktur ins = (Instruktur) pgn;
+        for (Model.Pengguna pgn : DataStore.daftarPengguna) {
+            if (pgn instanceof Model.Instruktur) {
+                Model.Instruktur ins = (Model.Instruktur) pgn;
                 if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif)) || 
                     (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
                     idAsli = ins.getIdInstruktur();
@@ -102,43 +102,55 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
         int akumulasiRataKelas = 0;
         int siswaPerluPerhatian = 0;
         
-        // Asumsi hitungan kehadiran dummy (misal 14x pertemuan)
         int totalPertemuanHadir = 0; 
         int totalPertemuanWajib = 0;
 
         int no = 1;
 
         // 2. Looping Data Peserta
-        for (Peserta p : DataStore.daftarPeserta) {
+        for (Model.Peserta p : DataStore.daftarPeserta) {
             
+            // Filter peserta khusus untuk instruktur ini
             if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idAsli)) {
                 totalSiswa++;
 
                 // === DATA SIMULASI NILAI ===
-                // Kita ambil nilai dasarnya dari nilai Seleksi agar sedikit realistis
-                int baseScore = 75; // Nilai default jika belum ada nilai seleksi
-                for (Seleksi s : DataStore.daftarSeleksi) {
+                int baseScore = 75; 
+                for (Model.Seleksi s : DataStore.daftarSeleksi) {
                     if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
                         baseScore = s.getNilai();
                         break;
                     }
                 }
 
-                // Buat nilai per-bab sedikit bervariasi dari baseScore
                 int nilaiBab4 = baseScore;
-                int nilaiPercakapan = Math.min(100, baseScore + 5); // Maksimal 100
-                int nilaiBab5 = Math.max(0, baseScore - 5);         // Minimal 0
+                int nilaiPercakapan = Math.min(100, baseScore + 5); 
+                int nilaiBab5 = Math.max(0, baseScore - 5);         
                 
                 int rataRataIndividu = (nilaiBab4 + nilaiPercakapan + nilaiBab5) / 3;
 
-                // === DATA SIMULASI KEHADIRAN ===
-                int hadir = 12; // Dummy: Hadir 12 kali
+                // === DATA KEHADIRAN (DISESUAIKAN DENGAN INPUT DASHBOARD) ===
+                // Asumsi: Siswa sudah mengikuti 10x pertemuan dasar + 1 pertemuan hari ini
+                int hadir = 10; 
                 int izin = 0;
                 int alpha = 0;
                 
-                // Variasi dummy: Jika nilainya kecil, anggap dia pernah alpha
+                // Ambil status presensi hari ini
+                String statusHadir = p.getKehadiranHariIni();
+                if (statusHadir != null) {
+                    if (statusHadir.equalsIgnoreCase("Hadir")) {
+                        hadir += 1; // Jika hari ini hadir, tambah ke hadir
+                    } else if (statusHadir.equalsIgnoreCase("Izin") || statusHadir.equalsIgnoreCase("Sakit")) {
+                        izin += 1;  // Sakit dan Izin masuk ke kolom Izin
+                    } else if (statusHadir.equalsIgnoreCase("Alpa")) {
+                        alpha += 1; // Masuk ke kolom Alpha
+                    }
+                }
+                
+                // Variasi dummy tambahan: Jika nilainya kecil, anggap dia sering bolos di masa lalu
                 if (rataRataIndividu < 70) {
-                    hadir = 9; alpha = 3;
+                    hadir -= 2; 
+                    alpha += 2;
                 }
 
                 // Kalkulasi Kartu Statistik
@@ -152,7 +164,7 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
 
                 String status = (rataRataIndividu >= 70) ? "Aman" : "Beresiko";
 
-                // 3. Masukkan ke Tabel (Urutan harus sama dengan kolom di NetBeans)
+                // 3. Masukkan ke Tabel
                 model.addRow(new Object[]{
                     no++,
                     p.getIdPeserta(),
@@ -169,11 +181,13 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
             }
         }
 
+        // 4. Update Kartu Statistik di Header
         if (totalSiswa > 0) {
             lblTotalPeserta.setText(String.valueOf(totalSiswa));
             
             int rataKelas = akumulasiRataKelas / totalSiswa;
-            lblPerluPerhatian.setText(String.valueOf(rataKelas));
+            // PERBAIKAN TYPO: Pastikan nama label ini sesuai dengan label rata-rata kelas di NetBeans Anda
+            lblKehadiran.setText(String.valueOf(rataKelas)); 
             
             lblPerluPerhatian.setText(String.valueOf(siswaPerluPerhatian));
             
@@ -181,7 +195,7 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
             lblKehadiran.setText(persenHadir + " %");
         } else {
             lblTotalPeserta.setText("0");
-            lblPerluPerhatian.setText("0");
+            lblKehadiran.setText("0"); // PERBAIKAN TYPO
             lblPerluPerhatian.setText("0");
             lblKehadiran.setText("0 %");
         }

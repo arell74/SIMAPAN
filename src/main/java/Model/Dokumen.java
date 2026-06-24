@@ -1,31 +1,60 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Model;
 
-/**
- *
- * @author arelssi
- */
 public class Dokumen {
     private String idDokumen;
     private Peserta peserta;
-    private String noPaspor;
     private String tanggalBerangkat;
 
-    public Dokumen(String idDokumen, Peserta peserta, String noPaspor, String tanggalBerangkat) {
+    private String noPaspor;
+    private String filePaspor;
+
+    private String hasilMcu;
+    private String fileMcu;
+    
+    private String noVisa;
+    private String fileVisa;
+
+    private String nikKtp;
+    private String fileKtp;
+
+    public Dokumen(String idDokumen, Peserta peserta, String tanggalBerangkat) {
         this.idDokumen = idDokumen;
         this.peserta = peserta;
-        this.noPaspor = noPaspor;
         this.tanggalBerangkat = tanggalBerangkat;
     }
 
+    // --- Getters ---
     public String getIdDokumen() { return idDokumen; }
     public Peserta getPeserta() { return peserta; }
-    public String getNoPaspor() { return noPaspor; }
     public String getTanggalBerangkat() { return tanggalBerangkat; }
+    
+    public String getNoPaspor() { return noPaspor; }
+    public String getFilePaspor() { return filePaspor; }
+    public String getHasilMcu() { return hasilMcu; }
+    public String getFileMcu() { return fileMcu; }
+    public String getNoVisa() { return noVisa; }
+    public String getFileVisa() { return fileVisa; }
+    public String getNikKtp() { return nikKtp; }
+    public String getFileKtp() { return fileKtp; }
 
-    public void setNoPaspor(String noPaspor) { this.noPaspor = noPaspor; }
-    public void setTanggalBerangkat(String tanggalBerangkat) { this.tanggalBerangkat = tanggalBerangkat; }
+    // --- Setters (Penting untuk Form Input!) ---
+    public void setPaspor(String noPaspor, String filePaspor) {
+        this.noPaspor = noPaspor;
+        this.filePaspor = filePaspor;
+    }
+
+    public void setMcu(String hasilMcu, String fileMcu) {
+        this.hasilMcu = hasilMcu;
+        this.fileMcu = fileMcu;
+    }
+
+    public void setVisa(String noVisa, String fileVisa) {
+        this.noVisa = noVisa;
+        this.fileVisa = fileVisa;
+    }
+
+    public void setKtp(String nikKtp, String fileKtp) {
+        this.nikKtp = nikKtp;
+        this.fileKtp = fileKtp;
+    }
 }

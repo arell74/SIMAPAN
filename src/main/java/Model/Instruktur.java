@@ -18,7 +18,7 @@ public class Instruktur extends Pengguna {
     public Instruktur(String username, String password, String namaLengkap, 
                       String idInstruktur, String noTelp, String spesialisasi, 
                       String levelJlpt, String kelasDiampu) {
-        super(username, password, namaLengkap, "INSTRUKTUR");
+        super(username, idInstruktur, namaLengkap, "INSTRUKTUR");
         this.idInstruktur = idInstruktur;
         this.noTelp = noTelp;
         this.spesialisasi = spesialisasi;
@@ -29,15 +29,35 @@ public class Instruktur extends Pengguna {
     public String getIdInstruktur() { return idInstruktur; }
     public String getSpesialisasi() { return spesialisasi; }
     public String getLevelJlpt() { return levelJlpt; }
-
+    
     public String getNoTelp() {
         return noTelp;
     }
 
+    public void setIdInstruktur(String idInstruktur) {
+        this.idInstruktur = idInstruktur;
+    }
+   
+
     public String getKelasDiampu() {
         return kelasDiampu;
     }
-    
+
+    public void setNoTelp(String noTelp) {
+        this.noTelp = noTelp;
+    }
+
+    public void setSpesialisasi(String spesialisasi) {
+        this.spesialisasi = spesialisasi;
+    }
+
+    public void setLevelJlpt(String levelJlpt) {
+        this.levelJlpt = levelJlpt;
+    }
+
+    public void setKelasDiampu(String kelasDiampu) {
+        this.kelasDiampu = kelasDiampu;
+    }
 
     @Override
     public String getMenuOtoritas() {

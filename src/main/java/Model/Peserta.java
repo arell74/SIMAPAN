@@ -178,4 +178,15 @@ public class Peserta {
         this.kelas = kelas;
     }
     
+    private String kehadiranHariIni = "Hadir"; // Default Hadir
+
+    // Tambahkan getter & setter ini di bawah
+    public String getKehadiranHariIni() {
+        return kehadiranHariIni;
+    }
+
+    public void setKehadiranHariIni(String kehadiranHariIni) {
+        this.kehadiranHariIni = kehadiranHariIni;
+    }
+    
 }

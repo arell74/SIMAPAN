@@ -213,7 +213,7 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
 
         cbLevelJLPT.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbLevelJLPT.setForeground(new java.awt.Color(30, 30, 30));
-        cbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "1", "2", "3", "4", "5" }));
+        cbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "N1", "N2", "N3", "N4", "N5" }));
         cbLevelJLPT.setPreferredSize(new java.awt.Dimension(220, 34));
         panelBody.add(cbLevelJLPT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
 

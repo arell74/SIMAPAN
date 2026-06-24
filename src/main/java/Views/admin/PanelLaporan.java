@@ -140,14 +140,23 @@ public class PanelLaporan extends javax.swing.JPanel {
             }
             int rataNilaiPeserta = (countSeleksi > 0) ? (nilaiTotalPesertaIni / countSeleksi) : 0;
 
-            // 4. MENCARI DOKUMEN & TANGGAL KEBERANGKATAN
-            String noPaspor = "Belum diinput";
+           String noPaspor = "Belum diinput";
             String tglBerangkat = "—";
-            for (Dokumen dok : DataStore.daftarDokumen) {
+            
+            for (Model.Dokumen dok : DataStore.daftarDokumen) {
                 if (dok.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
-                    noPaspor = dok.getNoPaspor();
-                    tglBerangkat = dok.getTanggalBerangkat();
-                    break;
+                    
+                    // Ambil nomor paspor dengan validasi
+                    if (dok.getNoPaspor() != null && !dok.getNoPaspor().trim().isEmpty() && !dok.getNoPaspor().equals("-")) {
+                        noPaspor = dok.getNoPaspor();
+                    }
+                    
+                    // Ambil tanggal berangkat
+                    if (dok.getTanggalBerangkat() != null && !dok.getTanggalBerangkat().trim().isEmpty()) {
+                        tglBerangkat = dok.getTanggalBerangkat();
+                    }
+                    
+                    break; // Berhenti mencari karena dokumen peserta sudah ditemukan
                 }
             }
 
