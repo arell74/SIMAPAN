@@ -80,7 +80,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             boolean match = keyword.isEmpty() || 
                             p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
                             p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
-
+            String namaIns = (p.getInstrukturDamping() != null) ? p.getInstrukturDamping().getNamaLengkap() : "-";
             if (match) {
                 model.addRow(new Object[]{
                     no++,
@@ -89,6 +89,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                     p.getNik(),
                     p.getProgram(),
                     p.getStatusSeleksi(),
+                    namaIns,
                     ""
                 });
             }
@@ -141,6 +142,8 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         jLabel3 = new javax.swing.JLabel();
+        btnEkspor = new javax.swing.JButton();
+        btnImpor = new javax.swing.JButton();
         panelTabel = new javax.swing.JPanel();
         scrollTabel = new javax.swing.JScrollPane();
         tabelPeserta = new javax.swing.JTable();
@@ -209,6 +212,22 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         jLabel3.setText("C");
         jLabel3.setPreferredSize(new java.awt.Dimension(24, 28));
         panelToolbar.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 14, -1, -1));
+
+        btnEkspor.setText("Ekspor");
+        btnEkspor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEksporActionPerformed(evt);
+            }
+        });
+        panelToolbar.add(btnEkspor, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 15, -1, 30));
+
+        btnImpor.setText("Import");
+        btnImpor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImporActionPerformed(evt);
+            }
+        });
+        panelToolbar.add(btnImpor, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 15, -1, 30));
 
         add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -283,8 +302,157 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         loadTableData("");
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Simpan Data Excel");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Files (*.xlsx)", "xlsx"));
+        
+        int userSelection = fileChooser.showSaveDialog(this);
+        
+        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            
+            try (org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+                org.apache.poi.ss.usermodel.Sheet sheet = workbook.createSheet("Data Peserta");
+                
+                org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(0);
+                int excelColIndex = 0;
+                
+                // Looping kolom tabel (kurangi 1 agar kolom 'Aksi' yang isinya tombol tidak ikut terekspor)
+                for (int i = 0; i < tabelPeserta.getColumnCount() - 1; i++) {
+                    org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(excelColIndex++);
+                    cell.setCellValue(tabelPeserta.getColumnName(i));
+                }
+                
+                for (int i = 0; i < tabelPeserta.getRowCount(); i++) {
+                    org.apache.poi.ss.usermodel.Row row = sheet.createRow(i + 1);
+                    excelColIndex = 0;
+                    for (int j = 0; j < tabelPeserta.getColumnCount() - 1; j++) {
+                        org.apache.poi.ss.usermodel.Cell cell = row.createCell(excelColIndex++);
+                        Object value = tabelPeserta.getValueAt(i, j);
+                        cell.setCellValue(value != null ? value.toString() : "");
+                    }
+                }
+
+                java.io.FileOutputStream out = new java.io.FileOutputStream(filePath);
+                workbook.write(out);
+                out.close();
+                
+                javax.swing.JOptionPane.showMessageDialog(this, "Data berhasil diekspor ke Excel!", "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Gagal mengekspor data: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnEksporActionPerformed
+
+    private void btnImporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImporActionPerformed
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+        fileChooser.setDialogTitle("Pilih File Excel untuk Diimpor");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Files (*.xlsx)", "xlsx"));
+        
+        if (fileChooser.showOpenDialog(this) == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File file = fileChooser.getSelectedFile();
+            
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(file);
+                 org.apache.poi.xssf.usermodel.XSSFWorkbook workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(fis)) {
+                 
+                org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheetAt(0);
+                java.util.Iterator<org.apache.poi.ss.usermodel.Row> rowIterator = sheet.iterator();
+                
+                if (rowIterator.hasNext()) {
+                    rowIterator.next(); 
+                }
+                
+                int jumlahBaru = 0;
+                int jumlahUpdate = 0;
+                
+                while (rowIterator.hasNext()) {
+                    org.apache.poi.ss.usermodel.Row row = rowIterator.next();
+                    org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
+                    
+                    // 1. BACA SESUAI URUTAN KOLOM EXCEL HASIL EKSPORMU!
+                    // Col 0: No (Abaikan)
+                    String idPeserta = formatter.formatCellValue(row.getCell(1)).trim(); // Col 1: ID
+                    String nama = formatter.formatCellValue(row.getCell(2)).trim();      // Col 2: Nama
+                    String nik = formatter.formatCellValue(row.getCell(3)).trim();       // Col 3: NIK
+                    String program = formatter.formatCellValue(row.getCell(4)).trim();   // Col 4: Program
+                    String statusSeleksi = formatter.formatCellValue(row.getCell(5)).trim(); // Col 5: Status
+                    
+                    // Lewati baris jika ID kosong atau tidak sengaja membaca header "ID Peserta"
+                    if (idPeserta.isEmpty() || idPeserta.equalsIgnoreCase("ID Peserta")) continue;
+                    
+                    boolean dataSudahAda = false;
+                    
+                    // 2. CEK LOGIKA UPSERT (UPDATE OR INSERT)
+                    for (Model.Peserta p : DataStore.daftarPeserta) {
+                        if (p.getIdPeserta().equals(idPeserta)) {
+                            // JIKA KETEMU: Timpa datanya!
+                            p.setNamaLengkap(nama);
+                            p.setNik(nik);
+                            p.setProgram(program);
+                            p.setStatusSeleksi(statusSeleksi);
+                            
+                            // (Kita tidak menyentuh Instruktur, Tgl Lahir, dll agar data lama tidak hilang)
+                            
+                            dataSudahAda = true;
+                            jumlahUpdate++;
+                            break; 
+                        }
+                    }
+                    
+                   if (!dataSudahAda) {
+                        String defaultUsername = nik;
+                        String defaultPassword = "yuuki" + nik;
+                        Model.Peserta pesertaBaru = new Model.Peserta(
+                            defaultUsername, // 1. Username
+                            defaultPassword, // 2. Password
+                            idPeserta,       // 3. ID Peserta
+                            nik,             // 4. NIK
+                            nama,            // 5. Nama Lengkap
+                            "1999-01-01",    // 6. Tanggal Lahir
+                            "Laki-laki",     // 7. Jenis Kelamin
+                            "-",             // 8. No HP
+                            "-",             // 9. Agama
+                            "-",             // 10. Alamat
+                            program,         // 11. Program
+                            null,            // 12. Instruktur Damping
+                            "-",             // 13. Level Bahasa
+                            "Belum Lunas",   // 14. Status Pembayaran
+                            statusSeleksi,   // 15. Status Seleksi
+                            "Belum Berangkat"// 16. Status Keberangkatan
+                        );
+                        DataStore.daftarPeserta.add(pesertaBaru);
+                        jumlahBaru++;
+                    }
+                }
+                
+                // Refresh Tabel
+                loadTableData("");
+                
+                // Pesan Sukses
+                String pesan = "Import Selesai!\n" +
+                               "- Data Baru Ditambahkan: " + jumlahBaru + "\n" +
+                               "- Data Lama Diperbarui: " + jumlahUpdate;
+                javax.swing.JOptionPane.showMessageDialog(this, pesan, "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Gagal mengimpor data! Pastikan format Excel sesuai. Error: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnImporActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEkspor;
+    private javax.swing.JButton btnImpor;
     private javax.swing.JButton btnTambah;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;

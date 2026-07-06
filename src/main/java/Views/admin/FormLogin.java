@@ -4,6 +4,7 @@
  */
 package Views.admin;
 
+import DataStore.DataStore;
 import com.formdev.flatlaf.ui.FlatDropShadowBorder;
 import java.awt.Color;
 import java.awt.Insets;
@@ -18,6 +19,7 @@ public class FormLogin extends javax.swing.JFrame {
     /**
      * Creates new form FormLogin
      */
+    char defaultEcho;
     public FormLogin() {
         initComponents();
         setSize(1100, 686);
@@ -25,6 +27,7 @@ public class FormLogin extends javax.swing.JFrame {
         setResizable(false);
         setTitle("Sistem Manajemen Pemagangan ke japan - SIMAPAN");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        defaultEcho = txtPassword.getEchoChar();
         
         pnlRight.putClientProperty("JComponent.arc", 25);
 
@@ -89,6 +92,7 @@ public class FormLogin extends javax.swing.JFrame {
         jLabel22 = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
+        btnSpy = new javax.swing.JButton();
         txtPassword = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
         btnLogin = new javax.swing.JButton();
@@ -266,6 +270,14 @@ public class FormLogin extends javax.swing.JFrame {
         jLabel23.setText("Password");
         pnlRight.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 330, -1, -1));
 
+        btnSpy.setText("show");
+        btnSpy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSpyActionPerformed(evt);
+            }
+        });
+        pnlRight.add(btnSpy, new org.netbeans.lib.awtextra.AbsoluteConstraints(355, 370, -1, 30));
+
         txtPassword.setBackground(new java.awt.Color(250, 250, 250));
         pnlRight.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 360, 400, 50));
 
@@ -328,9 +340,10 @@ public class FormLogin extends javax.swing.JFrame {
         }
         boolean loginSukses = false;
 
-        for (Model.Pengguna user : DataStore.DataStore.daftarPengguna) {
+        for (Model.Pengguna user : DataStore.daftarPengguna) {
             if (user.validasiLogin(inputUsername, inputPassword)) {
                 loginSukses = true;
+                DataStore.penggunaLogin = user;
                 javax.swing.JOptionPane.showMessageDialog(this, 
                     "Selamat Datang, " + user.getNamaLengkap() + "!\n" + user.getMenuOtoritas(), 
                     "Login Berhasil", 
@@ -339,14 +352,23 @@ public class FormLogin extends javax.swing.JFrame {
                 if (user.getRole().equals("ADMIN")) {
                     Views.admin.AdminFrame adminDashboard = new Views.admin.AdminFrame(); 
                     adminDashboard.setVisible(true);
+
                 } else if (user.getRole().equals("INSTRUKTUR")) {
                     Model.Instruktur ins = (Model.Instruktur) user;
                     String idYangLogin = ins.getIdInstruktur(); 
-                    
+
                     Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame(idYangLogin);
                     instrukturDashboard.setVisible(true);
-                    
+
+                // --- INI BAGIAN YANG DITAMBAHKAN UNTUK PESERTA ---
+                } else if (user.getRole().equals("PESERTA")) {
+                    Model.Peserta pst = (Model.Peserta) user;
+                    String idPesertaYangLogin = pst.getIdPeserta();
+
+                    Views.peserta.PesertaFrame pesertaDashboard = new Views.peserta.PesertaFrame(idPesertaYangLogin);
+                    pesertaDashboard.setVisible(true);
                 }
+
                 this.dispose();
                 break;
             }
@@ -359,6 +381,16 @@ public class FormLogin extends javax.swing.JFrame {
                 javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnLoginActionPerformed
+
+    private void btnSpyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSpyActionPerformed
+        if (txtPassword.getEchoChar() == (char)0) {
+            txtPassword.setEchoChar(defaultEcho);
+            btnSpy.setText("show");
+        } else {
+            txtPassword.setEchoChar((char)0);
+            btnSpy.setText("hidden");
+        }
+    }//GEN-LAST:event_btnSpyActionPerformed
 
     /**
      * @param args the command line arguments
@@ -398,6 +430,7 @@ public class FormLogin extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel bgImg;
     private javax.swing.JButton btnLogin;
+    private javax.swing.JButton btnSpy;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

@@ -15,10 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
- * Form Detail Instruktur.
- * Menampilkan data identitas, keahlian/kelas, status, serta daftar peserta
- * yang sedang dibimbing oleh instruktur terkait.
- *
+ * Form Detail Instruktur
  * @author arelssi
  */
 public class FormDetailInstruktur extends javax.swing.JFrame {
@@ -38,11 +35,22 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
         setTitle("Form Detail Instruktur");
         panelPesertaBimbingan.setLayout(new BoxLayout(panelPesertaBimbingan, BoxLayout.Y_AXIS));
 
-        loadDataIdentitas(idInstruktur);
+        boolean berhasil = loadDataIdentitas(idInstruktur);
+        if (!berhasil) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Data instruktur dengan ID \"" + idInstruktur + "\" tidak ditemukan.",
+                    "Data Tidak Ditemukan",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            btnSimpan.setEnabled(false);
+            btnTambahJadwal.setEnabled(false);
+        }
+
         loadPesertaBimbingan(idInstruktur);
     }
 
-    private void loadDataIdentitas(String idInstruktur) {
+    private boolean loadDataIdentitas(String idInstruktur) {
         Instruktur insAktif = null;
         for (Instruktur ins : DataStore.getHanyaInstruktur()) {
             if (ins.getIdInstruktur().equals(idInstruktur)) {
@@ -51,37 +59,51 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
             }
         }
 
-        if (insAktif != null) {
-            lblNamaHeader.setText(insAktif.getNamaLengkap());
-            lblIdHeader.setText(insAktif.getIdInstruktur() + " · " + insAktif.getSpesialisasi() + " · Level " + insAktif.getLevelJlpt());
-
-            lblIdInstruktur.setText(insAktif.getIdInstruktur());
-            lblUsername.setText(insAktif.getUsername());
-            lblNoTelp.setText(insAktif.getNoTelp());
-            lblRole.setText(insAktif.getRole());
-            lblHakAkses.setText("<html><div style='width:460px;'>" + insAktif.getMenuOtoritas() + "</div></html>");
-
-            lblSpesialisasi.setText(insAktif.getSpesialisasi());
-            lblLevelJlpt.setText(insAktif.getLevelJlpt());
-            lblKelasDiampu.setText(insAktif.getKelasDiampu());
-
-            int jumlahJadwal = 0;
-            for (Jadwal jdw : DataStore.daftarJadwal) {
-                if (jdw.getIdInstruktur().equals(idInstruktur)) {
-                    jumlahJadwal++;
-                }
-            }
-            lblJumlahJadwal.setText(jumlahJadwal + " Sesi Terjadwal");
-
-            int jumlahPeserta = 0;
-            for (Peserta p : DataStore.daftarPeserta) {
-                if (p.getInstrukturDamping() != null
-                        && p.getInstrukturDamping().getIdInstruktur().equals(idInstruktur)) {
-                    jumlahPeserta++;
-                }
-            }
-            lblJumlahPeserta.setText(jumlahPeserta + " Peserta");
+        if (insAktif == null) {
+            return false;
         }
+
+        lblNamaHeader.setText(insAktif.getNamaLengkap());
+        lblIdHeader.setText(insAktif.getIdInstruktur() + " · " + insAktif.getSpesialisasi() + " · Level " + insAktif.getLevelJlpt());
+
+        lblIdInstruktur.setText(insAktif.getIdInstruktur());
+        lblUsername.setText(insAktif.getUsername());
+        lblNoTelp.setText(insAktif.getNoTelp());
+        lblRole.setText(insAktif.getRole());
+        lblHakAkses.setText("<html><div style='width:460px;'>" + insAktif.getMenuOtoritas() + "</div></html>");
+
+        lblSpesialisasi.setText(insAktif.getSpesialisasi());
+        lblLevelJlpt.setText(insAktif.getLevelJlpt());
+        lblKelasDiampu.setText(insAktif.getKelasDiampu());
+
+        int jumlahJadwal = 0;
+        for (Jadwal jdw : DataStore.daftarJadwal) {
+            if (jdw.getIdInstruktur().equals(idInstruktur)) {
+                jumlahJadwal++;
+            }
+        }
+        lblJumlahJadwal.setText(jumlahJadwal + " Sesi Terjadwal");
+
+        int jumlahPeserta = 0;
+        for (Peserta p : DataStore.daftarPeserta) {
+            if (p.getInstrukturDamping() != null
+                    && p.getInstrukturDamping().getIdInstruktur().equals(idInstruktur)) {
+                jumlahPeserta++;
+            }
+        }
+        lblJumlahPeserta.setText(jumlahPeserta + " Peserta");
+
+        if (jumlahJadwal > 0) {
+            lblStatusAktif.setText("Aktif Mengajar");
+            lblStatusAktif.setForeground(new Color(0, 122, 0));
+            panelBadgeStatus.setBackground(new Color(210, 255, 210));
+        } else {
+            lblStatusAktif.setText("Belum Ada Jadwal");
+            lblStatusAktif.setForeground(new Color(160, 120, 0));
+            panelBadgeStatus.setBackground(new Color(255, 245, 210));
+        }
+
+        return true;
     }
 
     private void loadPesertaBimbingan(String idInstruktur) {
@@ -154,6 +176,98 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
         panelPesertaBimbingan.repaint();
     }
 
+
+    private void tampilkanDialogTambahJadwal() {
+        javax.swing.JDialog dialog = new javax.swing.JDialog(this, "Tambah Jadwal Mengajar", true);
+        dialog.setSize(350, 320);
+        dialog.setLocationRelativeTo(this);
+
+        javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridLayout(6, 2, 10, 10));
+        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Form Input
+        javax.swing.JComboBox<String> cbHari = new javax.swing.JComboBox<>(new String[]{"Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"});
+        javax.swing.JTextField txtJam = new javax.swing.JTextField("08:00");
+        javax.swing.JTextField txtMateri = new javax.swing.JTextField();
+        javax.swing.JComboBox<String> cbKelas = new javax.swing.JComboBox<>(new String[]{"Kelas A", "Kelas B", "Mandiri"});
+        javax.swing.JTextField txtDurasi = new javax.swing.JTextField("120");
+
+        panel.add(new javax.swing.JLabel("Hari:")); panel.add(cbHari);
+        panel.add(new javax.swing.JLabel("Jam (HH:mm):")); panel.add(txtJam);
+        panel.add(new javax.swing.JLabel("Materi:")); panel.add(txtMateri);
+        panel.add(new javax.swing.JLabel("Kelas:")); panel.add(cbKelas);
+        panel.add(new javax.swing.JLabel("Durasi (menit):")); panel.add(txtDurasi);
+
+        javax.swing.JButton btnSimpanJadwal = new javax.swing.JButton("Simpan");
+        btnSimpanJadwal.setBackground(new java.awt.Color(122, 0, 0));
+        btnSimpanJadwal.setForeground(java.awt.Color.WHITE);
+        panel.add(new javax.swing.JLabel()); // Spacer
+        panel.add(btnSimpanJadwal);
+
+        dialog.add(panel);
+
+        btnSimpanJadwal.addActionListener(e -> {
+            // Validasi input dasar sebelum diproses, dengan pesan spesifik
+            // per jenis kesalahan (bukan satu pesan generik untuk semua error).
+            String materi = txtMateri.getText() == null ? "" : txtMateri.getText().trim();
+            if (materi.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Materi tidak boleh kosong!", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!txtJam.getText().matches("^([01]\\d|2[0-3]):[0-5]\\d$")) {
+                JOptionPane.showMessageDialog(dialog, "Format jam harus HH:mm, contoh: 08:00", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int durasi;
+            try {
+                durasi = Integer.parseInt(txtDurasi.getText().trim());
+                if (durasi <= 0) {
+                    JOptionPane.showMessageDialog(dialog, "Durasi harus lebih besar dari 0 menit.", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(dialog, "Durasi harus berupa angka (menit).", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                String idJadwal = "JDW" + System.currentTimeMillis();
+                Jadwal jBaru = new Jadwal(
+                        idJadwal,
+                        this.idInstrukturAktif, // Menggunakan ID yang sedang dibuka
+                        cbHari.getSelectedItem().toString(),
+                        txtJam.getText(),
+                        materi,
+                        cbKelas.getSelectedItem().toString(),
+                        durasi,
+                        "Belum Dimulai"
+                );
+
+                DataStore.daftarJadwal.add(jBaru);
+
+                // Refresh tampilan label jadwal & badge status di form utama
+                loadDataIdentitas(this.idInstrukturAktif);
+
+                JOptionPane.showMessageDialog(dialog, "Jadwal berhasil ditambahkan!");
+                dialog.dispose();
+            } catch (Exception ex) {
+                // Exception di luar dugaan (bukan kesalahan input yang sudah
+                // divalidasi di atas) tetap ditangkap agar aplikasi tidak crash,
+                // namun pesannya tetap ditampilkan agar mudah di-debug.
+                JOptionPane.showMessageDialog(
+                        dialog,
+                        "Gagal menyimpan jadwal: " + ex.getMessage(),
+                        "Terjadi Kesalahan",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
+
+        dialog.setVisible(true);
+    }
+
     private FormDetailInstruktur() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
@@ -162,6 +276,10 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
+     *
+     * CATATAN REVISI: komponen btnTambahJadwal ditambahkan secara manual
+     * karena sebelumnya tidak pernah di-generate/ditambahkan ke form,
+     * sehingga fitur tambah jadwal tidak bisa diakses dari UI.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -202,6 +320,7 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
         lblJudulPeserta = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         panelPesertaBimbingan = new javax.swing.JPanel();
+        btnTambahJadwal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
         btnTutup = new javax.swing.JButton();
 
@@ -401,7 +520,7 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
 
         panelBadgeStatus.setBackground(new java.awt.Color(210, 255, 210));
         panelBadgeStatus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(220, 220, 220)));
-        panelBadgeStatus.setPreferredSize(new java.awt.Dimension(104, 22));
+        panelBadgeStatus.setPreferredSize(new java.awt.Dimension(140, 22));
         panelBadgeStatus.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblStatusAktif.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
@@ -424,6 +543,22 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
         jScrollPane1.setViewportView(panelPesertaBimbingan);
 
         panelBody.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 30, 290, 310));
+
+        // ==== KOMPONEN BARU: tombol Tambah Jadwal ====
+        btnTambahJadwal.setBackground(new java.awt.Color(0, 90, 160));
+        btnTambahJadwal.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+        btnTambahJadwal.setForeground(new java.awt.Color(255, 255, 255));
+        btnTambahJadwal.setText("+ Tambah Jadwal");
+        btnTambahJadwal.setBorderPainted(false);
+        btnTambahJadwal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnTambahJadwal.setFocusPainted(false);
+        btnTambahJadwal.setPreferredSize(new java.awt.Dimension(140, 22));
+        btnTambahJadwal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahJadwalActionPerformed(evt);
+            }
+        });
+        panelBody.add(btnTambahJadwal, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 320, 140, -1));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, 790, -1));
 
@@ -463,6 +598,10 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnTutupHeaderActionPerformed
 
+    private void btnTambahJadwalActionPerformed(java.awt.event.ActionEvent evt) {
+        tampilkanDialogTambahJadwal();
+    }
+
     private void btnTutupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTutupActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnTutupActionPerformed
@@ -470,7 +609,13 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
         // TODO: FormEditInstruktur saat ini belum menerima parameter idInstruktur.
         // Setelah FormEditInstruktur dilengkapi constructor(parent, modal, idInstruktur),
-        // ganti baris di bawah ini agar mengoper idInstrukturAktif supaya data ter-prefill.
+        // ganti baris di bawah ini menjadi, misalnya:
+        //
+        //   FormEditInstruktur formEdit = new FormEditInstruktur(this, true, idInstrukturAktif);
+        //   formEdit.setVisible(true);
+        //   this.dispose();
+        //
+        // supaya data ter-prefill dan form ini otomatis tertutup setelah form edit dibuka.
         JOptionPane.showMessageDialog(this, "Membuka form edit untuk instruktur: " + idInstrukturAktif);
         this.dispose();
     }//GEN-LAST:event_btnSimpanActionPerformed
@@ -509,6 +654,7 @@ public class FormDetailInstruktur extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSimpan;
+    private javax.swing.JButton btnTambahJadwal;
     private javax.swing.JButton btnTutup;
     private javax.swing.JButton btnTutupHeader;
     private javax.swing.JScrollPane jScrollPane1;

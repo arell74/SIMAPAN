@@ -25,6 +25,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
      * Creates new form FromEditPeserta
      */
     private String idPesertaAktif;
+    
     public FormDetailPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
         initComponents();
         setSize(790, 517);
@@ -49,6 +50,10 @@ public class FormDetailPeserta extends javax.swing.JFrame {
         }
 
         if (pesertaAktif != null) {
+            String namaInstruktur = (pesertaAktif.getInstrukturDamping() != null) 
+                        ? pesertaAktif.getInstrukturDamping().getNamaLengkap() 
+                        : "Belum ditentukan";
+            
             lblNamaHeader.setText(pesertaAktif.getNamaLengkap());
             lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · Terdaftar sejak 01 Oktober 2025"); 
 
@@ -59,8 +64,9 @@ public class FormDetailPeserta extends javax.swing.JFrame {
             lblNoHp.setText(pesertaAktif.getNoHp());
             lblLevelBahasa.setText(pesertaAktif.getLevelBahasa());
             lblAlamat.setText(pesertaAktif.getAlamat());
-            
-            lblInstruktur.setText(pesertaAktif.getInstrukturDamping().getNamaLengkap());
+//            
+//            lblInstruktur.setText(pesertaAktif.getInstrukturDamping().getNamaLengkap());
+            lblInstruktur.setText(namaInstruktur);
 
             for (Program prg : DataStore.daftarProgram) {
                 if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {

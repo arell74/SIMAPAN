@@ -95,7 +95,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         jLabel5 = new javax.swing.JLabel();
         txtIdSeleksi = new javax.swing.JTextField();
         txtNilaiSeleksi = new javax.swing.JTextField();
-        txtTanggalSeleksi = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         cbSpesialisasi = new javax.swing.JComboBox<>();
@@ -114,6 +113,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         cbStatusKelulusan = new javax.swing.JComboBox<>();
         jLabel19 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
+        txtTanggalSeleksi = new com.toedter.calendar.JDateChooser();
         panelFooter = new javax.swing.JPanel();
         jSeparator3 = new javax.swing.JSeparator();
         btnBatal = new javax.swing.JButton();
@@ -190,11 +190,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         });
         panelBody.add(txtNilaiSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, 220, -1));
 
-        txtTanggalSeleksi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
-        txtTanggalSeleksi.setForeground(new java.awt.Color(30, 30, 30));
-        txtTanggalSeleksi.setPreferredSize(new java.awt.Dimension(230, 34));
-        panelBody.add(txtTanggalSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 127, -1, -1));
-
         jLabel8.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(30, 30, 30));
         jLabel8.setText("Bidang");
@@ -265,7 +260,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         cbStatusKelulusan.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         cbStatusKelulusan.setForeground(new java.awt.Color(30, 30, 30));
-        cbStatusKelulusan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "lulus", "mengulang" }));
+        cbStatusKelulusan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Lulus", "Mengulang", "Gugur Permanen" }));
         cbStatusKelulusan.setPreferredSize(new java.awt.Dimension(480, 34));
         panelBody.add(cbStatusKelulusan, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 290, 230, -1));
 
@@ -280,6 +275,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         jLabel20.setText("Skala 0 sampai 100. Peserta dinyatakan lulus jika ");
         jLabel20.setPreferredSize(new java.awt.Dimension(160, 14));
         panelBody.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 330, 420, -1));
+        panelBody.add(txtTanggalSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, 230, 30));
 
         getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, -1, -1));
 
@@ -333,49 +329,47 @@ public class FormInputSeleksi extends javax.swing.JDialog {
                 cbStatusKelulusan.setSelectedItem("Mengulang");
             }
         } catch (NumberFormatException e) {
-            // Biarkan saja jika yang diketik bukan angka/masih kosong
+            
         }
     }//GEN-LAST:event_txtNilaiSeleksiKeyReleased
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        if (txtTanggalSeleksi.getText().trim().isEmpty() || txtNilaiSeleksi.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Tanggal dan Nilai tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        
+        if (txtTanggalSeleksi.getDate() == null || txtNilaiSeleksi.getText().trim().isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Tanggal dan Nilai tidak boleh kosong!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            // Validasi Nilai harus berupa angka 0-100
-            int nilai = Integer.parseInt(txtNilaiSeleksi.getText());
+            int nilai = Integer.parseInt(txtNilaiSeleksi.getText().trim());
             if (nilai < 0 || nilai > 100) {
-                JOptionPane.showMessageDialog(this, "Nilai seleksi harus berada di antara 0 sampai 100!", "Error", JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Nilai seleksi harus berada di antara 0 sampai 100!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Ambil data dari form
+            // Ambil data teks standar dari form
             String idSel = txtIdSeleksi.getText();
-            String tanggal = txtTanggalSeleksi.getText();
             String jenis = cbSpesialisasi.getSelectedItem().toString();
             String statusHasil = cbStatusKelulusan.getSelectedItem().toString();
 
-            // BUNGKUS JADI OBJEK BARU & SIMPAN KE DATASTORE
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            String tanggal = sdf.format(txtTanggalSeleksi.getDate());
             Seleksi seleksiBaru = new Seleksi(idSel, pesertaAktif, jenis, tanggal, nilai, statusHasil);
             DataStore.daftarSeleksi.add(seleksiBaru);
 
-            // LOGIKA BISNIS: Update status peserta jika Lulus / Gugur Permanen
             if (statusHasil.equals("Lulus")) {
                 pesertaAktif.setStatusSeleksi("Lulus");
-                // Jika ingin langsung mengaitkan ke halaman dokumen:
                 pesertaAktif.setStatusKeberangkatan("Menunggu Dokumen"); 
             } else if (statusHasil.equals("Gugur Permanen")) {
                 pesertaAktif.setStatusSeleksi("Gugur");
                 pesertaAktif.setStatusKeberangkatan("Dibatalkan");
             }
 
-            JOptionPane.showMessageDialog(this, "Hasil seleksi berhasil disimpan!");
-            this.dispose(); // Tutup form
+            javax.swing.JOptionPane.showMessageDialog(this, "Hasil seleksi berhasil disimpan!");
+            this.dispose();
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Input Nilai harus berupa angka (bilangan bulat)!", "Error Input", JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Input Nilai harus berupa angka (bilangan bulat)!", "Error Input", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSimpanActionPerformed
 
@@ -422,6 +416,6 @@ public class FormInputSeleksi extends javax.swing.JDialog {
     private javax.swing.JPanel panelHeader;
     private javax.swing.JTextField txtIdSeleksi;
     private javax.swing.JTextField txtNilaiSeleksi;
-    private javax.swing.JTextField txtTanggalSeleksi;
+    private com.toedter.calendar.JDateChooser txtTanggalSeleksi;
     // End of variables declaration//GEN-END:variables
 }

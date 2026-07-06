@@ -4,10 +4,13 @@
  */
 package Views.admin;
 
+import DataStore.DataStore;
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import static org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory.model;
+import Model.Pengguna;
 
 /**
  *
@@ -55,6 +58,127 @@ public class AdminFrame extends javax.swing.JFrame {
             lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", 
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
             showPanel(new PanelDashboardAdmin());
+            tampilkanSapaanAdmin();
+    }
+    
+    private void tampilkanSapaanAdmin() {
+        Model.Pengguna adminAktif = null;
+        for (Model.Pengguna p : DataStore.daftarPengguna) {
+            if (p.getRole().equalsIgnoreCase("Admin LPK") || p.getRole().equalsIgnoreCase("ADMIN")) {
+                adminAktif = p;
+                break;
+            }
+        }
+
+        if (adminAktif != null) {
+            lblHalamanSub.setText("Selamat datang, " + adminAktif.getNamaLengkap());
+        }
+    }
+    
+    private void tampilkanDialogProfil() {
+        Model.Pengguna adminAktif = null;
+        for (Model.Pengguna p : DataStore.daftarPengguna) {
+            if (p.getRole().equalsIgnoreCase("Admin LPK") || p.getRole().equalsIgnoreCase("ADMIN")) {
+                adminAktif = p;
+                break;
+            }
+        }
+
+        if (adminAktif == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Data Admin tidak ditemukan di sistem!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        javax.swing.JDialog dialog = new javax.swing.JDialog((java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), "Profil Pengguna", true);
+        dialog.setSize(380, 260); 
+        dialog.setLocationRelativeTo(this); 
+        dialog.setResizable(false);
+
+        javax.swing.JPanel panel = new javax.swing.JPanel();
+        panel.setLayout(new java.awt.GridLayout(5, 2, 10, 15)); 
+        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        javax.swing.JLabel lblNama = new javax.swing.JLabel("Nama Lengkap:");
+        javax.swing.JTextField txtNama = new javax.swing.JTextField(adminAktif.getNamaLengkap());
+
+        javax.swing.JLabel lblUser = new javax.swing.JLabel("Username:");
+        javax.swing.JTextField txtUser = new javax.swing.JTextField(adminAktif.getUsername());
+
+        // Komponen Baris 3: Role (TETAP TERKUNCI / READ-ONLY)
+        javax.swing.JLabel lblRole = new javax.swing.JLabel("Role Pengguna:");
+        javax.swing.JTextField txtRole = new javax.swing.JTextField(adminAktif.getRole());
+        txtRole.setEditable(false); 
+        txtRole.setBackground(new java.awt.Color(240, 240, 240));
+        javax.swing.JLabel lblPass = new javax.swing.JLabel("Password:");
+        
+        javax.swing.JPanel panelPass = new javax.swing.JPanel(new java.awt.BorderLayout());
+        javax.swing.JPasswordField txtPass = new javax.swing.JPasswordField(adminAktif.getPassword());
+        javax.swing.JCheckBox chkShowPass = new javax.swing.JCheckBox("👁");
+        chkShowPass.setFocusPainted(false); 
+        
+        panelPass.add(txtPass, java.awt.BorderLayout.CENTER);
+        panelPass.add(chkShowPass, java.awt.BorderLayout.EAST);
+
+        chkShowPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (chkShowPass.isSelected()) {
+                    txtPass.setEchoChar((char) 0);
+                } else {
+                    txtPass.setEchoChar('•'); 
+                }
+            }
+        });
+        
+        javax.swing.JButton btnBatal = new javax.swing.JButton("Batal");
+        javax.swing.JButton btnSimpan = new javax.swing.JButton("Simpan");
+        btnSimpan.setBackground(new java.awt.Color(122, 0, 0)); 
+        btnSimpan.setForeground(java.awt.Color.WHITE);
+
+        panel.add(lblNama);
+        panel.add(txtNama);
+        panel.add(lblUser); 
+        panel.add(txtUser);
+        panel.add(lblRole);
+        panel.add(txtRole);
+        panel.add(lblPass);
+        panel.add(panelPass);
+        panel.add(btnBatal);
+        panel.add(btnSimpan);
+
+        dialog.add(panel);
+
+        final Model.Pengguna adminFinal = adminAktif; 
+        
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dialog.dispose(); 
+            }
+        });
+
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String namaBaru = txtNama.getText().trim();
+                String userBaru = txtUser.getText().trim();
+                String passBaru = new String(txtPass.getPassword());
+
+                if (namaBaru.isEmpty() || userBaru.isEmpty() || passBaru.isEmpty()) {
+                    javax.swing.JOptionPane.showMessageDialog(dialog, "Semua kolom wajib diisi!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Update data objek di memori
+                adminFinal.setNamaLengkap(namaBaru);
+                adminFinal.setUsername(userBaru); 
+                adminFinal.setPassword(passBaru);
+
+                javax.swing.JOptionPane.showMessageDialog(dialog, "Profil berhasil diperbarui!", "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+
+                btnProfile.setText(namaBaru.substring(0, 1).toUpperCase());
+            }
+        });
+
+        dialog.setVisible(true);
     }
 
     /**
@@ -89,8 +213,7 @@ public class AdminFrame extends javax.swing.JFrame {
         lblHalamanSub = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
+        btnProfile = new javax.swing.JButton();
         mainContent = new javax.swing.JPanel();
         panelKartu1 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
@@ -333,29 +456,14 @@ public class AdminFrame extends javax.swing.JFrame {
         jLabel9.setPreferredSize(new java.awt.Dimension(160, 16));
         panelHeadr.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 30, -1, -1));
 
-        jPanel1.setBackground(new java.awt.Color(255, 235, 235));
-
-        jLabel10.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15)); // NOI18N
-        jLabel10.setText("A");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(jLabel10)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(13, Short.MAX_VALUE)
-                .addComponent(jLabel10)
-                .addContainerGap())
-        );
-
-        panelHeadr.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 10, 40, 40));
+        btnProfile.setBackground(new java.awt.Color(255, 220, 220));
+        btnProfile.setText("A");
+        btnProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProfileActionPerformed(evt);
+            }
+        });
+        panelHeadr.add(btnProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(867, 10, 50, 40));
 
         mainContent.setBackground(new java.awt.Color(245, 245, 245));
         mainContent.setName("mainContent"); // NOI18N
@@ -626,7 +734,6 @@ public class AdminFrame extends javax.swing.JFrame {
 
             FormLogin formLogin = new FormLogin();
             formLogin.setVisible(true);
-
             this.dispose();
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
@@ -651,6 +758,10 @@ public class AdminFrame extends javax.swing.JFrame {
         FormTambahPeserta form = new FormTambahPeserta(this, true);
         form.setVisible(true);
     }//GEN-LAST:event_btnTambahPesertaActionPerformed
+
+    private void btnProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProfileActionPerformed
+        tampilkanDialogProfil();
+    }//GEN-LAST:event_btnProfileActionPerformed
 
     /**
      * @param args the command line arguments
@@ -696,10 +807,10 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
+    private javax.swing.JButton btnProfile;
     private javax.swing.JButton btnProgram;
     private javax.swing.JButton btnTambahPeserta;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -719,7 +830,6 @@ public class AdminFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;

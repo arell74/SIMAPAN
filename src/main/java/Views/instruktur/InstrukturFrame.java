@@ -4,6 +4,7 @@
  */
 package Views.instruktur;
 
+import DataStore.DataStore;
 import Views.admin.FormLogin;
 import Views.admin.FormTambahPeserta;
 import java.awt.Color;
@@ -33,7 +34,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         private Color foregroundDefault = new Color(255,210,210);
 
         private void setActiveButton(JButton activeBtn) {
-        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnManajemenSeleksi, btnLihatLaporan};
+        JButton[] sidebarButtons = {btnDashboard, btnPeserta, btnInstruktur, btnManajemenSeleksi, btnInputMateri};
 
         for (JButton btn : sidebarButtons) {
             btn.setBackground(colorDefault);
@@ -61,6 +62,127 @@ public class InstrukturFrame extends javax.swing.JFrame {
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
             showPanel(new Views.instruktur.PanelDashboardInstruktur(this.idInstruktur));
     }
+    
+    private void tampilkanDialogProfilInstruktur(Model.Pengguna instrukturAktif) {
+        
+        if (instrukturAktif == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Data Instruktur login tidak valid!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // --- JURUS DOWNCASTING DIMULAI DI SINI ---
+        // Kita ubah (cast) wujud Pengguna menjadi Instruktur agar noTelp bisa diakses
+        Model.Instruktur dataInstruktur = null;
+        
+        if (instrukturAktif instanceof Model.Instruktur) {
+            dataInstruktur = (Model.Instruktur) instrukturAktif;
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Akses ditolak! Objek ini bukan Instruktur.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        // -----------------------------------------
+
+        // 1. Membuat Jendela Pop-up Murni 
+        javax.swing.JDialog dialog = new javax.swing.JDialog((java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), "Profil Instruktur", true);
+        dialog.setSize(380, 300); 
+        dialog.setLocationRelativeTo(this); 
+        dialog.setResizable(false);
+
+        // 2. Menyiapkan Grid Layout
+        javax.swing.JPanel panel = new javax.swing.JPanel();
+        panel.setLayout(new java.awt.GridLayout(6, 2, 10, 15)); 
+        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // 3. Meracik Komponen Inputan (Sekarang pakai variabel 'dataInstruktur')
+        javax.swing.JLabel lblNama = new javax.swing.JLabel("Nama Lengkap:");
+        javax.swing.JTextField txtNama = new javax.swing.JTextField(dataInstruktur.getNamaLengkap());
+
+        javax.swing.JLabel lblUser = new javax.swing.JLabel("Username:");
+        javax.swing.JTextField txtUser = new javax.swing.JTextField(dataInstruktur.getUsername());
+
+        // MENGAMBIL NO TELP DARI OBJEK INSTRUKTUR
+        javax.swing.JLabel lblNoHp = new javax.swing.JLabel("No. Telp / WhatsApp:");
+        javax.swing.JTextField txtNoHp = new javax.swing.JTextField(dataInstruktur.getNoTelp());
+
+        javax.swing.JLabel lblRole = new javax.swing.JLabel("Role Pengguna:");
+        javax.swing.JTextField txtRole = new javax.swing.JTextField(dataInstruktur.getRole());
+        txtRole.setEditable(false); 
+        txtRole.setBackground(new java.awt.Color(240, 240, 240));
+
+        javax.swing.JLabel lblPass = new javax.swing.JLabel("Password:");
+        javax.swing.JPanel panelPass = new javax.swing.JPanel(new java.awt.BorderLayout());
+        javax.swing.JPasswordField txtPass = new javax.swing.JPasswordField(dataInstruktur.getPassword());
+        javax.swing.JCheckBox chkShowPass = new javax.swing.JCheckBox("👁");
+        chkShowPass.setFocusPainted(false);
+        
+        panelPass.add(txtPass, java.awt.BorderLayout.CENTER);
+        panelPass.add(chkShowPass, java.awt.BorderLayout.EAST);
+
+        chkShowPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (chkShowPass.isSelected()) {
+                    txtPass.setEchoChar((char) 0); 
+                } else {
+                    txtPass.setEchoChar('•'); 
+                }
+            }
+        });
+
+        // Tombol Aksi
+        javax.swing.JButton btnBatal = new javax.swing.JButton("Batal");
+        javax.swing.JButton btnSimpan = new javax.swing.JButton("Simpan");
+        btnSimpan.setBackground(new java.awt.Color(122, 0, 0)); 
+        btnSimpan.setForeground(java.awt.Color.WHITE);
+
+        // 4. Menyusun Komponen
+        panel.add(lblNama);
+        panel.add(txtNama);
+        panel.add(lblUser);
+        panel.add(txtUser);
+        panel.add(lblNoHp); 
+        panel.add(txtNoHp);
+        panel.add(lblRole);
+        panel.add(txtRole);
+        panel.add(lblPass);
+        panel.add(panelPass); 
+        panel.add(btnBatal);
+        panel.add(btnSimpan);
+
+        dialog.add(panel);
+
+        final Model.Instruktur instrukturFinal = dataInstruktur; 
+        
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dialog.dispose(); 
+            }
+        });
+
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String namaBaru = txtNama.getText().trim();
+                String userBaru = txtUser.getText().trim();
+                String noHpBaru = txtNoHp.getText().trim();
+                String passBaru = new String(txtPass.getPassword());
+
+                if (namaBaru.isEmpty() || userBaru.isEmpty() || noHpBaru.isEmpty() || passBaru.isEmpty()) {
+                    javax.swing.JOptionPane.showMessageDialog(dialog, "Semua kolom wajib diisi!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // UPDATE DATA KE OBJEK SPESIFIK INSTRUKTUR
+                instrukturFinal.setNamaLengkap(namaBaru);
+                instrukturFinal.setUsername(userBaru); 
+                instrukturFinal.setNoTelp(noHpBaru); // Menyimpan noTelp ke model Instruktur
+                instrukturFinal.setPassword(passBaru);
+
+                javax.swing.JOptionPane.showMessageDialog(dialog, "Profil Instruktur berhasil diperbarui!", "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose();
+            }
+        });
+
+        dialog.setVisible(true);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -82,16 +204,17 @@ public class InstrukturFrame extends javax.swing.JFrame {
         jSeparator2 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         btnManajemenSeleksi = new javax.swing.JButton();
-        btnLihatLaporan = new javax.swing.JButton();
+        btnInputMateri = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
         btnLogout = new javax.swing.JButton();
+        btnLihatLaporan1 = new javax.swing.JButton();
+        btnInputSoal = new javax.swing.JButton();
         panelHeadr = new javax.swing.JPanel();
         lblHalamanJudul = new javax.swing.JLabel();
         lblHalamanSub = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
+        btnProfile = new javax.swing.JButton();
         mainContent = new javax.swing.JPanel();
         panelKartu1 = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
@@ -204,7 +327,7 @@ public class InstrukturFrame extends javax.swing.JFrame {
         btnManajemenSeleksi.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
         btnManajemenSeleksi.setForeground(new java.awt.Color(255, 210, 210));
         btnManajemenSeleksi.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/approval.png")); // NOI18N
-        btnManajemenSeleksi.setText("Input Nilai");
+        btnManajemenSeleksi.setText("Lihat Nilai");
         btnManajemenSeleksi.setBorderPainted(false);
         btnManajemenSeleksi.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnManajemenSeleksi.setFocusPainted(false);
@@ -217,22 +340,22 @@ public class InstrukturFrame extends javax.swing.JFrame {
         });
         sidebar.add(btnManajemenSeleksi, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, -1, -1));
 
-        btnLihatLaporan.setBackground(new java.awt.Color(122, 0, 0));
-        btnLihatLaporan.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        btnLihatLaporan.setForeground(new java.awt.Color(255, 210, 210));
-        btnLihatLaporan.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
-        btnLihatLaporan.setText("Rekap Peserta");
-        btnLihatLaporan.setBorderPainted(false);
-        btnLihatLaporan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnLihatLaporan.setFocusPainted(false);
-        btnLihatLaporan.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnLihatLaporan.setPreferredSize(new java.awt.Dimension(220, 41));
-        btnLihatLaporan.addActionListener(new java.awt.event.ActionListener() {
+        btnInputMateri.setBackground(new java.awt.Color(122, 0, 0));
+        btnInputMateri.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        btnInputMateri.setForeground(new java.awt.Color(255, 210, 210));
+        btnInputMateri.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
+        btnInputMateri.setText("Input Materi");
+        btnInputMateri.setBorderPainted(false);
+        btnInputMateri.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnInputMateri.setFocusPainted(false);
+        btnInputMateri.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnInputMateri.setPreferredSize(new java.awt.Dimension(220, 41));
+        btnInputMateri.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLihatLaporanActionPerformed(evt);
+                btnInputMateriActionPerformed(evt);
             }
         });
-        sidebar.add(btnLihatLaporan, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, -1, -1));
+        sidebar.add(btnInputMateri, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 333, -1, -1));
 
         jSeparator4.setForeground(new java.awt.Color(255, 160, 160));
         jSeparator4.setPreferredSize(new java.awt.Dimension(220, 8));
@@ -253,6 +376,40 @@ public class InstrukturFrame extends javax.swing.JFrame {
             }
         });
         sidebar.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 630, -1, -1));
+
+        btnLihatLaporan1.setBackground(new java.awt.Color(122, 0, 0));
+        btnLihatLaporan1.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        btnLihatLaporan1.setForeground(new java.awt.Color(255, 210, 210));
+        btnLihatLaporan1.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/bar-chart (1).png")); // NOI18N
+        btnLihatLaporan1.setText("Rekap Peserta");
+        btnLihatLaporan1.setBorderPainted(false);
+        btnLihatLaporan1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnLihatLaporan1.setFocusPainted(false);
+        btnLihatLaporan1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLihatLaporan1.setPreferredSize(new java.awt.Dimension(220, 41));
+        btnLihatLaporan1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLihatLaporan1ActionPerformed(evt);
+            }
+        });
+        sidebar.add(btnLihatLaporan1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 422, -1, -1));
+
+        btnInputSoal.setBackground(new java.awt.Color(122, 0, 0));
+        btnInputSoal.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        btnInputSoal.setForeground(new java.awt.Color(255, 210, 210));
+        btnInputSoal.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/approval.png")); // NOI18N
+        btnInputSoal.setText("Input Soal");
+        btnInputSoal.setBorderPainted(false);
+        btnInputSoal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnInputSoal.setFocusPainted(false);
+        btnInputSoal.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnInputSoal.setPreferredSize(new java.awt.Dimension(220, 42));
+        btnInputSoal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInputSoalActionPerformed(evt);
+            }
+        });
+        sidebar.add(btnInputSoal, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 376, -1, -1));
 
         panelHeadr.setBackground(new java.awt.Color(255, 255, 255));
         panelHeadr.setPreferredSize(new java.awt.Dimension(980, 64));
@@ -282,29 +439,15 @@ public class InstrukturFrame extends javax.swing.JFrame {
         jLabel9.setPreferredSize(new java.awt.Dimension(160, 16));
         panelHeadr.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 30, -1, -1));
 
-        jPanel1.setBackground(new java.awt.Color(255, 235, 235));
-
-        jLabel10.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15)); // NOI18N
-        jLabel10.setText("I");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(jLabel10)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(13, Short.MAX_VALUE)
-                .addComponent(jLabel10)
-                .addContainerGap())
-        );
-
-        panelHeadr.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 10, 40, 40));
+        btnProfile.setBackground(new java.awt.Color(255, 220, 220));
+        btnProfile.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 0, 15)); // NOI18N
+        btnProfile.setText("I");
+        btnProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProfileActionPerformed(evt);
+            }
+        });
+        panelHeadr.add(btnProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 10, 50, 40));
 
         mainContent.setBackground(new java.awt.Color(245, 245, 245));
         mainContent.setName("mainContent"); // NOI18N
@@ -509,13 +652,46 @@ public class InstrukturFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
 
-    private void btnLihatLaporanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLihatLaporanActionPerformed
+    private void btnInputMateriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInputMateriActionPerformed
+        lblHalamanJudul.setText("Input Materi");
+        lblHalamanSub.setText("Upload dan kelola materi belajar untuk peserta");
+ 
+        showPanel(new Views.instruktur.PanelInputMateri(idInstruktur));
+        setActiveButton(btnInputMateri);
+    }//GEN-LAST:event_btnInputMateriActionPerformed
+
+    private void btnProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProfileActionPerformed
+        if (DataStore.penggunaLogin != null) {
+            
+            String unameLogin = DataStore.penggunaLogin.getUsername();
+            
+            FormProfilInstruktur form = new FormProfilInstruktur(
+                (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), 
+                true, 
+                unameLogin 
+            );
+            form.setVisible(true);
+            
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Anda belum login!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnProfileActionPerformed
+
+    private void btnLihatLaporan1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLihatLaporan1ActionPerformed
         lblHalamanJudul.setText("Lihat Laporan");
         lblHalamanSub.setText("Lihat Laporan Peserta");
 
         showPanel(new PanelLaporanInstruktur(idInstruktur));
-        setActiveButton(btnLihatLaporan);
-    }//GEN-LAST:event_btnLihatLaporanActionPerformed
+        setActiveButton(btnInputMateri);
+    }//GEN-LAST:event_btnLihatLaporan1ActionPerformed
+
+    private void btnInputSoalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInputSoalActionPerformed
+        lblHalamanJudul.setText("Input Kuis");
+        lblHalamanSub.setText("Upload dan kelola Kuis untuk peserta");
+ 
+        showPanel(new Views.instruktur.PanelInputKuis(idInstruktur));
+        setActiveButton(btnInputMateri);
+    }//GEN-LAST:event_btnInputSoalActionPerformed
 
     /**
      * @param args the command line arguments
@@ -561,14 +737,16 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
+    private javax.swing.JButton btnInputMateri;
+    private javax.swing.JButton btnInputSoal;
     private javax.swing.JButton btnInstruktur;
-    private javax.swing.JButton btnLihatLaporan;
+    private javax.swing.JButton btnLihatLaporan1;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnManajemenSeleksi;
     private javax.swing.JButton btnPeserta;
+    private javax.swing.JButton btnProfile;
     private javax.swing.JButton btnTambahPeserta;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -581,7 +759,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;

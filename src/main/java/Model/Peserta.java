@@ -1,14 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Model;
 
-public class Peserta {
+// 1. Tambahkan extends Pengguna
+public class Peserta extends Pengguna {
     // Encapsulation
     private String idPeserta;
     private String nik;
-    private String namaLengkap;
     private String tanggalLahir;
     private String jenisKelamin;
     private String noHp;
@@ -24,15 +20,20 @@ public class Peserta {
     
     private String statusSeleksi;        
     private String statusKeberangkatan;
+    private String kehadiranHariIni = "Hadir"; // Default Hadir
 
-    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, 
-                   String jenisKelamin, String noHp, String agama, String alamat, 
+    // 2. Tambahkan parameter username dan password di constructor utama
+    public Peserta(String username, String password, String idPeserta, String nik, String namaLengkap, 
+                   String tanggalLahir, String jenisKelamin, String noHp, String agama, String alamat, 
                    String program, Instruktur instrukturDamping, String levelBahasa, 
                    String statusPembayaran, String statusSeleksi, String statusKeberangkatan) {
                    
+        // Panggil constructor Pengguna (Superclass)
+        // Set role default sebagai "PESERTA"
+        super(username, password, namaLengkap, "PESERTA");
+        
         this.idPeserta = idPeserta;
         this.nik = nik;
-        this.namaLengkap = namaLengkap;
         this.tanggalLahir = tanggalLahir;
         this.jenisKelamin = jenisKelamin;
         this.noHp = noHp;
@@ -46,147 +47,72 @@ public class Peserta {
         this.statusKeberangkatan = statusKeberangkatan;
     }
     
-    public Peserta(String idPeserta, String nik, String namaLengkap, String tanggalLahir, 
-                   String jenisKelamin, String noHp, String agama, String alamat, 
+    // Constructor kedua juga harus disesuaikan
+    public Peserta(String username, String password, String idPeserta, String nik, String namaLengkap, 
+                   String tanggalLahir, String jenisKelamin, String noHp, String agama, String alamat, 
                    String program, Instruktur instrukturDamping, String levelBahasa, 
                    String statusPembayaran) {
                    
-        // Panggil cetakan 1 dari dalam cetakan 2 menggunakan 'this' agar tidak capek ngetik ulang
-        // Nilai "Belum Mulai" dan "Belum Berangkat" akan jadi nilai default-nya
-        this(idPeserta, nik, namaLengkap, tanggalLahir, jenisKelamin, noHp, agama, 
+        // Lempar ke constructor pertama
+        this(username, password, idPeserta, nik, namaLengkap, tanggalLahir, jenisKelamin, noHp, agama, 
              alamat, program, instrukturDamping, levelBahasa, statusPembayaran, 
              "Belum Mulai", "Belum Berangkat");
     }
 
-    public String getIdPeserta() {
-        return idPeserta;
+    // 3. Override method dari superclass Pengguna
+    @Override
+    public String getMenuOtoritas() {
+        return "Akses Terbatas: Melihat Profil, Status Seleksi, dan Info Keberangkatan.";
     }
 
-    public void setIdPeserta(String idPeserta) {
-        this.idPeserta = idPeserta;
-    }
+    // ==========================================
+    // Getter & Setter di bawah sini tetap sama
+    // (Tidak perlu menulis ulang getter/setter namaLengkap 
+    // karena sudah diwarisi dari class Pengguna)
+    // ==========================================
 
-    public String getNik() {
-        return nik;
-    }
+    public String getIdPeserta() { return idPeserta; }
+    public void setIdPeserta(String idPeserta) { this.idPeserta = idPeserta; }
 
-    public void setNik(String nik) {
-        this.nik = nik;
-    }
+    public String getNik() { return nik; }
+    public void setNik(String nik) { this.nik = nik; }
 
-    public String getNamaLengkap() {
-        return namaLengkap;
-    }
+    public String getTanggalLahir() { return tanggalLahir; }
+    public void setTanggalLahir(String tanggalLahir) { this.tanggalLahir = tanggalLahir; }
 
-    public void setNamaLengkap(String namaLengkap) {
-        this.namaLengkap = namaLengkap;
-    }
+    public String getJenisKelamin() { return jenisKelamin; }
+    public void setJenisKelamin(String jenisKelamin) { this.jenisKelamin = jenisKelamin; }
 
-    public String getTanggalLahir() {
-        return tanggalLahir;
-    }
+    public String getNoHp() { return noHp; }
+    public void setNoHp(String noHp) { this.noHp = noHp; }
 
-    public void setTanggalLahir(String tanggalLahir) {
-        this.tanggalLahir = tanggalLahir;
-    }
+    public String getAgama() { return agama; }
+    public void setAgama(String agama) { this.agama = agama; }
 
-    public String getJenisKelamin() {
-        return jenisKelamin;
-    }
+    public String getAlamat() { return alamat; }
+    public void setAlamat(String alamat) { this.alamat = alamat; }
 
-    public void setJenisKelamin(String jenisKelamin) {
-        this.jenisKelamin = jenisKelamin;
-    }
+    public String getProgram() { return program; }
+    public void setProgram(String program) { this.program = program; }
 
-    public String getNoHp() {
-        return noHp;
-    }
+    public Instruktur getInstrukturDamping() { return instrukturDamping; }
+    public void setInstrukturDamping(Instruktur instrukturDamping) { this.instrukturDamping = instrukturDamping; }
 
-    public void setNoHp(String noHp) {
-        this.noHp = noHp;
-    }
+    public String getLevelBahasa() { return levelBahasa; }
+    public void setLevelBahasa(String levelBahasa) { this.levelBahasa = levelBahasa; }
 
-    public String getAgama() {
-        return agama;
-    }
+    public String getStatusPembayaran() { return statusPembayaran; }
+    public void setStatusPembayaran(String statusPembayaran) { this.statusPembayaran = statusPembayaran; }
 
-    public void setAgama(String agama) {
-        this.agama = agama;
-    }
+    public String getStatusSeleksi() { return statusSeleksi; }
+    public void setStatusSeleksi(String statusSeleksi) { this.statusSeleksi = statusSeleksi; }
 
-    public String getAlamat() {
-        return alamat;
-    }
-
-    public void setAlamat(String alamat) {
-        this.alamat = alamat;
-    }
-
-    public String getProgram() {
-        return program;
-    }
-
-    public void setProgram(String program) {
-        this.program = program;
-    }
-
-    public Instruktur getInstrukturDamping() {
-        return instrukturDamping;
-    }
-
-    public void setInstrukturDamping(Instruktur instrukturDamping) {
-        this.instrukturDamping = instrukturDamping;
-    }
-
-    public String getLevelBahasa() {
-        return levelBahasa;
-    }
-
-    public void setLevelBahasa(String levelBahasa) {
-        this.levelBahasa = levelBahasa;
-    }
-
-    public String getStatusPembayaran() {
-        return statusPembayaran;
-    }
-
-    public void setStatusPembayaran(String statusPembayaran) {
-        this.statusPembayaran = statusPembayaran;
-    }
-
-    public String getStatusSeleksi() {
-        return statusSeleksi;
-    }
-
-    public void setStatusSeleksi(String statusSeleksi) {
-        this.statusSeleksi = statusSeleksi;
-    }
-
-    public String getStatusKeberangkatan() {
-        return statusKeberangkatan;
-    }
-
-    public void setStatusKeberangkatan(String statusKeberangkatan) {
-        this.statusKeberangkatan = statusKeberangkatan;
-    }
+    public String getStatusKeberangkatan() { return statusKeberangkatan; }
+    public void setStatusKeberangkatan(String statusKeberangkatan) { this.statusKeberangkatan = statusKeberangkatan; }
     
-    public String getKelas() {
-        return kelas;
-    }
-
-    public void setKelas(String kelas) {
-        this.kelas = kelas;
-    }
+    public String getKelas() { return kelas; }
+    public void setKelas(String kelas) { this.kelas = kelas; }
     
-    private String kehadiranHariIni = "Hadir"; // Default Hadir
-
-    // Tambahkan getter & setter ini di bawah
-    public String getKehadiranHariIni() {
-        return kehadiranHariIni;
-    }
-
-    public void setKehadiranHariIni(String kehadiranHariIni) {
-        this.kehadiranHariIni = kehadiranHariIni;
-    }
-    
+    public String getKehadiranHariIni() { return kehadiranHariIni; }
+    public void setKehadiranHariIni(String kehadiranHariIni) { this.kehadiranHariIni = kehadiranHariIni; }
 }

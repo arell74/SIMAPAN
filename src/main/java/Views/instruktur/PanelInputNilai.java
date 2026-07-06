@@ -3,23 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package Views.instruktur;
-
+ 
 import DataStore.DataStore;
 import Model.Instruktur;
 import Model.Pengguna;
 import Model.Peserta;
 import Util.TabelUtil;
 import Views.admin.FormTambahInstruktur;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author arelssi
- */
 public class PanelInputNilai extends javax.swing.JPanel {
-
+ 
     /**
      * Creates new form PanelInputNilai
      */
@@ -32,78 +29,8 @@ public class PanelInputNilai extends javax.swing.JPanel {
         
         this.idInstrukturAktif = idInstruktur;
         
-        setupTabelInput();
-        loadDataSiswa();
-        
-        // Memasang "Telinga" agar tabel bereaksi saat nilai diubah
-        pasangListenerTabel();
     }
     
-    private void setupTabelInput() {
-        tabelNilai.setRowHeight(40);
-        
-        // Membuat model tabel khusus di mana HANYA kolom index 4 (Nilai) yang bisa diedit
-        modelTabel = new DefaultTableModel(
-            new Object [][] {},
-            new String [] {"No.", "ID", "Nama Siswa", "Level", "Nilai", "Status"} // Sesuaikan nama kolommu (tanpa Progres)
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Hanya kolom ke-4 (Nilai) yang bernilai TRUE (bisa diedit)
-                return column == 4; 
-            }
-        };
-        
-        tabelNilai.setModel(modelTabel);
-        
-        TabelUtil.autoResizeKolom(tabelNilai);
-        javax.swing.table.JTableHeader header = tabelNilai.getTableHeader();
-        
-        header.setBackground(new java.awt.Color(122, 0, 0));
-        header.setForeground(java.awt.Color.WHITE);
-        
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
-        header.setOpaque(true);
-    }
-
-    private void pasangListenerTabel() {
-        modelTabel.addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                // Jika yang berubah adalah kolom ke-4 (Nilai)
-                if (e.getType() == TableModelEvent.UPDATE && e.getColumn() == 4) {
-                    int baris = e.getFirstRow();
-                    
-                    try {
-                        // Ambil nilai yang baru saja diketik
-                        String nilaiString = modelTabel.getValueAt(baris, 4).toString();
-                        int nilai = Integer.parseInt(nilaiString);
-                        
-                        // Validasi skala 0-100
-                        if (nilai < 0) nilai = 0;
-                        if (nilai > 100) nilai = 100;
-                        
-                        // Update sel kembali jika melebihi batas (opsional, agar aman)
-                        // modelTabel.setValueAt(String.valueOf(nilai), baris, 4); 
-
-                        // Tentukan Status (Lulus jika >= 70)
-                        if (nilai >= 70) {
-                            modelTabel.setValueAt("Lulus", baris, 5);
-                        } else {
-                            modelTabel.setValueAt("Tidak Lulus", baris, 5);
-                        }
-                        
-                        // Hitung ulang rata-rata keseluruhan kelas
-                        hitungRataRataKelas();
-                        
-                    } catch (NumberFormatException ex) {
-                        // Jika instruktur iseng mengetik huruf, kembalikan status jadi kosong
-                        modelTabel.setValueAt("-", baris, 5);
-                    }
-                }
-            }
-        });
-    }
     
     private void loadDataSiswa() {
         modelTabel.setRowCount(0); // Kosongkan tabel
@@ -120,7 +47,7 @@ public class PanelInputNilai extends javax.swing.JPanel {
                 }
             }
         }
-
+ 
         int no = 1;
         for (Peserta p : DataStore.daftarPeserta) {
             // Hanya masukkan siswa dari instruktur ini
@@ -165,6 +92,34 @@ public class PanelInputNilai extends javax.swing.JPanel {
         // Update Label Rata-rata di pojok kanan atas (Sesuaikan nama variabelnya)
         lblRataRata.setText("Rata-rata: " + rataRata);
     }
+ 
+    /**
+     * Mengambil objek Peserta yang sedang dipilih di tabelNilai berdasarkan
+     * kolom ID (index 1). Mengembalikan null jika tidak ada baris terpilih
+     * atau peserta tidak ditemukan di DataStore.
+     */
+    private Peserta ambilPesertaTerpilih() {
+        int baris = tabelNilai.getSelectedRow();
+        if (baris < 0) {
+            return null;
+        }
+ 
+        // Konversi index tampilan ke index model, untuk berjaga-jaga jika
+        // tabel di-sort oleh user.
+        int barisModel = tabelNilai.convertRowIndexToModel(baris);
+        Object idObj = modelTabel.getValueAt(barisModel, 1);
+        if (idObj == null) {
+            return null;
+        }
+ 
+        String idPeserta = idObj.toString();
+        for (Peserta p : DataStore.daftarPeserta) {
+            if (p.getIdPeserta().equals(idPeserta)) {
+                return p;
+            }
+        }
+        return null;
+    }               
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -176,11 +131,11 @@ public class PanelInputNilai extends javax.swing.JPanel {
     private void initComponents() {
 
         panelToolbar = new javax.swing.JPanel();
-        btnTambah = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         jComboBox1 = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
+        btnEvaluas = new javax.swing.JButton();
         panelTabel = new javax.swing.JPanel();
         scrollTabel = new javax.swing.JScrollPane();
         tabelNilai = new javax.swing.JTable();
@@ -193,18 +148,6 @@ public class PanelInputNilai extends javax.swing.JPanel {
 
         panelToolbar.setBackground(new java.awt.Color(255, 255, 255));
         panelToolbar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        btnTambah.setBackground(new java.awt.Color(122, 0, 0));
-        btnTambah.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
-        btnTambah.setForeground(new java.awt.Color(255, 255, 255));
-        btnTambah.setText("Simpan Nilai");
-        btnTambah.setPreferredSize(new java.awt.Dimension(148, 30));
-        btnTambah.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTambahActionPerformed(evt);
-            }
-        });
-        panelToolbar.add(btnTambah, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 14, -1, -1));
 
         jSeparator2.setPreferredSize(new java.awt.Dimension(980, 2));
         panelToolbar.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 54, -1, -1));
@@ -219,6 +162,16 @@ public class PanelInputNilai extends javax.swing.JPanel {
 
         jLabel1.setText("Materi");
         panelToolbar.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, -1, -1));
+
+        btnEvaluas.setBackground(new java.awt.Color(122, 0, 0));
+        btnEvaluas.setForeground(new java.awt.Color(255, 255, 255));
+        btnEvaluas.setText("Evaluasi Peserta");
+        btnEvaluas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEvaluasActionPerformed(evt);
+            }
+        });
+        panelToolbar.add(btnEvaluas, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, -1, 30));
 
         add(panelToolbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
@@ -292,20 +245,33 @@ public class PanelInputNilai extends javax.swing.JPanel {
         add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, -1, 20));
 
         jLabel4.setForeground(new java.awt.Color(70, 70, 70));
-        jLabel4.setText("Input Nilai Materi");
+        jLabel4.setText("Evaluasi peserta lpk");
         add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, 20));
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-        javax.swing.JOptionPane.showMessageDialog(this, 
-            "Data nilai berhasil disimpan ke dalam sistem!", 
-            "Sukses", 
-            javax.swing.JOptionPane.INFORMATION_MESSAGE);
-    }//GEN-LAST:event_btnTambahActionPerformed
+    private void btnEvaluasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEvaluasActionPerformed
+        Peserta pesertaTerpilih = ambilPesertaTerpilih();
+ 
+        if (pesertaTerpilih == null) {
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Pilih dulu salah satu baris peserta di tabel sebelum melakukan evaluasi.",
+                    "Belum Ada Peserta Terpilih",
+                    javax.swing.JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+ 
+        java.awt.Frame parentFrame = (java.awt.Frame) SwingUtilities.getWindowAncestor(this);
+        FormEvaluasiPeserta formEvaluasi = new FormEvaluasiPeserta(parentFrame, true, pesertaTerpilih, idInstrukturAktif);
+        formEvaluasi.setVisible(true);
+ 
+        loadDataSiswa();
+    }//GEN-LAST:event_btnEvaluasActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnTambah;
+    private javax.swing.JButton btnEvaluas;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;

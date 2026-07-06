@@ -24,7 +24,7 @@ import javax.swing.JOptionPane;
     public class FormTambahPeserta extends javax.swing.JFrame {
         
     private Views.admin.PanelDataPeserta panelInduk;
-        //ID Otomatis
+    
     private String generateIdPeserta() {
         int ukuranData = DataStore.daftarPeserta.size();
         return String.format("PST%03d", ukuranData + 1);
@@ -218,6 +218,11 @@ import javax.swing.JOptionPane;
         txtNoHp.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
         txtNoHp.setForeground(new java.awt.Color(60, 60, 60));
         txtNoHp.setPreferredSize(new java.awt.Dimension(240, 34));
+        txtNoHp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNoHpActionPerformed(evt);
+            }
+        });
         txtNoHp.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtNoHpKeyTyped(evt);
@@ -382,7 +387,14 @@ import javax.swing.JOptionPane;
         }
         
         String programDipilih = cmbProgram.getSelectedItem().toString();
+
+        String usernamePeserta = nik; 
+        String passwordPeserta = "yuuki" + nik;
+
+        // 2. Masukkan username dan password di urutan pertama saat membuat objek
         Model.Peserta pesertaBaru = new Model.Peserta(
+            usernamePeserta,     // <-- Wajib ditambahkan (dari class Pengguna)
+            passwordPeserta,     // <-- Wajib ditambahkan (dari class Pengguna)
             idPeserta, 
             nik, 
             namaLengkap, 
@@ -423,9 +435,9 @@ import javax.swing.JOptionPane;
     }//GEN-LAST:event_txtNikKeyTyped
 
     private void txtNoHpKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNoHpKeyTyped
-        char c = evt.getKeyChar();
+        char hp = evt.getKeyChar();
         
-        if (!Character.isDigit(c)) {
+        if (!Character.isDigit(hp)) {
             evt.consume();
         }
         
@@ -433,6 +445,10 @@ import javax.swing.JOptionPane;
             evt.consume();
         }
     }//GEN-LAST:event_txtNoHpKeyTyped
+
+    private void txtNoHpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNoHpActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNoHpActionPerformed
 
     /**
      * @param args the command line arguments

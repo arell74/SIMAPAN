@@ -72,12 +72,16 @@ public class FormEditPeserta extends javax.swing.JFrame {
             cmbLevelBahasa.setSelectedItem(pesertaEdit.getLevelBahasa());
             cmbStatusBayar.setSelectedItem(pesertaEdit.getStatusPembayaran());
             
-            for (int i = 0; i < cmbInstruktur.getItemCount(); i++) {
-                Instruktur insItem = (Instruktur) cmbInstruktur.getItemAt(i);
-                if (insItem.getIdInstruktur().equals(pesertaEdit.getInstrukturDamping().getIdInstruktur())) {
-                    cmbInstruktur.setSelectedIndex(i);
-                    break;
+            if (pesertaEdit.getInstrukturDamping() != null) {
+                for (int i = 0; i < cmbInstruktur.getItemCount(); i++) {
+                    Instruktur insItem = (Instruktur) cmbInstruktur.getItemAt(i);
+                    if (insItem.getIdInstruktur().equals(pesertaEdit.getInstrukturDamping().getIdInstruktur())) {
+                        cmbInstruktur.setSelectedIndex(i);
+                        break;
+                    }
                 }
+            } else {
+                cmbInstruktur.setSelectedIndex(-1); 
             }
 
             for (int i = 0; i < cmbProgram.getItemCount(); i++) {
