@@ -14,12 +14,8 @@ import Model.Pengguna;
  */
 public class FormTambahInstruktur extends javax.swing.JDialog {
 
-    /**
-     * Creates new form FormTambahInstruktur
-     */
-    
     private Views.admin.PanelDataInstruktur panelInduk;
-    
+
     public FormTambahInstruktur(Views.admin.PanelDataInstruktur panelInduk) {
         initComponents();
         setSize(520, 490);
@@ -28,31 +24,236 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         setResizable(false);
         setTitle("Tambah Instruktur Baru");
         setModal(true);
-        
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
         this.panelInduk = panelInduk;
-        
+
         siapkanForm();
     }
-    
+
     private void siapkanForm() {
-        int jumlahInstruktur = 0;
-        for (Pengguna p : DataStore.daftarPengguna) {
-            if (p instanceof Instruktur) {
-                jumlahInstruktur++;
-            }
-        }
-        
-        String idBaru = String.format("INS%03d", (jumlahInstruktur + 1)); 
-        
-        txtIdInstruktur.setText(idBaru);
+        // Ambil ID berikutnya langsung dari MySQL (INS001, INS002, dst.)
+        txtIdInstruktur.setText(Database.PenggunaDAO.idInstrukturBerikutnya());
         txtIdInstruktur.setEditable(false);
-        
-        // 2. (Opsional) Jika item Combobox belum diset di layar Design, 
-        // kamu bisa mengaturnya di sini menggunakan 
+
+        cbSpesialisasi.removeAllItems();
         cbSpesialisasi.addItem("Budaya Jepang");
         cbSpesialisasi.addItem("Bahasa Jepang");
         cbSpesialisasi.addItem("JLPT");
     }
+
+//    @SuppressWarnings("unchecked")
+//    // <editor-fold defaultstate="collapsed" desc="Generated Code">
+//    private void initComponents() {
+//
+//        panelHeader = new javax.swing.JPanel();
+//        jLabel1 = new javax.swing.JLabel();
+//        jLabel2 = new javax.swing.JLabel();
+//        jButton1 = new javax.swing.JButton();
+//        jLabel11 = new javax.swing.JLabel();
+//        panelBody = new javax.swing.JPanel();
+//        jLabel3 = new javax.swing.JLabel();
+//        jSeparator1 = new javax.swing.JSeparator();
+//        jLabel4 = new javax.swing.JLabel();
+//        jLabel5 = new javax.swing.JLabel();
+//        jLabel6 = new javax.swing.JLabel();
+//        txtIdInstruktur = new javax.swing.JTextField();
+//        txtNamaInstruktur = new javax.swing.JTextField();
+//        txtNoTelp = new javax.swing.JTextField();
+//        jLabel7 = new javax.swing.JLabel();
+//        jSeparator2 = new javax.swing.JSeparator();
+//        jLabel8 = new javax.swing.JLabel();
+//        jLabel9 = new javax.swing.JLabel();
+//        jLabel10 = new javax.swing.JLabel();
+//        cbSpesialisasi = new javax.swing.JComboBox<>();
+//        cbLevelJLPT = new javax.swing.JComboBox<>();
+//        cbKelasDiampu = new javax.swing.JComboBox<>();
+//        panelFooter = new javax.swing.JPanel();
+//        jSeparator3 = new javax.swing.JSeparator();
+//        btnBatal = new javax.swing.JButton();
+//        btnSimpan = new javax.swing.JButton();
+//
+//        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+//        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+//
+//        panelHeader.setBackground(new java.awt.Color(122, 0, 0));
+//        panelHeader.setPreferredSize(new java.awt.Dimension(520, 68));
+//        panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+//
+//        jLabel1.setFont(new java.awt.Font("Inter", 1, 15)); // NOI18N
+//        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+//        jLabel1.setText("Tambah Instruktur Baru");
+//        jLabel1.setPreferredSize(new java.awt.Dimension(280, 22));
+//        panelHeader.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 14, -1, -1));
+//
+//        jLabel2.setFont(new java.awt.Font("Inter", 0, 11)); // NOI18N
+//        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+//        jLabel2.setText("Isi data instruktur dengan benar");
+//        jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
+//        panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
+//
+//        jButton1.setBackground(new java.awt.Color(160, 20, 20));
+//        jButton1.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
+//        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+//        jButton1.setText("X");
+//        jButton1.setBorderPainted(false);
+//        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+//        jButton1.setFocusPainted(false);
+//        jButton1.setPreferredSize(new java.awt.Dimension(30, 30));
+////        jButton1.addActionListener(new java.awt.event.ActionListener() {
+////            public void actionPerformed(java.awt.event.ActionEvent evt) {
+////                jButton1ActionPerformed(evt);
+////            }
+////        });
+//        panelHeader.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(474, 18, -1, -1));
+//
+//        jLabel11.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/videocall (1).png")); // NOI18N
+//        jLabel11.setText("Icon");
+//        jLabel11.setPreferredSize(new java.awt.Dimension(36, 36));
+//        panelHeader.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(16, 18, -1, -1));
+//
+//        getContentPane().add(panelHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+//
+//        panelBody.setBackground(new java.awt.Color(248, 248, 248));
+//        panelBody.setPreferredSize(new java.awt.Dimension(520, 364));
+//        panelBody.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+//
+//        jLabel3.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+//        jLabel3.setForeground(new java.awt.Color(122, 0, 0));
+//        jLabel3.setText("DATA IDENTITAS");
+//        jLabel3.setPreferredSize(new java.awt.Dimension(200, 14));
+//        panelBody.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 16, -1, -1));
+//
+//        jSeparator1.setPreferredSize(new java.awt.Dimension(480, 8));
+//        panelBody.add(jSeparator1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 32, -1, -1));
+//
+//        jLabel4.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel4.setForeground(new java.awt.Color(60, 60, 60));
+//        jLabel4.setText("ID Instruktur");
+//        jLabel4.setPreferredSize(new java.awt.Dimension(140, 14));
+//        panelBody.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 44, -1, -1));
+//
+//        jLabel5.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel5.setForeground(new java.awt.Color(60, 60, 60));
+//        jLabel5.setText("No. Telp");
+//        jLabel5.setPreferredSize(new java.awt.Dimension(140, 14));
+//        panelBody.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 44, -1, -1));
+//
+//        jLabel6.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel6.setForeground(new java.awt.Color(60, 60, 60));
+//        jLabel6.setText("Nama Instruktur");
+//        jLabel6.setPreferredSize(new java.awt.Dimension(200, 14));
+//        panelBody.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 102, -1, -1));
+//
+//        txtIdInstruktur.setEditable(false);
+//        txtIdInstruktur.setBackground(new java.awt.Color(245, 245, 245));
+//        txtIdInstruktur.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        txtIdInstruktur.setForeground(new java.awt.Color(160, 160, 160));
+//        txtIdInstruktur.setText("INS001");
+//        txtIdInstruktur.setPreferredSize(new java.awt.Dimension(220, 34));
+//        panelBody.add(txtIdInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
+//
+//        txtNamaInstruktur.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        txtNamaInstruktur.setForeground(new java.awt.Color(30, 30, 30));
+//        txtNamaInstruktur.setPreferredSize(new java.awt.Dimension(480, 34));
+//        panelBody.add(txtNamaInstruktur, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 118, -1, -1));
+//
+//        txtNoTelp.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        txtNoTelp.setForeground(new java.awt.Color(30, 30, 30));
+//        txtNoTelp.setPreferredSize(new java.awt.Dimension(230, 34));
+//        txtNoTelp.addKeyListener(new java.awt.event.KeyAdapter() {
+//            public void keyTyped(java.awt.event.KeyEvent evt) {
+//                txtNoTelpKeyTyped(evt);
+//            }
+//        });
+//        panelBody.add(txtNoTelp, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, -1));
+//
+//        jLabel7.setFont(new java.awt.Font("Inter", 1, 10)); // NOI18N
+//        jLabel7.setForeground(new java.awt.Color(122, 0, 0));
+//        jLabel7.setText("DATA KEAHLIAN");
+//        jLabel7.setPreferredSize(new java.awt.Dimension(200, 14));
+//        panelBody.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 168, -1, -1));
+//
+//        jSeparator2.setPreferredSize(new java.awt.Dimension(480, 8));
+//        panelBody.add(jSeparator2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 184, -1, -1));
+//
+//        jLabel8.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel8.setForeground(new java.awt.Color(30, 30, 30));
+//        jLabel8.setText("Spesialisasi");
+//        jLabel8.setPreferredSize(new java.awt.Dimension(160, 14));
+//        panelBody.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 196, -1, -1));
+//
+//        jLabel9.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel9.setForeground(new java.awt.Color(30, 30, 30));
+//        jLabel9.setText("Level JLPT");
+//        jLabel9.setPreferredSize(new java.awt.Dimension(160, 14));
+//        panelBody.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 254, -1, -1));
+//
+//        jLabel10.setFont(new java.awt.Font("Inter", 1, 11)); // NOI18N
+//        jLabel10.setForeground(new java.awt.Color(30, 30, 30));
+//        jLabel10.setText("Kelas Diampu");
+//        jLabel10.setPreferredSize(new java.awt.Dimension(160, 14));
+//        panelBody.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 254, -1, -1));
+//
+//        cbSpesialisasi.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        cbSpesialisasi.setForeground(new java.awt.Color(30, 30, 30));
+//        cbSpesialisasi.setPreferredSize(new java.awt.Dimension(480, 34));
+//        panelBody.add(cbSpesialisasi, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 212, -1, -1));
+//
+//        cbLevelJLPT.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        cbLevelJLPT.setForeground(new java.awt.Color(30, 30, 30));
+//        cbLevelJLPT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "N1", "N2", "N3", "N4", "N5" }));
+//        cbLevelJLPT.setPreferredSize(new java.awt.Dimension(220, 34));
+//        panelBody.add(cbLevelJLPT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 270, -1, -1));
+//
+//        cbKelasDiampu.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        cbKelasDiampu.setForeground(new java.awt.Color(30, 30, 30));
+//        cbKelasDiampu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Reguler", "Mandiri", "GTOG" }));
+//        cbKelasDiampu.setPreferredSize(new java.awt.Dimension(230, 34));
+//        panelBody.add(cbKelasDiampu, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 270, -1, -1));
+//
+//        getContentPane().add(panelBody, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 68, -1, -1));
+//
+//        panelFooter.setBackground(new java.awt.Color(248, 248, 248));
+//        panelFooter.setPreferredSize(new java.awt.Dimension(520, 58));
+//        panelFooter.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+//
+//        jSeparator3.setPreferredSize(new java.awt.Dimension(520, 2));
+//        panelFooter.add(jSeparator3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+//
+//        btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
+//        btnBatal.setForeground(new java.awt.Color(80, 80, 80));
+//        btnBatal.setText("Batal");
+//        btnBatal.setToolTipText("Batal");
+//        btnBatal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+//        btnBatal.setFocusPainted(false);
+//        btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
+//        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                btnBatalActionPerformed(evt);
+//            }
+//        });
+//        panelFooter.add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(282, 12, -1, -1));
+//
+//        btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
+//        btnSimpan.setFont(new java.awt.Font("Inter", 1, 12)); // NOI18N
+//        btnSimpan.setForeground(new java.awt.Color(255, 255, 255));
+//        btnSimpan.setText("Simpan");
+//        btnSimpan.setBorderPainted(false);
+//        btnSimpan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+//        btnSimpan.setFocusPainted(false);
+//        btnSimpan.setPreferredSize(new java.awt.Dimension(116, 34));
+//        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+//            public void actionPerformed(java.awt.event.ActionEvent evt) {
+//                btnSimpanActionPerformed(evt);
+//            }
+//        });
+//        panelFooter.add(btnSimpan, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 12, -1, -1));
+//
+//        getContentPane().add(panelFooter, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 432, -1, -1));
+//
+//        pack();
+//    }// </editor-fold>
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -239,6 +440,11 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         btnBatal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnBatal.setFocusPainted(false);
         btnBatal.setPreferredSize(new java.awt.Dimension(100, 34));
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBatalActionPerformed(evt);
+            }
+        });
         panelFooter.add(btnBatal, new org.netbeans.lib.awtextra.AbsoluteConstraints(282, 12, -1, -1));
 
         btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
@@ -272,43 +478,58 @@ public class FormTambahInstruktur extends javax.swing.JDialog {
         String idInstruktur = txtIdInstruktur.getText();
         String namaInstruktur = txtNamaInstruktur.getText().trim();
         String noTelp = txtNoTelp.getText().trim();
-        
+
         String spesialisasi = cbSpesialisasi.getSelectedItem().toString();
         String levelJLPT = cbLevelJLPT.getSelectedItem().toString();
         String kelasDiampu = cbKelasDiampu.getSelectedItem().toString();
-        
-        // 2. Validasi Input Kosong
+
+        // 1. Validasi Input Kosong
         if (namaInstruktur.isEmpty() || noTelp.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Nama Instruktur dan No. Telp tidak boleh kosong!", "Peringatan", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Nama Instruktur dan No. Telp tidak boleh kosong!", "Peringatan",
                 javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        
+
+        // 2. Buat objek Instruktur baru (username = idInstruktur, password default = "12345")
         Instruktur instrukturBaru = new Instruktur(
-            idInstruktur,      
-            "12345",        
-            namaInstruktur,  
-            idInstruktur,     
-            noTelp,          
-            spesialisasi,      
-            levelJLPT,     
-            kelasDiampu       
+            idInstruktur,
+            "12345",
+            namaInstruktur,
+            idInstruktur,
+            noTelp,
+            spesialisasi,
+            levelJLPT,
+            kelasDiampu
         );
-        
-        // 4. Masukkan ke dalam DataStore
-        DataStore.daftarPengguna.add(instrukturBaru);
-        
-        // 5. Lapor ke Markas (Refresh Tabel)
-        if (panelInduk != null) {
-            panelInduk.loadTableData(""); // Memanggil fungsi refresh milik PanelDataInstruktur
+
+        // 3. Simpan ke database MySQL (tabel pengguna & instruktur) dalam 1 transaksi
+        if (Database.PenggunaDAO.tambahInstruktur(instrukturBaru)) {
+            DataStore.muatUlang();
+
+            if (panelInduk != null) {
+                panelInduk.loadTableData("");
+            }
+
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Instruktur Baru Berhasil Ditambahkan!\nUsername: " + idInstruktur + " | Password: 12345");
+            this.dispose();
         }
-        
-        // 6. Notifikasi sukses dan tutup form
-        javax.swing.JOptionPane.showMessageDialog(this, "Instruktur Baru Berhasil Ditambahkan!");
-        this.dispose();
     }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
+        // TODO add your handling code here:
+        int konfirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Data yang diisi akan hilang. Yakin ingin membatalkan?",
+            "Konfirmasi Batal",
+            javax.swing.JOptionPane.YES_NO_OPTION,
+            javax.swing.JOptionPane.WARNING_MESSAGE
+        );
+        if (konfirm == javax.swing.JOptionPane.YES_OPTION) {
+            this.dispose();
+        }
+    }//GEN-LAST:event_btnBatalActionPerformed
 
     /**
      * @param args the command line arguments

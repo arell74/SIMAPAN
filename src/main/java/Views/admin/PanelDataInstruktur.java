@@ -18,18 +18,17 @@ import javax.swing.table.DefaultTableModel;
  * @author arelssi
  */
 public class PanelDataInstruktur extends javax.swing.JPanel {
-    /**
-     * Creates new form PanelDataStruktur
-     */
+
     public PanelDataInstruktur() {
         initComponents();
         setPreferredSize(new java.awt.Dimension(980, 616));
         setBackground(new java.awt.Color(245, 245, 245));
-        
+
         setupTable();
+        DataStore.muatUlang();
         loadTableData("");
     }
-    
+
     private void setupTable() {
         tabelInstruktur.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelInstruktur.getTableHeader().setBackground(new Color(122, 0, 0));
@@ -41,28 +40,34 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
         tabelInstruktur.getColumnModel().getColumn(7).setCellRenderer(new TombolAksiRenderer());
         tabelInstruktur.getColumnModel().getColumn(7).setCellEditor(
             new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
-                
+
                 @Override
                 public void onDetail(int baris) {
                     String id = tabelInstruktur.getValueAt(baris, 1).toString();
-                    FormDetailInstruktur form = new FormDetailInstruktur(
-                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelDataInstruktur.this),
-                        true,
-                        id
-                    );
-                    form.setVisible(true);
+                    java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelDataInstruktur.this);
+                    if (parentWindow instanceof java.awt.Frame) {
+                        FormDetailInstruktur form = new FormDetailInstruktur(
+                            (java.awt.Frame) parentWindow,
+                            true,
+                            id
+                        );
+                        form.setVisible(true);
+                    }
                 }
 
                 @Override
                 public void onEdit(int baris) {
-                    String idTarget = tabelInstruktur.getValueAt(baris, 1).toString().trim(); 
-                    FormEditInstruktur formEdit = new FormEditInstruktur(
-                        (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(PanelDataInstruktur.this), 
-                        true, 
-                        idTarget, 
-                        PanelDataInstruktur.this
-                    );
-                    formEdit.setVisible(true);
+                    String idTarget = tabelInstruktur.getValueAt(baris, 1).toString().trim();
+                    java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelDataInstruktur.this);
+                    if (parentWindow instanceof java.awt.Frame) {
+                        FormEditInstruktur formEdit = new FormEditInstruktur(
+                            (java.awt.Frame) parentWindow,
+                            true,
+                            idTarget,
+                            PanelDataInstruktur.this
+                        );
+                        tampilkanFormDenganRefresh(formEdit);
+                    }
                 }
 
                 @Override
@@ -73,23 +78,31 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
         );
     }
 
+    // Refresh cache MySQL & tabel otomatis saat form Tambah/Edit ditutup
+    private void tampilkanFormDenganRefresh(java.awt.Window form) {
+        form.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                DataStore.muatUlang();
+                loadTableData("");
+            }
+        });
+        form.setVisible(true);
+    }
+
     // Method untuk Load Data ke JTable
     public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelInstruktur.getModel();
-        model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
+        model.setRowCount(0);
 
         int no = 1;
-        
-        // Memanggil helper method untuk mengambil khusus data Instruktur
+
         for (Instruktur ins : DataStore.getHanyaInstruktur()) {
-            
-            // Logika Pencarian (Search)
-            boolean match = keyword.isEmpty() || 
-                            ins.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
+            boolean match = keyword.isEmpty() ||
+                            ins.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) ||
                             ins.getIdInstruktur().toLowerCase().contains(keyword.toLowerCase());
 
             if (match) {
-                // Menambahkan baris dengan mengambil data dari Getter
                 model.addRow(new Object[]{
                     no++,
                     ins.getIdInstruktur(),
@@ -102,9 +115,9 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
                 });
             }
         }
-        
+
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data Instruktur");
-        
+
         try {
             Util.TabelUtil.autoResizeKolom(tabelInstruktur);
         } catch (Exception e) {
@@ -112,27 +125,22 @@ public class PanelDataInstruktur extends javax.swing.JPanel {
         }
     }
 
+    // Hapus data instruktur dari MySQL via PenggunaDAO
     private void hapusData(int baris) {
         String idInstruktur = tabelInstruktur.getValueAt(baris, 1).toString();
         String nama = tabelInstruktur.getValueAt(baris, 2).toString();
-        
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Apakah Anda yakin ingin menghapus instruktur " + nama + "?", 
-            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-            
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Apakah Anda yakin ingin menghapus instruktur " + nama + "?\nAkun login instruktur ini juga akan ikut terhapus.",
+            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
-           
-            boolean sukses = DataStore.daftarPengguna.removeIf(p -> 
-                p instanceof Instruktur && ((Instruktur) p).getIdInstruktur().equals(idInstruktur)
-            );
-            
-            if (sukses) {
+            if (Database.PenggunaDAO.hapusInstruktur(idInstruktur)) {
+                DataStore.muatUlang();
                 JOptionPane.showMessageDialog(this, "Data Instruktur Berhasil Dihapus!");
-                // Refresh tabel kembali ke keadaan awal
                 loadTableData("");
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal menghapus data instruktur!", "Error", JOptionPane.ERROR_MESSAGE);
             }
+            // Jika gagal (misal masih membimbing peserta), popup error sudah ditampilkan oleh DAO
         }
     }
 

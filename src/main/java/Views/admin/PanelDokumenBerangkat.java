@@ -84,7 +84,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
 
                 if (dokumenTerpilih != null) {
                    FormEditDokumen form = new FormEditDokumen(PanelDokumenBerangkat.this, dokumenTerpilih);
-tampilkanFormDenganRefresh(form);
+                   tampilkanFormDenganRefresh(form);
                 }
             }
 
