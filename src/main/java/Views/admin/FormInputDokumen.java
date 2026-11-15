@@ -12,50 +12,39 @@ import Model.Dokumen;
  */
 public class FormInputDokumen extends javax.swing.JFrame {
 
-    /**
-     * Creates new form FormInputDokumen
-     */
-    
     private Views.admin.PanelDokumenBerangkat panelInduk;
     private Dokumen dokumenAktif;
-    
+
     public FormInputDokumen(Views.admin.PanelDokumenBerangkat panelInduk, Dokumen dokumenDikirim) {
         initComponents();
         this.panelInduk = panelInduk;
         this.dokumenAktif = dokumenDikirim;
-//        setSize(520, 425);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         tampilkanDataAwal();
         setupComboBoxDokumen();
     }
-    
+
     private void setupComboBoxDokumen() {
-        // 1. Bersihkan isi bawaan NetBeans
         cbJenisDokumen.removeAllItems();
-        
-        // 2. Masukkan daftar jenis dokumen yang wajib untuk ke Jepang
+
         cbJenisDokumen.addItem("Paspor");
         cbJenisDokumen.addItem("Medical Check-Up");
         cbJenisDokumen.addItem("Visa");
         cbJenisDokumen.addItem("KTP");
         cbJenisDokumen.addItem("Ijazah");
         cbJenisDokumen.addItem("Surat Izin Keluarga");
-        
-        // 3. Pasang "Telinga" agar form mereset otomatis saat pilihan diganti
+
         cbJenisDokumen.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                // Pastikan ada yang dipilih agar tidak error
                 if (cbJenisDokumen.getSelectedItem() != null) {
-                    
-                    // Kosongkan kolom inputan setiap kali ganti jenis dokumen!
                     txtNomorDokumen.setText("");
                     txtPathFile.setText("");
-                    
-                    // (Opsional) Mengubah teks petunjuk (placeholder) 
+
                     String pilihan = cbJenisDokumen.getSelectedItem().toString();
                     if (pilihan.equals("Medical Check-Up") || pilihan.equals("Surat Izin Keluarga")) {
-                        // Kalau MCU atau Surat Izin, biasanya tidak ada nomor dokumennya
-                        txtNomorDokumen.setEnabled(false); 
+                        txtNomorDokumen.setEnabled(false);
                         txtNomorDokumen.setText("-");
                     } else {
                         txtNomorDokumen.setEnabled(true);
@@ -64,12 +53,10 @@ public class FormInputDokumen extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void tampilkanDataAwal() {
-        
         lblNamaPeserta.setText(dokumenAktif.getPeserta().getNamaLengkap());
         lblIdPeserta.setText(dokumenAktif.getPeserta().getIdPeserta());
-        
         lblStatusKeberangkatan.setText(dokumenAktif.getPeserta().getStatusKeberangkatan());
     }
 
@@ -301,51 +288,51 @@ public class FormInputDokumen extends javax.swing.JFrame {
 
         // 1. Validasi File
         if (pathAsli.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Pilih berkas file-nya terlebih dahulu, kawan!", "Peringatan", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Pilih berkas file-nya terlebih dahulu, kawan!", "Peringatan",
                 javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Validasi Nomor Dokumen 
-        // Kalau bukan file MCU atau Surat Izin, Nomor Dokumen wajib diisi
+        // 2. Validasi Nomor Dokumen
         if (!jenisDokumen.equals("Medical Check-Up") && !jenisDokumen.equals("Surat Izin Keluarga") && nomorDokumen.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Nomor " + jenisDokumen + " tidak boleh kosong!", "Peringatan", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Nomor " + jenisDokumen + " tidak boleh kosong!", "Peringatan",
                 javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
-            // 3. Proses Copy File ke Brankas (Logika Anda sudah sangat baik)
+            // 3. Proses Copy File ke Brankas_Dokumen
             String folderTujuan = System.getProperty("user.dir") + "/Brankas_Dokumen/" + dokumenAktif.getPeserta().getIdPeserta();
             java.io.File direktori = new java.io.File(folderTujuan);
             if (!direktori.exists()) {
-                direktori.mkdirs(); 
+                direktori.mkdirs();
             }
 
-            String ekstensi = pathAsli.substring(pathAsli.lastIndexOf("."));
+            int titikTerakhir = pathAsli.lastIndexOf(".");
+            String ekstensi = (titikTerakhir != -1) ? pathAsli.substring(titikTerakhir) : "";
             String namaFileBaru = dokumenAktif.getPeserta().getIdPeserta() + "_" + jenisDokumen.replace(" ", "") + ekstensi;
 
             java.nio.file.Path sumberPath = java.nio.file.Paths.get(pathAsli);
             java.nio.file.Path targetPath = java.nio.file.Paths.get(folderTujuan, namaFileBaru);
             java.nio.file.Files.copy(sumberPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-            // 4. Update Objek "Map" Dokumen (INI YANG BARU)
-            // Arahkan data ke slot (setter) yang tepat sesuai jenisnya
+            // 4. Update Objek Dokumen & Status Peserta di Memori
+            boolean statusPesertaBerubah = false;
+
             switch (jenisDokumen) {
                 case "Paspor":
                     dokumenAktif.setPaspor(nomorDokumen, namaFileBaru);
 
-                    // Jika Paspor beres, set status jadi Siap Berangkat
-                    if (!dokumenAktif.getPeserta().getStatusKeberangkatan().equals("Siap Berangkat")) {
+                    if (!"Siap Berangkat".equals(dokumenAktif.getPeserta().getStatusKeberangkatan())) {
                         dokumenAktif.getPeserta().setStatusKeberangkatan("Siap Berangkat");
+                        statusPesertaBerubah = true;
                     }
                     break;
 
                 case "Medical Check-Up":
-                    // Jika user tidak isi nomor, kasih nilai default "Tersedia"
-                    String hasilMcu = nomorDokumen.isEmpty() ? "Ada Berkas" : nomorDokumen;
+                    String hasilMcu = (nomorDokumen.isEmpty() || nomorDokumen.equals("-")) ? "Ada Berkas" : nomorDokumen;
                     dokumenAktif.setMcu(hasilMcu, namaFileBaru);
                     break;
 
@@ -358,29 +345,37 @@ public class FormInputDokumen extends javax.swing.JFrame {
                     break;
 
                 default:
-                    // Untuk Ijazah / Surat Izin Keluarga
-                    // File tetap aman di-copy ke Brankas, namun jika ingin dimunculkan 
-                    // di FormDetailDokumen, Anda perlu menambahkan atribut + setter di model Dokumen.
-                    System.out.println("Info: Berkas " + jenisDokumen + " tersimpan di folder.");
+                    System.out.println("Info: Berkas " + jenisDokumen + " tersimpan di folder Brankas_Dokumen.");
                     break;
             }
 
-            // 5. Refresh UI Induk & Tutup Form
-            if (panelInduk != null) {
-                // Karena tidak pakai GUI builder, panggil method manual yang ada di panelInduk
-                panelInduk.loadTableData(""); 
-                panelInduk.loadStatistics(); 
+            // 5. Simpan Perubahan ke MySQL via DAO
+            boolean okDokumen = Database.DokumenDAO.ubah(dokumenAktif);
+            boolean okPeserta = true;
+
+            if (okDokumen && statusPesertaBerubah) {
+                okPeserta = Database.PesertaDAO.ubah(dokumenAktif.getPeserta());
             }
 
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Dokumen " + jenisDokumen + " berhasil di-upload dan diamankan!", "Sukses", 
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            // 6. Sinkronkan ulang cache DataStore dengan database
+            DataStore.DataStore.muatUlang();
 
-            this.dispose();
+            if (okDokumen && okPeserta) {
+                if (panelInduk != null) {
+                    panelInduk.loadTableData("");
+                    panelInduk.loadStatistics();
+                }
+
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Dokumen " + jenisDokumen + " berhasil di-upload dan disimpan ke database!", "Sukses",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                this.dispose();
+            }
 
         } catch (Exception e) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Gagal memproses file: " + e.getMessage(), "Error Kritis", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Gagal memproses file: " + e.getMessage(), "Error Kritis",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
@@ -389,16 +384,15 @@ public class FormInputDokumen extends javax.swing.JFrame {
     private void btnCariFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariFileActionPerformed
         javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
         fileChooser.setDialogTitle("Pilih Dokumen Peserta");
-        
-        javax.swing.filechooser.FileNameExtensionFilter filter = 
+
+        javax.swing.filechooser.FileNameExtensionFilter filter =
             new javax.swing.filechooser.FileNameExtensionFilter("Dokumen PDF & Gambar", "pdf", "jpg", "jpeg", "png");
         fileChooser.setFileFilter(filter);
 
         int pilihan = fileChooser.showOpenDialog(this);
-        
+
         if (pilihan == javax.swing.JFileChooser.APPROVE_OPTION) {
             java.io.File fileTerpilih = fileChooser.getSelectedFile();
-            
             txtPathFile.setText(fileTerpilih.getAbsolutePath());
         }
     }//GEN-LAST:event_btnCariFileActionPerformed

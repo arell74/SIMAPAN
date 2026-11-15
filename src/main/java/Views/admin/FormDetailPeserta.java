@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.sql.ResultSet;
 import javax.swing.BoxLayout;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -21,41 +22,37 @@ import javax.swing.JPanel;
  */
 public class FormDetailPeserta extends javax.swing.JFrame {
 
-    /**
-     * Creates new form FromEditPeserta
-     */
     private String idPesertaAktif;
-    
+
     public FormDetailPeserta(java.awt.Frame parent, boolean modal, String idPeserta) {
         initComponents();
         setSize(790, 517);
         pack();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(parent);
         setResizable(false);
         setTitle("Form Detail Peserta");
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
         this.idPesertaAktif = idPeserta;
         panelRiwayatSeleksi.setLayout(new BoxLayout(panelRiwayatSeleksi, BoxLayout.Y_AXIS));
-        
+
+        // Pastikan cache DataStore sinkron dengan data terbaru dari MySQL
+        DataStore.muatUlang();
+
         loadDataIdentitas(idPeserta);
         loadRiwayatSeleksi(idPeserta);
     }
-    
+
     private void loadDataIdentitas(String idPeserta) {
-        Peserta pesertaAktif = null;
-        for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta().equals(idPeserta)) {
-                pesertaAktif = p;
-                break;
-            }
-        }
+        Peserta pesertaAktif = DataStore.cariPeserta(idPeserta);
 
         if (pesertaAktif != null) {
-            String namaInstruktur = (pesertaAktif.getInstrukturDamping() != null) 
-                        ? pesertaAktif.getInstrukturDamping().getNamaLengkap() 
-                        : "Belum ditentukan";
-            
+            String namaInstruktur = (pesertaAktif.getInstrukturDamping() != null)
+                    ? pesertaAktif.getInstrukturDamping().getNamaLengkap()
+                    : "Belum ditentukan";
+
             lblNamaHeader.setText(pesertaAktif.getNamaLengkap());
-            lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · Terdaftar sejak 01 Oktober 2025"); 
+            lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · Terdaftar sejak 01 Oktober 2025");
 
             lblNik.setText(pesertaAktif.getNik());
             lblTglLahir.setText(pesertaAktif.getTanggalLahir());
@@ -64,40 +61,42 @@ public class FormDetailPeserta extends javax.swing.JFrame {
             lblNoHp.setText(pesertaAktif.getNoHp());
             lblLevelBahasa.setText(pesertaAktif.getLevelBahasa());
             lblAlamat.setText(pesertaAktif.getAlamat());
-//            
-//            lblInstruktur.setText(pesertaAktif.getInstrukturDamping().getNamaLengkap());
             lblInstruktur.setText(namaInstruktur);
 
-            for (Program prg : DataStore.daftarProgram) {
-                if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {
-                    lblProgram.setText(prg.getIdProgram() + " - " + prg.getNamaProgram());
-                    lblBiaya.setText("Rp " + String.format("%,.0f", prg.getBiaya()).replace(',', '.'));
-                    break;
-                }
+            Program prg = DataStore.cariProgram(pesertaAktif.getProgram());
+            if (prg != null) {
+                lblProgram.setText(prg.getIdProgram() + " - " + prg.getNamaProgram());
+                lblBiaya.setText("Rp " + String.format("%,.0f", prg.getBiaya()).replace(',', '.'));
+            } else {
+                lblProgram.setText("-");
+                lblBiaya.setText("Rp 0");
             }
-            
+
             lblStatusSeleksi.setText(pesertaAktif.getStatusSeleksi());
             lblStatusBayar.setText(pesertaAktif.getStatusPembayaran());
             lblStatusDokumen.setText(pesertaAktif.getStatusKeberangkatan());
+        } else {
+            JOptionPane.showMessageDialog(this, "Data peserta tidak ditemukan di database!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+            this.dispose();
         }
     }
-    
+
     private void loadRiwayatSeleksi(String idPeserta) {
         panelRiwayatSeleksi.removeAll();
-        
 
         boolean adaRiwayat = false;
 
         for (Seleksi sel : DataStore.daftarSeleksi) {
-            if (sel.getPeserta().getIdPeserta().equals(idPeserta)) {
+            if (sel.getPeserta() != null && idPeserta.equals(sel.getPeserta().getIdPeserta())) {
                 adaRiwayat = true;
-                
+
                 JPanel card = new JPanel();
                 card.setLayout(new java.awt.BorderLayout());
                 card.setBackground(Color.WHITE);
                 card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                    javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)), // Garis bawah
-                    javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10) // Padding dalam
+                    javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
+                    javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10)
                 ));
                 card.setMaximumSize(new Dimension(400, 80));
 
@@ -105,26 +104,26 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 panelKiri.setBackground(Color.WHITE);
                 javax.swing.JLabel lblJudul = new javax.swing.JLabel(sel.getJenisSeleksi());
                 lblJudul.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
-                
+
                 javax.swing.JLabel lblTanggal = new javax.swing.JLabel(sel.getTanggalSeleksi());
                 lblTanggal.setFont(new java.awt.Font("Inter", java.awt.Font.PLAIN, 10));
                 lblTanggal.setForeground(Color.GRAY);
-                
+
                 panelKiri.add(lblJudul);
                 panelKiri.add(lblTanggal);
 
                 JPanel panelKanan = new JPanel(new java.awt.GridLayout(2, 1));
                 panelKanan.setBackground(Color.WHITE);
-                
+
                 javax.swing.JLabel lblNilai = new javax.swing.JLabel(String.valueOf(sel.getNilai()), javax.swing.SwingConstants.RIGHT);
                 lblNilai.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 14));
                 lblNilai.setForeground(new Color(150, 0, 0));
 
                 javax.swing.JLabel lblStatus = new javax.swing.JLabel(sel.getStatusHasil(), javax.swing.SwingConstants.RIGHT);
                 lblStatus.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
-                
-                if (sel.getStatusHasil().equalsIgnoreCase("Lulus")) {
-                    lblStatus.setForeground(new Color(0, 150, 0)); // Hijau
+
+                if ("Lulus".equalsIgnoreCase(sel.getStatusHasil())) {
+                    lblStatus.setForeground(new Color(0, 150, 0));
                 } else {
                     lblStatus.setForeground(Color.RED);
                 }
@@ -138,6 +137,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
                 panelRiwayatSeleksi.add(card);
             }
         }
+
         if (!adaRiwayat) {
             javax.swing.JLabel lblKosong = new javax.swing.JLabel("Belum ada riwayat seleksi.");
             lblKosong.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -149,7 +149,7 @@ public class FormDetailPeserta extends javax.swing.JFrame {
     }
 
     private FormDetailPeserta() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**

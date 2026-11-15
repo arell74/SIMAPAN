@@ -24,10 +24,10 @@ import Database.PesertaDAO;
  */
     public class FormTambahPeserta extends javax.swing.JFrame {
         
-    private Views.admin.PanelDataPeserta panelInduk;
-    
-    private String generateIdPeserta() {
-        return PesertaDAO.idBerikutnya();
+        private Views.admin.PanelDataPeserta panelInduk;
+
+        private String generateIdPeserta() {
+            return PesertaDAO.idBerikutnya();
     }
 
     private void loadComboBoxInstruktur() {
