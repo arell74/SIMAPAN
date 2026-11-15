@@ -11,6 +11,7 @@ import Model.Program;
 import java.awt.Frame;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import Database.PesertaDAO;
 
 /**
  *
@@ -27,14 +28,14 @@ public class FormEditPeserta extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
         txtIdPeserta.setEditable(false);
-        
-        loadComboBoxData();
-        cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3"}));
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        loadComboBoxData();   // mengisi instruktur & program dari DataStore
+        cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3", "N2", "N1"}));
         cmbStatusBayar.setModel(new DefaultComboBoxModel<>(new String[]{"Belum Lunas", "Lunas"}));
         cmbAgama.setModel(new DefaultComboBoxModel<>(new String[]{"Islam", "Kristen", "Hindu", "Katholik", "Budha"}));
         cmbJenisKelamin.setModel(new DefaultComboBoxModel<>(new String[]{"Laki-laki", "Perempuan"}));
-        cmbProgram.setModel(new DefaultComboBoxModel<>(new String[]{"Manufaktur", "Caregiver", "Pertanian"}));
-        
+
         tampilkanDataPeserta(idPeserta);
     }
     
@@ -376,30 +377,38 @@ public class FormEditPeserta extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "NIK dan Nama tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+        if (cmbProgram.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Pilih program terlebih dahulu!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
-            pesertaEdit.setNik(txtNik.getText()); 
-            pesertaEdit.setNamaLengkap(txtNamaLengkap.getText());
-            pesertaEdit.setTanggalLahir(txtTanggalLahir.getText()); 
-            pesertaEdit.setJenisKelamin(cmbJenisKelamin.getSelectedItem().toString()); 
-            pesertaEdit.setNoHp(txtNoHp.getText());
-            pesertaEdit.setAgama(cmbAgama.getSelectedItem().toString()); 
-            pesertaEdit.setAlamat(txtAlamat.getText());
-            pesertaEdit.setLevelBahasa(cmbLevelBahasa.getSelectedItem().toString());
-            pesertaEdit.setStatusPembayaran(cmbStatusBayar.getSelectedItem().toString());
+            java.time.LocalDate.parse(txtTanggalLahir.getText().trim());   // harus yyyy-MM-dd
+        } catch (java.time.format.DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Tanggal lahir harus berformat YYYY-MM-DD, contoh 2003-12-17",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-            Instruktur instrukturBaru = (Instruktur) cmbInstruktur.getSelectedItem();
-            pesertaEdit.setInstrukturDamping(instrukturBaru);
-            
-            String programString = cmbProgram.getSelectedItem().toString();
-            String idProgramBaru = programString.substring(0, 6); 
-            pesertaEdit.setProgram(idProgramBaru);
+        // 1. isi objek dengan data dari form
+        pesertaEdit.setNik(txtNik.getText().trim());
+        pesertaEdit.setNamaLengkap(txtNamaLengkap.getText().trim());
+        pesertaEdit.setTanggalLahir(txtTanggalLahir.getText().trim());
+        pesertaEdit.setJenisKelamin(cmbJenisKelamin.getSelectedItem().toString());
+        pesertaEdit.setNoHp(txtNoHp.getText());
+        pesertaEdit.setAgama(cmbAgama.getSelectedItem().toString());
+        pesertaEdit.setAlamat(txtAlamat.getText());
+        pesertaEdit.setLevelBahasa(cmbLevelBahasa.getSelectedItem().toString());
+        pesertaEdit.setStatusPembayaran(cmbStatusBayar.getSelectedItem().toString());
+        pesertaEdit.setInstrukturDamping((Instruktur) cmbInstruktur.getSelectedItem());
+        pesertaEdit.setProgram(cmbProgram.getSelectedItem().toString().split(" - ")[0]);   // "PRG001"
 
+        // 2. simpan ke database, 3. muat ulang cache
+        boolean ok = PesertaDAO.ubah(pesertaEdit);
+        DataStore.muatUlang();   // sekalian membuang perubahan di memori kalau simpan gagal
+
+        if (ok) {
             JOptionPane.showMessageDialog(this, "Data berhasil diperbarui!");
             this.dispose();
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSimpanActionPerformed
 

@@ -56,8 +56,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
 
         // Pasang Renderer dan Editor di kolom Aksi (Indeks ke-8)
         tabelDokumen.getColumnModel().getColumn(8).setCellRenderer(new TombolAksiRenderer());
-        tabelDokumen.getColumnModel().getColumn(8).setCellEditor(
-            new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
+        tabelDokumen.getColumnModel().getColumn(8).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
                 
                 @Override
                 public void onDetail(int baris) {

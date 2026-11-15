@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package Views.peserta;
 
 import Views.admin.FormLogin;
@@ -6,7 +10,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-/*
+/**
+ *
  * @author arelssi
  */
 public class PesertaFrame extends javax.swing.JFrame {
@@ -61,7 +66,13 @@ public class PesertaFrame extends javax.swing.JFrame {
 
         Model.Peserta pesertaAktif = cariPesertaAktif();
         if (pesertaAktif != null) {
-            lblNamaPeserta.setText(pesertaAktif.getNamaLengkap());
+            String namaLengkap = pesertaAktif.getNamaLengkap();
+            lblNamaPeserta.setText(namaLengkap);
+            
+            // Set inisial ke tombol profil
+            if (namaLengkap != null && !namaLengkap.isEmpty()) {
+                btnProfile.setText(String.valueOf(namaLengkap.charAt(0)).toUpperCase());
+            }
         }
 
         showPanel(new Views.peserta.PanelDashboardPeserta(this.idPeserta));
@@ -105,8 +116,7 @@ public class PesertaFrame extends javax.swing.JFrame {
         lblHalamanSub = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
         lblNamaPeserta = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabelAvatar = new javax.swing.JLabel();
+        btnProfile = new javax.swing.JButton(); // Menggantikan jPanel1 dan jLabelAvatar
         mainContent = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -240,39 +250,33 @@ public class PesertaFrame extends javax.swing.JFrame {
 
         lblTanggal.setFont(new java.awt.Font("Inter", 0, 11));
         lblTanggal.setForeground(new java.awt.Color(140, 140, 140));
+        lblTanggal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT); // Diratakan ke kanan
         lblTanggal.setText("Selasa, 12 Mei 2026");
         lblTanggal.setPreferredSize(new java.awt.Dimension(240, 16));
-        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 10, 230, 20));
+        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 12, 240, 20));
 
         lblNamaPeserta.setFont(new java.awt.Font("Inter", 1, 12));
         lblNamaPeserta.setForeground(new java.awt.Color(40, 40, 40));
+        lblNamaPeserta.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT); // Diratakan ke kanan
         lblNamaPeserta.setText("Peserta");
         lblNamaPeserta.setPreferredSize(new java.awt.Dimension(210, 16));
-        panelHeadr.add(lblNamaPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 30, 230, -1));
+        panelHeadr.add(lblNamaPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 32, 240, -1));
 
-        jPanel1.setBackground(new java.awt.Color(255, 235, 235));
-
-        jLabelAvatar.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15));
-        jLabelAvatar.setText("S");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(jLabelAvatar)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(13, Short.MAX_VALUE)
-                .addComponent(jLabelAvatar)
-                .addContainerGap())
-        );
-
-        panelHeadr.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 10, 40, 40));
+        // Penggantian jPanel1 dan jLabelAvatar dengan btnProfile
+        btnProfile.setBackground(new java.awt.Color(255, 235, 235));
+        btnProfile.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 16));
+        btnProfile.setForeground(new java.awt.Color(122, 0, 0));
+        btnProfile.setText("U"); // Default Inisial
+        btnProfile.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1)); // Menghapus border tebal
+        btnProfile.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnProfile.setFocusPainted(false);
+        btnProfile.setToolTipText("Lihat Profil Saya");
+        btnProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProfileActionPerformed(evt);
+            }
+        });
+        panelHeadr.add(btnProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 12, 40, 40));
 
         mainContent.setBackground(new java.awt.Color(245, 245, 245));
         mainContent.setName("mainContent"); // NOI18N
@@ -343,6 +347,23 @@ public class PesertaFrame extends javax.swing.JFrame {
         setActiveButton(btnLihatNilai);
     }//GEN-LAST:event_btnLihatNilaiActionPerformed
 
+    private void btnProfileActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        if (DataStore.DataStore.penggunaLogin != null) {
+            String unameLogin = DataStore.DataStore.penggunaLogin.getUsername();
+            
+            // Memanggil JDialog profil khusus untuk peserta
+            FormProfilPeserta form = new FormProfilPeserta(
+                this, 
+                true, 
+                unameLogin 
+            );
+            form.setVisible(true);
+            
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Anda belum login!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         int konfirmasi = javax.swing.JOptionPane.showConfirmDialog(this,
             "Apakah Anda yakin ingin keluar dari sistem?",
@@ -351,10 +372,8 @@ public class PesertaFrame extends javax.swing.JFrame {
             javax.swing.JOptionPane.QUESTION_MESSAGE);
 
         if (konfirmasi == javax.swing.JOptionPane.YES_OPTION) {
-
             FormLogin formLogin = new FormLogin();
             formLogin.setVisible(true);
-
             this.dispose();
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
@@ -370,17 +389,16 @@ public class PesertaFrame extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnKerjakanKuis;
     private javax.swing.JButton btnLihatMateri;
     private javax.swing.JButton btnLihatNilai;
     private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnProfile; // Variabel baru pengganti jPanel1 dan jLabelAvatar
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabelAvatar;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lblHalamanJudul;
@@ -390,5 +408,5 @@ public class PesertaFrame extends javax.swing.JFrame {
     private javax.swing.JPanel mainContent;
     private javax.swing.JPanel panelHeadr;
     private javax.swing.JPanel sidebar;
-    // End of variables declaration
+    // End of variables declaration//GEN-END:variables
 }

@@ -353,14 +353,13 @@ public class FormLogin extends javax.swing.JFrame {
                     Views.admin.AdminFrame adminDashboard = new Views.admin.AdminFrame(); 
                     adminDashboard.setVisible(true);
 
-                } else if (user.getRole().equals("INSTRUKTUR")) {
+               } else if (user.getRole().equals("INSTRUKTUR")) {
                     Model.Instruktur ins = (Model.Instruktur) user;
                     String idYangLogin = ins.getIdInstruktur(); 
 
-                    Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame(idYangLogin);
+                    Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame(null, null, idYangLogin);
                     instrukturDashboard.setVisible(true);
 
-                // --- INI BAGIAN YANG DITAMBAHKAN UNTUK PESERTA ---
                 } else if (user.getRole().equals("PESERTA")) {
                     Model.Peserta pst = (Model.Peserta) user;
                     String idPesertaYangLogin = pst.getIdPeserta();

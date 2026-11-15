@@ -36,13 +36,11 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
     }
     
     private void setupTable() {
-        // Styling tabel standar...
         tabelSeleksi.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelSeleksi.getTableHeader().setBackground(new Color(122, 0, 0));
         tabelSeleksi.getTableHeader().setForeground(Color.WHITE);
         tabelSeleksi.setRowHeight(36);
         
-        // Asumsi kolom "Aksi" berada di indeks ke-9 (Kolom ke-10)
         tabelSeleksi.getColumnModel().getColumn(9).setCellRenderer(new TombolAksiRenderer());
         tabelSeleksi.getColumnModel().getColumn(9).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
             
@@ -59,9 +57,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
 
             @Override
             public void onEdit(int baris) {
-                String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString(); 
-                
-                // 2. Cari objek Peserta aslinya dari DataStore
+                String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString();
                 Model.Peserta pesertaTerpilih = null;
                 for (Model.Peserta p : DataStore.daftarPeserta) {
                     if (p.getIdPeserta().equals(idPeserta)) {
@@ -69,11 +65,7 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
                         break;
                     }
                 }
-                
-                // 3. Panggil Form Input Seleksi
                 if (pesertaTerpilih != null) {
-                    
-                    // Gunakan PanelManajemenSeleksi.this agar lemparan induknya tepat sasaran
                     FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, PanelManajemenSeleksi.this);
                     form.setVisible(true); 
                     

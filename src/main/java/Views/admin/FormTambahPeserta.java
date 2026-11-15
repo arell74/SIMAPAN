@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import Database.PesertaDAO;
 
 /**
  *
@@ -26,8 +27,7 @@ import javax.swing.JOptionPane;
     private Views.admin.PanelDataPeserta panelInduk;
     
     private String generateIdPeserta() {
-        int ukuranData = DataStore.daftarPeserta.size();
-        return String.format("PST%03d", ukuranData + 1);
+        return PesertaDAO.idBerikutnya();
     }
 
     private void loadComboBoxInstruktur() {
@@ -51,13 +51,15 @@ import javax.swing.JOptionPane;
         txtIdPeserta.setEditable(false);
         
         loadComboBoxInstruktur();
-        cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3"}));
-        // Status Pembayaran
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        cmbLevelBahasa.setModel(new DefaultComboBoxModel<>(new String[]{"N5", "N4", "N3", "N2", "N1"}));
         cmbStatusBayar.setModel(new DefaultComboBoxModel<>(new String[]{"Belum Lunas", "Lunas"}));
         cmbAgama.setModel(new DefaultComboBoxModel<>(new String[]{"Islam", "Kristen", "Hindu", "Katholik", "Budha"}));
         cmbJenisKelamin.setModel(new DefaultComboBoxModel<>(new String[]{"Laki-laki", "Perempuan"}));
-        cmbProgram.setModel(new DefaultComboBoxModel<>(new String[]{"Manufaktur", "Caregiver", "Pertanian"}));
-        
+        cmbProgram.removeAllItems();
+        for (Model.Program prg : DataStore.daftarProgram) {
+            cmbProgram.addItem(prg.getIdProgram() + " - " + prg.getNamaProgram());
+        }
     }
 
     /**
@@ -374,7 +376,8 @@ import javax.swing.JOptionPane;
         }
 
         String namaInstrukturDipilih = cmbInstruktur.getSelectedItem().toString();
-        Model.Instruktur instrukturPilihan = null;
+        Model.Instruktur instrukturPilihan = (Model.Instruktur) cmbInstruktur.getSelectedItem();
+
         
         for (Model.Pengguna p : DataStore.daftarPengguna) {
             if (p instanceof Model.Instruktur) {
@@ -386,7 +389,7 @@ import javax.swing.JOptionPane;
             }
         }
         
-        String programDipilih = cmbProgram.getSelectedItem().toString();
+        String programDipilih = cmbProgram.getSelectedItem().toString().split(" - ")[0];   // "PRG001"
 
         String usernamePeserta = nik; 
         String passwordPeserta = "yuuki" + nik;
@@ -411,14 +414,11 @@ import javax.swing.JOptionPane;
             "Belum Berangkat"
         );
         
-        DataStore.daftarPeserta.add(pesertaBaru);
-        
-        if (panelInduk != null) {
-            panelInduk.loadTableData(""); 
+        if (PesertaDAO.tambah(pesertaBaru)) {
+            DataStore.muatUlang();
+            JOptionPane.showMessageDialog(this, "Peserta Baru Berhasil Ditambahkan!");
+            this.dispose();
         }
-        
-        javax.swing.JOptionPane.showMessageDialog(this, "Peserta Baru Berhasil Ditambahkan!");
-        this.dispose();
     
     }//GEN-LAST:event_btnSimpanActionPerformed
 
@@ -441,7 +441,7 @@ import javax.swing.JOptionPane;
             evt.consume();
         }
         
-        if (txtNik.getText().length() >= 14) {
+        if (txtNoHp.getText().length() >= 14) {
             evt.consume();
         }
     }//GEN-LAST:event_txtNoHpKeyTyped

@@ -24,12 +24,12 @@ public class PanelDataPeserta extends javax.swing.JPanel {
      * Creates new form DataPeserta
      */
 
-    public PanelDataPeserta() {
+     public PanelDataPeserta() {
         initComponents();
         setupTable();
         loadTableData(""); 
     }
-
+ 
     private void setupTable() {
         tabelPeserta.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelPeserta.getTableHeader().setBackground(new Color(122, 0, 0));
@@ -48,7 +48,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                     detailForm.setVisible(true);
                 }
             }
-
+ 
             @Override
             public void onEdit(int baris) {
                 String id = tabelPeserta.getValueAt(baris, 1).toString();
@@ -57,23 +57,34 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 
                 if (parentWindow instanceof java.awt.Frame) {
                     FormEditPeserta editForm = new FormEditPeserta((java.awt.Frame) parentWindow, true, id);
-                    editForm.setVisible(true); 
-                    
-                    loadTableData(""); 
+                    // DIUBAH: tabel di-refresh SAAT form ditutup (bukan langsung setelah setVisible)
+                    tampilkanFormDenganRefresh(editForm);
                 }
             }
-
+ 
             @Override
             public void onHapus(int baris) {
                 hapusData(baris);
             }
         }));
     }
-
+ 
+    // BARU: membuka form (JFrame non-modal) lalu me-refresh tabel ketika form itu ditutup.
+    // Dipakai oleh tombol Edit dan tombol Tambah.
+    private void tampilkanFormDenganRefresh(javax.swing.JFrame form) {
+        form.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                loadTableData(txtCari.getText());
+            }
+        });
+        form.setVisible(true);
+    }
+ 
     public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
         model.setRowCount(0);
-
+ 
         int no = 1;
         
         for (Peserta p : DataStore.daftarPeserta) {
@@ -94,7 +105,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 });
             }
         }
-
+ 
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
         
         try {
@@ -103,25 +114,23 @@ public class PanelDataPeserta extends javax.swing.JPanel {
             System.out.println("TabelUtil error/belum ada: " + e.getMessage());
         }
     }
-
+ 
+    // DIUBAH: menghapus lewat DAO (MySQL), bukan removeIf() pada list di memori
     private void hapusData(int baris) {
         String idPeserta = tabelPeserta.getValueAt(baris, 1).toString();
         String nama = tabelPeserta.getValueAt(baris, 2).toString();
         
         int confirm = JOptionPane.showConfirmDialog(this, 
-            "Yakin ingin menghapus data " + nama + "?", 
+            "Yakin ingin menghapus data " + nama + "?\nData seleksi dan dokumen peserta ini juga ikut terhapus.", 
             "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
-            boolean sukses = DataStore.daftarPeserta.removeIf(p -> p.getIdPeserta().equals(idPeserta));
-            
-            if (sukses) {
+            if (Database.PesertaDAO.hapus(idPeserta)) {
+                DataStore.muatUlang();
                 JOptionPane.showMessageDialog(this, "Data berhasil dihapus!");
-                
-                loadTableData(""); 
-            } else {
-                JOptionPane.showMessageDialog(this, "Data gagal dihapus atau ID tidak ditemukan!");
+                loadTableData(txtCari.getText());
             }
+            // kalau gagal, popup error sudah ditampilkan oleh DAO
         }
     }
 
@@ -353,7 +362,7 @@ public class PanelDataPeserta extends javax.swing.JPanel {
     }//GEN-LAST:event_btnEksporActionPerformed
 
     private void btnImporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImporActionPerformed
-        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+         javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
         fileChooser.setDialogTitle("Pilih File Excel untuk Diimpor");
         fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel Files (*.xlsx)", "xlsx"));
         
@@ -372,47 +381,42 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                 
                 int jumlahBaru = 0;
                 int jumlahUpdate = 0;
+                int jumlahGagal = 0;   // BARU
                 
                 while (rowIterator.hasNext()) {
                     org.apache.poi.ss.usermodel.Row row = rowIterator.next();
                     org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
                     
-                    // 1. BACA SESUAI URUTAN KOLOM EXCEL HASIL EKSPORMU!
-                    // Col 0: No (Abaikan)
+                    // Urutan kolom = hasil ekspor. Col 0: No (diabaikan)
                     String idPeserta = formatter.formatCellValue(row.getCell(1)).trim(); // Col 1: ID
                     String nama = formatter.formatCellValue(row.getCell(2)).trim();      // Col 2: Nama
                     String nik = formatter.formatCellValue(row.getCell(3)).trim();       // Col 3: NIK
-                    String program = formatter.formatCellValue(row.getCell(4)).trim();   // Col 4: Program
+                    String program = formatter.formatCellValue(row.getCell(4)).trim();   // Col 4: Program (ID, mis. PRG001)
                     String statusSeleksi = formatter.formatCellValue(row.getCell(5)).trim(); // Col 5: Status
                     
                     // Lewati baris jika ID kosong atau tidak sengaja membaca header "ID Peserta"
                     if (idPeserta.isEmpty() || idPeserta.equalsIgnoreCase("ID Peserta")) continue;
                     
-                    boolean dataSudahAda = false;
+                    // DIUBAH: cari lewat cache DataStore, simpan lewat DAO
+                    Model.Peserta ada = DataStore.cariPeserta(idPeserta);
                     
-                    // 2. CEK LOGIKA UPSERT (UPDATE OR INSERT)
-                    for (Model.Peserta p : DataStore.daftarPeserta) {
-                        if (p.getIdPeserta().equals(idPeserta)) {
-                            // JIKA KETEMU: Timpa datanya!
-                            p.setNamaLengkap(nama);
-                            p.setNik(nik);
-                            p.setProgram(program);
-                            p.setStatusSeleksi(statusSeleksi);
-                            
-                            // (Kita tidak menyentuh Instruktur, Tgl Lahir, dll agar data lama tidak hilang)
-                            
-                            dataSudahAda = true;
-                            jumlahUpdate++;
-                            break; 
-                        }
-                    }
-                    
-                   if (!dataSudahAda) {
-                        String defaultUsername = nik;
-                        String defaultPassword = "yuuki" + nik;
+                    if (ada != null) {
+                        // UPDATE: timpa data (Instruktur, Tgl Lahir, dll sengaja tidak disentuh)
+                        ada.setNamaLengkap(nama);
+                        ada.setNik(nik);
+                        ada.setProgram(program);
+                        ada.setStatusSeleksi(statusSeleksi);
+                        
+                        // false = jangan munculkan popup error per baris
+                        if (Database.PesertaDAO.ubah(ada, false)) jumlahUpdate++; else jumlahGagal++;
+                        
+                    } else {
+                        // INSERT: NIK dipakai sebagai username, jadi tidak boleh kosong
+                        if (nik.isEmpty()) { jumlahGagal++; continue; }
+                        
                         Model.Peserta pesertaBaru = new Model.Peserta(
-                            defaultUsername, // 1. Username
-                            defaultPassword, // 2. Password
+                            nik,             // 1. Username
+                            "yuuki" + nik,   // 2. Password
                             idPeserta,       // 3. ID Peserta
                             nik,             // 4. NIK
                             nama,            // 5. Nama Lengkap
@@ -422,24 +426,25 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                             "-",             // 9. Agama
                             "-",             // 10. Alamat
                             program,         // 11. Program
-                            null,            // 12. Instruktur Damping
+                            null,            // 12. Instruktur Damping (kolom id_instruktur boleh NULL)
                             "-",             // 13. Level Bahasa
                             "Belum Lunas",   // 14. Status Pembayaran
                             statusSeleksi,   // 15. Status Seleksi
                             "Belum Berangkat"// 16. Status Keberangkatan
                         );
-                        DataStore.daftarPeserta.add(pesertaBaru);
-                        jumlahBaru++;
+                        if (Database.PesertaDAO.tambah(pesertaBaru, false)) jumlahBaru++; else jumlahGagal++;
                     }
                 }
                 
-                // Refresh Tabel
+                // Muat ulang dari database: menampilkan hasil import SEKALIGUS membuang
+                // perubahan di memori pada baris yang gagal disimpan
+                DataStore.muatUlang();
                 loadTableData("");
                 
-                // Pesan Sukses
                 String pesan = "Import Selesai!\n" +
                                "- Data Baru Ditambahkan: " + jumlahBaru + "\n" +
-                               "- Data Lama Diperbarui: " + jumlahUpdate;
+                               "- Data Lama Diperbarui: " + jumlahUpdate + "\n" +
+                               "- Baris Gagal (program/NIK tidak valid atau duplikat): " + jumlahGagal;
                 javax.swing.JOptionPane.showMessageDialog(this, pesan, "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
                 
             } catch (Exception e) {

@@ -5,6 +5,8 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Model.HasilKuis;
+import Model.Peserta;
 import Views.admin.FormLogin;
 import Views.admin.FormTambahPeserta;
 import java.awt.Color;
@@ -18,7 +20,9 @@ import javax.swing.JPanel;
  */
 public class InstrukturFrame extends javax.swing.JFrame {
     private String idInstruktur;
-    private void showPanel(JPanel panel) {
+    private HasilKuis hasilAktif;
+    private Peserta pesertaAktif;
+    public void showPanel(JPanel panel) {
             mainContent.removeAll(); 
 
             mainContent.setLayout(new java.awt.BorderLayout());
@@ -47,7 +51,11 @@ public class InstrukturFrame extends javax.swing.JFrame {
             activeBtn.setForeground(foregroundActive);
         }
         
-    public InstrukturFrame(String idInstruktur) {
+    public InstrukturFrame(HasilKuis hasil, Peserta peserta, String idInstruktur) {
+        this.hasilAktif = hasil;
+        this.pesertaAktif = peserta;
+        this.idInstruktur = idInstruktur;
+        
         initComponents();
         setSize(1200, 680);
             pack();
@@ -55,8 +63,6 @@ public class InstrukturFrame extends javax.swing.JFrame {
             setResizable(false);
             setTitle("SIMAPAN - Role Instruktur");
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            
-            this.idInstruktur = idInstruktur;
 
             lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", 
                                new java.util.Locale("id", "ID")).format(new java.util.Date()));
@@ -183,6 +189,23 @@ public class InstrukturFrame extends javax.swing.JFrame {
 
         dialog.setVisible(true);
     }
+    
+    private void muatDataHeader() { // (Atau method lain tempat error itu berada)
+    
+    // Tambahkan pembungkus IF ini
+    if (this.hasilAktif != null && this.pesertaAktif != null) {
+        
+        // Pindahkan kodemu yang lama ke dalam sini
+        String idPeserta = this.hasilAktif.getIdPeserta();
+        // txtIdPeserta.setText(idPeserta);
+        // ... (kode lanjutanmu) ...
+        
+    } else {
+        // Opsional: Beri nilai default jika data dipanggil dari tombol menu utama
+        System.out.println("Form dibuka tanpa data peserta terpilih.");
+        // lblNamaPeserta.setText("-"); 
+    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -632,7 +655,12 @@ public class InstrukturFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Manajemen Nilai");
         lblHalamanSub.setText("Kelola Nilai Peserta dari Materi");
 
-        showPanel(new PanelInputNilai(idInstruktur));
+        // SEBELUMNYA:
+        // showPanel(new PanelPenilaianHasilKuis(null, null, idInstrukturAktif));
+
+        // UBAH MENJADI SEPERTI INI:
+        showPanel(new PanelDaftarHasilKuis(idInstruktur));
+
         setActiveButton(btnManajemenSeleksi);
     }//GEN-LAST:event_btnManajemenSeleksiActionPerformed
 
@@ -697,43 +725,16 @@ public class InstrukturFrame extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(InstrukturFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
+    // ... (kode tampilan look and feel bawaan IDE biarkan saja) ...
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new InstrukturFrame("INS001").setVisible(true);
-            }
-        });
-    }
+    /* Create and display the form */
+    java.awt.EventQueue.invokeLater(new Runnable() {
+        public void run() {
+            // UBAH BARIS INI: Tambahkan null, null
+            new InstrukturFrame(null, null, "INS001").setVisible(true);
+        }
+    });
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;

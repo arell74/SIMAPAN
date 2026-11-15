@@ -87,7 +87,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         panelHeader = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnTutup = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
         panelBody = new javax.swing.JPanel();
         jSeparator1 = new javax.swing.JSeparator();
@@ -137,15 +137,15 @@ public class FormInputSeleksi extends javax.swing.JDialog {
         jLabel2.setPreferredSize(new java.awt.Dimension(300, 16));
         panelHeader.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(58, 38, -1, -1));
 
-        jButton1.setBackground(new java.awt.Color(160, 20, 20));
-        jButton1.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("X");
-        jButton1.setBorderPainted(false);
-        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButton1.setFocusPainted(false);
-        jButton1.setPreferredSize(new java.awt.Dimension(30, 30));
-        panelHeader.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(474, 18, -1, -1));
+        btnTutup.setBackground(new java.awt.Color(160, 20, 20));
+        btnTutup.setFont(new java.awt.Font("Inter", 1, 13)); // NOI18N
+        btnTutup.setForeground(new java.awt.Color(255, 255, 255));
+        btnTutup.setText("X");
+        btnTutup.setBorderPainted(false);
+        btnTutup.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnTutup.setFocusPainted(false);
+        btnTutup.setPreferredSize(new java.awt.Dimension(30, 30));
+        panelHeader.add(btnTutup, new org.netbeans.lib.awtextra.AbsoluteConstraints(474, 18, -1, -1));
 
         jLabel11.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/videocall (1).png")); // NOI18N
         jLabel11.setText("Icon");
@@ -288,7 +288,7 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
         btnBatal.setFont(new java.awt.Font("Inter", 0, 12)); // NOI18N
         btnBatal.setForeground(new java.awt.Color(80, 80, 80));
-        btnBatal.setText("Batal");
+        btnBatal.setText("Reset");
         btnBatal.setToolTipText("Batal");
         btnBatal.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnBatal.setFocusPainted(false);
@@ -334,20 +334,16 @@ public class FormInputSeleksi extends javax.swing.JDialog {
     }//GEN-LAST:event_txtNilaiSeleksiKeyReleased
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        
         if (txtTanggalSeleksi.getDate() == null || txtNilaiSeleksi.getText().trim().isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Tanggal dan Nilai tidak boleh kosong!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         try {
             int nilai = Integer.parseInt(txtNilaiSeleksi.getText().trim());
             if (nilai < 0 || nilai > 100) {
                 javax.swing.JOptionPane.showMessageDialog(this, "Nilai seleksi harus berada di antara 0 sampai 100!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // Ambil data teks standar dari form
             String idSel = txtIdSeleksi.getText();
             String jenis = cbSpesialisasi.getSelectedItem().toString();
             String statusHasil = cbStatusKelulusan.getSelectedItem().toString();
@@ -374,7 +370,13 @@ public class FormInputSeleksi extends javax.swing.JDialog {
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
-        this.dispose();
+        txtNilaiSeleksi.setText("");
+        txtTanggalSeleksi.setDate(null);
+        cbSpesialisasi.setSelectedIndex(0);
+        cbStatusKelulusan.setSelectedIndex(0);
+        txtIdSeleksi.setText(""); 
+
+        txtTanggalSeleksi.requestFocus();
     }//GEN-LAST:event_btnBatalActionPerformed
 
     /**
@@ -385,9 +387,9 @@ public class FormInputSeleksi extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
+    private javax.swing.JButton btnTutup;
     private javax.swing.JComboBox<String> cbSpesialisasi;
     private javax.swing.JComboBox<String> cbStatusKelulusan;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

@@ -703,6 +703,9 @@ public class AdminFrame extends javax.swing.JFrame {
         lblHalamanJudul.setText("Data Peserta");
         lblHalamanSub.setText("Kelola seluruh data peserta pemagangan");
 
+//        showPanel(new PanelDataPeserta());
+//        new FormDataPeserta().setVisible(true);
+//        setActiveButton(btnPeserta);
         showPanel(new PanelDataPeserta());
         setActiveButton(btnPeserta);
     }//GEN-LAST:event_btnPesertaActionPerformed
