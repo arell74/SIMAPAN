@@ -20,9 +20,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelDataProgram extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelProgram
-     */
+    public PanelDataProgram() {
+        initComponents();
+        setPreferredSize(new java.awt.Dimension(980, 616));
+        setBackground(new java.awt.Color(245, 245, 245));
+
+        setupTable();
+
+        // Sinkronkan cache DataStore dengan data terbaru dari MySQL
+        DataStore.muatUlang();
+        loadTableData("");
+    }
+
     private void setupTable() {
         // Styling Header
         tabelProgram.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
@@ -32,26 +41,39 @@ public class PanelDataProgram extends javax.swing.JPanel {
         tabelProgram.setRowHeight(36);
         tabelProgram.setSelectionBackground(new Color(255, 230, 230));
 
-        // 1. PASANG RENDERER DAN EDITOR KE KOLOM AKSI (Indeks ke-6)
+        // Pasang Renderer dan Editor ke Kolom Aksi (Indeks ke-6)
         tabelProgram.getColumnModel().getColumn(6).setCellRenderer(new TombolAksiRenderer());
         tabelProgram.getColumnModel().getColumn(6).setCellEditor(
             new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
-                
+
                 @Override
                 public void onDetail(int baris) {
-                    
+                    String idProgram = tabelProgram.getValueAt(baris, 1).toString().trim();
+                    java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelDataProgram.this);
+                    if (parentWindow instanceof java.awt.Frame) {
+                        FormDetailProgram formDetail = new FormDetailProgram(
+                            (java.awt.Frame) parentWindow,
+                            true,
+                            idProgram,
+                            PanelDataProgram.this
+                        );
+                        tampilkanFormDenganRefresh(formDetail);
+                    }
                 }
 
                 @Override
                 public void onEdit(int baris) {
-                    String idTarget = tabelProgram.getValueAt(baris, 1).toString().trim(); 
-                    FormEditProgram formEdit = new FormEditProgram(
-                        (java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(PanelDataProgram.this), 
-                        true, 
-                        idTarget, 
-                        PanelDataProgram.this
-                    );
-                    formEdit.setVisible(true);
+                    String idTarget = tabelProgram.getValueAt(baris, 1).toString().trim();
+                    java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelDataProgram.this);
+                    if (parentWindow instanceof java.awt.Frame) {
+                        FormEditProgram formEdit = new FormEditProgram(
+                            (java.awt.Frame) parentWindow,
+                            true,
+                            idTarget,
+                            PanelDataProgram.this
+                        );
+                        tampilkanFormDenganRefresh(formEdit);
+                    }
                 }
 
                 @Override
@@ -61,40 +83,78 @@ public class PanelDataProgram extends javax.swing.JPanel {
             })
         );
     }
-    
+
+    // Refresh cache MySQL & tabel otomatis saat form Tambah/Edit ditutup
+    private void tampilkanFormDenganRefresh(java.awt.Window form) {
+        form.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                DataStore.muatUlang();
+                loadTableData("");
+            }
+        });
+        form.setVisible(true);
+    }
+
+    // Menampilkan ringkasan detail program + jumlah peserta terdaftar dari cache MySQL
+    private void tampilkanDetailProgram(String idProgram) {
+        Program prg = DataStore.cariProgram(idProgram);
+        if (prg == null) {
+            JOptionPane.showMessageDialog(this, "Data program tidak ditemukan di database!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int jumlahPeserta = 0;
+        for (Model.Peserta p : DataStore.daftarPeserta) {
+            if (idProgram.equals(p.getProgram())) {
+                jumlahPeserta++;
+            }
+        }
+
+        String biayaFormatted = "Rp " + String.format("%,.0f", prg.getBiaya()).replace(',', '.');
+        String info = "ID Program      : " + prg.getIdProgram() + "\n"
+                    + "Nama Program  : " + prg.getNamaProgram() + "\n"
+                    + "Bidang Usaha   : " + prg.getBidangUsaha() + "\n"
+                    + "Biaya Program  : " + biayaFormatted + "\n"
+                    + "Kuota Peserta   : " + prg.getKuota() + " orang\n"
+                    + "Terdaftar Saat Ini : " + jumlahPeserta + " peserta";
+
+        JOptionPane.showMessageDialog(this, info, "Detail Program - " + prg.getIdProgram(),
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Hapus data program dari MySQL via ProgramDAO
     private void hapusData(int baris) {
         String idProgram = tabelProgram.getValueAt(baris, 1).toString();
         String nama = tabelProgram.getValueAt(baris, 2).toString();
-        
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Apakah Anda yakin ingin menghapus program " + nama + "?", 
-            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
-            
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Apakah Anda yakin ingin menghapus program " + nama + "?",
+            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
-            // Hapus dari memori In-Memory DataStore
-            boolean sukses = DataStore.daftarProgram.removeIf(prg -> prg.getIdProgram().equals(idProgram));
-            
-            if (sukses) {
+            if (Database.ProgramDAO.hapus(idProgram)) {
+                DataStore.muatUlang();
                 JOptionPane.showMessageDialog(this, "Data Program Berhasil Dihapus!");
-                loadTableData(""); // Refresh tabel
-            } else {
-                JOptionPane.showMessageDialog(this, "Gagal menghapus program!", "Error", JOptionPane.ERROR_MESSAGE);
+                loadTableData("");
             }
+            // Jika gagal (misal masih dipakai oleh peserta), popup error sudah ditampilkan oleh ProgramDAO
         }
     }
-    
+
     public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelProgram.getModel();
-        model.setRowCount(0); // Kosongkan tabel
+        model.setRowCount(0);
 
+        String kw = (keyword == null) ? "" : keyword.trim().toLowerCase();
         int no = 1;
-        
+
         for (Program prg : DataStore.daftarProgram) {
-            
-            // Logika Search berdasarkan ID atau Nama Program
-            boolean match = keyword.isEmpty() || 
-                            prg.getNamaProgram().toLowerCase().contains(keyword.toLowerCase()) || 
-                            prg.getIdProgram().toLowerCase().contains(keyword.toLowerCase());
+            boolean match = kw.isEmpty() ||
+                            prg.getNamaProgram().toLowerCase().contains(kw) ||
+                            prg.getIdProgram().toLowerCase().contains(kw) ||
+                            (prg.getBidangUsaha() != null && prg.getBidangUsaha().toLowerCase().contains(kw));
 
             if (match) {
                 model.addRow(new Object[]{
@@ -102,28 +162,20 @@ public class PanelDataProgram extends javax.swing.JPanel {
                     prg.getIdProgram(),
                     prg.getNamaProgram(),
                     prg.getBidangUsaha(),
-                    "Rp " + String.format("%,.0f", prg.getBiaya()), // Format angka ke Rupiah
+                    "Rp " + String.format("%,.0f", prg.getBiaya()).replace(',', '.'),
                     prg.getKuota(),
                     "" // Kolom Aksi
                 });
             }
         }
-        
+
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data program");
-        
+
         try {
             Util.TabelUtil.autoResizeKolom(tabelProgram);
-        } catch (Exception e) {}
-    }
-    
-    public PanelDataProgram() {
-        initComponents();
-        setPreferredSize(new java.awt.Dimension(980, 616));
-        setBackground(new java.awt.Color(245, 245, 245));
-        
-        setupTable();
-        
-        loadTableData("");
+        } catch (Exception e) {
+            System.out.println("TabelUtil belum tersedia: " + e.getMessage());
+        }
     }
 
     /**

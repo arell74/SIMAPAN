@@ -1,17 +1,22 @@
 package Views.admin;
 
 import DataStore.DataStore;
+import Database.PesertaDAO;
+import Database.SeleksiDAO;
+import Model.Peserta;
 import Model.Seleksi;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
 public class FormEditSeleksi extends javax.swing.JDialog {
 
     private String idTarget;
-    private Object panelInduk; // Ganti Object dengan PanelDataSeleksi jika sudah ada
+    private PanelManajemenSeleksi panelInduk;
     private Seleksi seleksiTarget;
 
     // --- Definisi Komponen GUI ---
@@ -21,7 +26,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
     private JButton btnTutupHeader;
 
     private JPanel panelBody;
-    
+
     // Kolom Kiri: Identitas (Read-Only)
     private JLabel lblSectionPeserta;
     private JSeparator separatorPeserta;
@@ -54,7 +59,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
     private final Color BG_READONLY = new Color(230, 230, 230);
     private final Color TXT_ABU = new Color(90, 90, 90);
     private final Color TXT_UTAMA = new Color(10, 10, 10);
-    
+
     private final Font FONT_BOLD_10 = new Font("Inter", Font.BOLD, 10);
     private final Font FONT_BOLD_11 = new Font("Inter", Font.BOLD, 11);
     private final Font FONT_PLAIN_11 = new Font("Inter", Font.PLAIN, 11);
@@ -63,11 +68,11 @@ public class FormEditSeleksi extends javax.swing.JDialog {
     /**
      * Constructor Manual FormEditSeleksi
      */
-    public FormEditSeleksi(java.awt.Frame parent, boolean modal, String idSeleksi, Object panelInduk) {
+    public FormEditSeleksi(java.awt.Frame parent, boolean modal, String idSeleksi, PanelManajemenSeleksi panelInduk) {
         super(parent, modal);
         this.idTarget = idSeleksi;
         this.panelInduk = panelInduk;
-        
+
         // Setup Window Dialog
         this.setTitle("Edit Hasil Seleksi");
         this.setSize(620, 460);
@@ -87,7 +92,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         // ==========================================
         panelHeader = new JPanel(new AbsoluteLayout());
         panelHeader.setBackground(MAROON_UTAMA);
-        
+
         lblJudulHeader = new JLabel("Edit Hasil Seleksi");
         lblJudulHeader.setForeground(Color.WHITE);
         lblJudulHeader.setFont(FONT_BOLD_16);
@@ -104,6 +109,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         btnTutupHeader.setFocusPainted(false);
         btnTutupHeader.setBorderPainted(false);
         btnTutupHeader.setFont(FONT_BOLD_11);
+        btnTutupHeader.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnTutupHeader.addActionListener(e -> this.dispose());
         panelHeader.add(btnTutupHeader, new AbsoluteConstraints(550, 15, 45, 30));
 
@@ -119,7 +125,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         lblSectionPeserta = new JLabel("IDENTITAS PESERTA (TERKUNCI)");
         lblSectionPeserta.setForeground(MAROON_UTAMA);
         lblSectionPeserta.setFont(FONT_BOLD_10);
-        panelBody.add(lblSectionPeserta, new AbsoluteConstraints(20, 15, 200, 20));
+        panelBody.add(lblSectionPeserta, new AbsoluteConstraints(20, 15, 220, 20));
 
         separatorPeserta = new JSeparator();
         panelBody.add(separatorPeserta, new AbsoluteConstraints(20, 35, 260, 10));
@@ -128,15 +134,16 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         lblIdSeleksi.setForeground(TXT_ABU);
         lblIdSeleksi.setFont(FONT_BOLD_11);
         panelBody.add(lblIdSeleksi, new AbsoluteConstraints(20, 50, 260, 20));
-        
+
         txtIdSeleksi = createReadOnlyField();
+        txtIdSeleksi.setFont(FONT_BOLD_11);
         panelBody.add(txtIdSeleksi, new AbsoluteConstraints(20, 70, 260, 30));
 
         lblIdPeserta = new JLabel("ID Peserta");
         lblIdPeserta.setForeground(TXT_ABU);
         lblIdPeserta.setFont(FONT_BOLD_11);
         panelBody.add(lblIdPeserta, new AbsoluteConstraints(20, 110, 260, 20));
-        
+
         txtIdPeserta = createReadOnlyField();
         panelBody.add(txtIdPeserta, new AbsoluteConstraints(20, 130, 260, 30));
 
@@ -144,10 +151,9 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         lblNamaPeserta.setForeground(TXT_ABU);
         lblNamaPeserta.setFont(FONT_BOLD_11);
         panelBody.add(lblNamaPeserta, new AbsoluteConstraints(20, 170, 260, 20));
-        
+
         txtNamaPeserta = createReadOnlyField();
         panelBody.add(txtNamaPeserta, new AbsoluteConstraints(20, 190, 260, 30));
-
 
         // --- KOLOM KANAN (Rincian Hasil - EDITABLE) ---
         lblSectionHasil = new JLabel("RINCIAN NILAI & STATUS");
@@ -158,48 +164,61 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         separatorHasil = new JSeparator();
         panelBody.add(separatorHasil, new AbsoluteConstraints(320, 35, 260, 10));
 
-        lblJenisSeleksi = new JLabel("Jenis Seleksi");
+        lblJenisSeleksi = new JLabel("Bidang / Jenis Seleksi");
         lblJenisSeleksi.setForeground(TXT_ABU);
         lblJenisSeleksi.setFont(FONT_BOLD_11);
         panelBody.add(lblJenisSeleksi, new AbsoluteConstraints(320, 50, 260, 20));
-        
+
         cbJenisSeleksi = new JComboBox<>(new String[]{
-            "Seleksi Bahasa Jepang", "Seleksi Fisik", "Seleksi Matematika", "Seleksi Wawancara"
+            "Manufaktur", "Caregiver", "Pertanian", "Pelautan", "Konstruksi", "JLPT / Bahasa Jepang"
         });
         cbJenisSeleksi.setFont(FONT_PLAIN_11);
         cbJenisSeleksi.setBackground(Color.WHITE);
         panelBody.add(cbJenisSeleksi, new AbsoluteConstraints(320, 70, 260, 30));
 
-        lblTanggalSeleksi = new JLabel("Tanggal Seleksi (DD/MM/YYYY)");
+        lblTanggalSeleksi = new JLabel("Tanggal Seleksi (YYYY-MM-DD)");
         lblTanggalSeleksi.setForeground(TXT_ABU);
         lblTanggalSeleksi.setFont(FONT_BOLD_11);
         panelBody.add(lblTanggalSeleksi, new AbsoluteConstraints(320, 110, 260, 20));
-        
+
         txtTanggalSeleksi = new JTextField();
         txtTanggalSeleksi.setFont(FONT_PLAIN_11);
         panelBody.add(txtTanggalSeleksi, new AbsoluteConstraints(320, 130, 260, 30));
 
-        lblNilai = new JLabel("Total Nilai (Angka)");
+        lblNilai = new JLabel("Total Nilai (0 - 100)");
         lblNilai.setForeground(TXT_ABU);
         lblNilai.setFont(FONT_BOLD_11);
         panelBody.add(lblNilai, new AbsoluteConstraints(320, 170, 260, 20));
-        
+
         txtNilai = new JTextField();
         txtNilai.setFont(FONT_PLAIN_11);
+        txtNilai.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                try {
+                    int nilai = Integer.parseInt(txtNilai.getText().trim());
+                    if (nilai >= 70) {
+                        cbStatusHasil.setSelectedItem("Lulus");
+                    } else if ("Lulus".equals(cbStatusHasil.getSelectedItem())) {
+                        cbStatusHasil.setSelectedItem("Mengulang");
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        });
         panelBody.add(txtNilai, new AbsoluteConstraints(320, 190, 260, 30));
 
         lblStatusHasil = new JLabel("Status Hasil");
         lblStatusHasil.setForeground(TXT_ABU);
         lblStatusHasil.setFont(FONT_BOLD_11);
         panelBody.add(lblStatusHasil, new AbsoluteConstraints(320, 230, 260, 20));
-        
-        cbStatusHasil = new JComboBox<>(new String[]{"Lulus", "Gagal", "Menunggu"});
+
+        cbStatusHasil = new JComboBox<>(new String[]{"Lulus", "Mengulang", "Gugur Permanen"});
         cbStatusHasil.setFont(FONT_PLAIN_11);
         cbStatusHasil.setBackground(Color.WHITE);
         panelBody.add(cbStatusHasil, new AbsoluteConstraints(320, 250, 260, 30));
 
         this.getContentPane().add(panelBody, new AbsoluteConstraints(0, 68, 620, 300));
-
 
         // ==========================================
         // 3. PANEL FOOTER (Tombol Aksi)
@@ -209,6 +228,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         btnBatal.setBackground(Color.WHITE);
         btnBatal.setForeground(TXT_UTAMA);
         btnBatal.setFocusPainted(false);
+        btnBatal.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnBatal.addActionListener(e -> this.dispose());
         this.getContentPane().add(btnBatal, new AbsoluteConstraints(370, 375, 100, 35));
 
@@ -217,6 +237,7 @@ public class FormEditSeleksi extends javax.swing.JDialog {
         btnSimpan.setBackground(MAROON_UTAMA);
         btnSimpan.setForeground(Color.WHITE);
         btnSimpan.setFocusPainted(false);
+        btnSimpan.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSimpan.addActionListener(e -> aksiSimpan());
         this.getContentPane().add(btnSimpan, new AbsoluteConstraints(480, 375, 100, 35));
     }
@@ -235,74 +256,154 @@ public class FormEditSeleksi extends javax.swing.JDialog {
     }
 
     private void loadData() {
-        boolean dataDitemukan = false;
-        
+        DataStore.muatUlang();
+        this.seleksiTarget = null;
+
         for (Seleksi sel : DataStore.daftarSeleksi) {
             if (sel.getIdSeleksi().equals(idTarget)) {
                 this.seleksiTarget = sel;
-                
-                // Prefill Data Peserta (Kiri)
-                txtIdSeleksi.setText(sel.getIdSeleksi());
-                if (sel.getPeserta() != null) {
-                    txtIdPeserta.setText(sel.getPeserta().getIdPeserta());
-                    txtNamaPeserta.setText(sel.getPeserta().getNamaLengkap());
-                }
-                
-                // Prefill Data Hasil (Kanan)
-                cbJenisSeleksi.setSelectedItem(sel.getJenisSeleksi());
-                txtTanggalSeleksi.setText(sel.getTanggalSeleksi());
-                txtNilai.setText(String.valueOf(sel.getNilai()));
-                cbStatusHasil.setSelectedItem(sel.getStatusHasil());
-                
-                dataDitemukan = true;
                 break;
             }
         }
-        
-        if (!dataDitemukan) {
-            JOptionPane.showMessageDialog(this, "Data Seleksi tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+
+        if (seleksiTarget != null) {
+            txtIdSeleksi.setText(seleksiTarget.getIdSeleksi());
+            if (seleksiTarget.getPeserta() != null) {
+                txtIdPeserta.setText(seleksiTarget.getPeserta().getIdPeserta());
+                txtNamaPeserta.setText(seleksiTarget.getPeserta().getNamaLengkap());
+            }
+
+            // Pastikan jenis seleksi dari DB tetap terpilih meski tidak ada di daftar bawaan
+            String jenisDb = seleksiTarget.getJenisSeleksi();
+            if (jenisDb != null) {
+                boolean adaDiList = false;
+                for (int i = 0; i < cbJenisSeleksi.getItemCount(); i++) {
+                    if (cbJenisSeleksi.getItemAt(i).equalsIgnoreCase(jenisDb)) {
+                        cbJenisSeleksi.setSelectedIndex(i);
+                        adaDiList = true;
+                        break;
+                    }
+                }
+                if (!adaDiList) {
+                    cbJenisSeleksi.addItem(jenisDb);
+                    cbJenisSeleksi.setSelectedItem(jenisDb);
+                }
+            }
+
+            txtTanggalSeleksi.setText(seleksiTarget.getTanggalSeleksi());
+            txtNilai.setText(String.valueOf(seleksiTarget.getNilai()));
+
+            String statusDb = seleksiTarget.getStatusHasil();
+            if ("Gagal".equalsIgnoreCase(statusDb) || "Gugur".equalsIgnoreCase(statusDb)) {
+                cbStatusHasil.setSelectedItem("Gugur Permanen");
+            } else if (statusDb != null) {
+                cbStatusHasil.setSelectedItem(statusDb);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Data Seleksi tidak ditemukan di database!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
     }
 
     private void aksiSimpan() {
+        String tglStr = txtTanggalSeleksi.getText().trim();
+        String nilaiStr = txtNilai.getText().trim();
+
         // 1. Validasi Kolom Kosong
-        if (txtTanggalSeleksi.getText().trim().isEmpty() || txtNilai.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "Tanggal Seleksi dan Total Nilai tidak boleh kosong!", 
+        if (tglStr.isEmpty() || nilaiStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Tanggal Seleksi dan Total Nilai tidak boleh kosong!",
                 "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        int nilaiBaru = 0;
-
-        // 2. Validasi Angka pada Nilai
+        // 2. Validasi Format Tanggal YYYY-MM-DD agar valid untuk MySQL
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setLenient(false);
         try {
-            nilaiBaru = Integer.parseInt(txtNilai.getText().trim());
+            sdf.parse(tglStr);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this,
+                "Format Tanggal Seleksi harus YYYY-MM-DD (contoh: 2026-06-15)!",
+                "Error Format Tanggal", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // 3. Validasi Angka & Rentang Nilai (0-100)
+        int nilaiBaru;
+        try {
+            nilaiBaru = Integer.parseInt(nilaiStr);
+            if (nilaiBaru < 0 || nilaiBaru > 100) {
+                JOptionPane.showMessageDialog(this,
+                    "Total Nilai harus berada di antara 0 sampai 100!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Kolom Total Nilai harus berupa angka bulat yang valid!", 
+            JOptionPane.showMessageDialog(this,
+                "Kolom Total Nilai harus berupa angka bulat yang valid!",
                 "Error Format Angka", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // 3. Simpan Data ke Objek Target
+        // 4. Update Objek & Simpan ke MySQL
         if (seleksiTarget != null) {
-            seleksiTarget.setJenisSeleksi(cbJenisSeleksi.getSelectedItem().toString());
-            seleksiTarget.setTanggalSeleksi(txtTanggalSeleksi.getText().trim());
+            String jenisBaru = cbJenisSeleksi.getSelectedItem().toString();
+            String statusBaru = cbStatusHasil.getSelectedItem().toString();
+
+            seleksiTarget.setJenisSeleksi(jenisBaru);
+            seleksiTarget.setTanggalSeleksi(tglStr);
             seleksiTarget.setNilai(nilaiBaru);
-            seleksiTarget.setStatusHasil(cbStatusHasil.getSelectedItem().toString());
+            seleksiTarget.setStatusHasil(statusBaru);
 
-            // 4. Update Status Lulus/Gagal Peserta jika diperlukan
-            // (Opsional: Anda bisa menambahkan logika di sini untuk meng-update 
-            // status keseluruhan Peserta berdasarkan status seleksi ini)
+            boolean ok = SeleksiDAO.ubah(seleksiTarget);
 
-            JOptionPane.showMessageDialog(this, "Data Hasil Seleksi berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            if (ok) {
+                // Sinkronkan status akhir Peserta jika record ini adalah seleksi terakhirnya
+                Peserta peserta = seleksiTarget.getPeserta();
+                if (peserta != null && isSeleksiTerakhir(peserta.getIdPeserta(), seleksiTarget.getIdSeleksi())) {
+                    if ("Lulus".equalsIgnoreCase(statusBaru)) {
+                        peserta.setStatusSeleksi("Lulus");
+                        if ("Dibatalkan".equalsIgnoreCase(peserta.getStatusKeberangkatan())
+                                || "Belum Dijadwalkan".equalsIgnoreCase(peserta.getStatusKeberangkatan())) {
+                            peserta.setStatusKeberangkatan("Menunggu Dokumen");
+                        }
+                    } else if ("Gugur Permanen".equalsIgnoreCase(statusBaru)) {
+                        peserta.setStatusSeleksi("Gugur");
+                        peserta.setStatusKeberangkatan("Dibatalkan");
+                    } else {
+                        peserta.setStatusSeleksi("Mengulang");
+                        if ("Dibatalkan".equalsIgnoreCase(peserta.getStatusKeberangkatan())) {
+                            peserta.setStatusKeberangkatan("Belum Dijadwalkan");
+                        }
+                    }
+                    PesertaDAO.ubah(peserta);
+                }
 
-            if (panelInduk != null) {
-                 ((PanelManajemenSeleksi) panelInduk).loadTableData(""); 
+                DataStore.muatUlang();
+
+                JOptionPane.showMessageDialog(this, "Data Hasil Seleksi berhasil diperbarui!",
+                        "Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+                if (panelInduk != null) {
+                    panelInduk.loadStatistics();
+                    panelInduk.loadTableData("");
+                }
+                this.dispose();
+            } else {
+                DataStore.muatUlang();
             }
-            this.dispose();
         }
+    }
+
+    private boolean isSeleksiTerakhir(String idPeserta, String idSeleksiTarget) {
+        String idTerakhir = null;
+        for (Seleksi s : DataStore.daftarSeleksi) {
+            if (s.getPeserta() != null && idPeserta.equals(s.getPeserta().getIdPeserta())) {
+                idTerakhir = s.getIdSeleksi();
+            }
+        }
+        return idSeleksiTarget.equals(idTerakhir);
     }
 }

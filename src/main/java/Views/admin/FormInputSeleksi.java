@@ -15,59 +15,69 @@ import javax.swing.JOptionPane;
  */
 public class FormInputSeleksi extends javax.swing.JDialog {
 
-    /**
-     * Creates new form FormInputSeleksi
-     */
     private Peserta pesertaAktif;
-    private PanelManajemenSeleksi panelInduk; // Untuk memanggil fungsi refresh
+    private PanelManajemenSeleksi panelInduk;
+    private int percobaanSekarang = 1;
 
     public FormInputSeleksi(Peserta peserta, PanelManajemenSeleksi panelInduk) {
         initComponents();
-        this.setLocationRelativeTo(null); // Agar muncul di tengah layar
-        
+        setModal(true);
+        setResizable(false);
+        setTitle("Input Hasil Seleksi");
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+
         this.pesertaAktif = peserta;
         this.panelInduk = panelInduk;
-        
+
         siapkanDataLayar();
     }
-    
+
     private void siapkanDataLayar() {
+        DataStore.muatUlang();
+
         // 1. Tampilkan Data Statis Peserta
         lblNamaPeserta.setText(pesertaAktif.getNamaLengkap());
-        lblInfoPeserta.setText(pesertaAktif.getIdPeserta() + "   Level " + pesertaAktif.getLevelBahasa());
-        
-        // 2. Hitung ini percobaan ke berapa
+        lblInfoPeserta.setText(pesertaAktif.getIdPeserta() + "  ·  Level " + pesertaAktif.getLevelBahasa());
+
+        // 2. Hitung percobaan ke berapa dari cache MySQL
         int jumlahPercobaan = 0;
         for (Model.Seleksi s : DataStore.daftarSeleksi) {
-            if (s.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
+            if (s.getPeserta() != null && pesertaAktif.getIdPeserta().equals(s.getPeserta().getIdPeserta())) {
                 jumlahPercobaan++;
             }
         }
-        
-        int percobaanSekarang = jumlahPercobaan + 1;
-        int sisa = 3 - percobaanSekarang; // Asumsi maksimal 3x coba
-        
-        lblPercobaan.setText(percobaanSekarang + " dari 3 - Sisa " + Math.max(0, sisa + 1)); 
-        // Catatan: sisa saya tambah 1 di Math.max agar saat percobaan ke-3 (terakhir), sisanya tampil 0, bukan -1.
-        
-        // 3. Buatkan ID Seleksi Otomatis
-        txtIdSeleksi.setText("SEL" + (DataStore.daftarSeleksi.size() + 1));
-        
-        // 4. VALIDASI BATAS MAKSIMAL PERCOBAAN
-        if (percobaanSekarang > 3) {
-            // Matikan tombol simpan
+
+        percobaanSekarang = jumlahPercobaan + 1;
+        int sisaSetelahIni = Math.max(0, 3 - percobaanSekarang);
+        lblPercobaan.setText(percobaanSekarang + " dari 3 - Sisa " + sisaSetelahIni);
+
+        // 3. Ambil ID Seleksi otomatis dari MySQL (SEL001, SEL002, dst.)
+        txtIdSeleksi.setText(Database.SeleksiDAO.idBerikutnya());
+        txtTanggalSeleksi.setDate(new java.util.Date());
+
+        // 4. Validasi batas maksimal percobaan atau status final peserta
+        boolean sudahLulus = "Lulus".equalsIgnoreCase(pesertaAktif.getStatusSeleksi());
+        boolean sudahGugur = "Gugur".equalsIgnoreCase(pesertaAktif.getStatusSeleksi())
+                || "Gugur Permanen".equalsIgnoreCase(pesertaAktif.getStatusSeleksi());
+
+        if (percobaanSekarang > 3 || sudahLulus || sudahGugur) {
             btnSimpan.setEnabled(false);
-            lblPercobaan.setText("Batas Maksimal Percobaan Habis!");
-            lblPercobaan.setForeground(new java.awt.Color(200, 0, 0)); // Ubah teks jadi merah
-            
-            // KUNCI SEMUA INPUTAN AGAR TIDAK BISA DIKLIK/DIKETIK
+            btnBatal.setEnabled(false);
+
+            if (sudahLulus) {
+                lblPercobaan.setText("Peserta Sudah Lulus Seleksi");
+                lblPercobaan.setForeground(new java.awt.Color(0, 140, 60));
+            } else {
+                lblPercobaan.setText("Batas Maksimal / Gugur Permanen");
+                lblPercobaan.setForeground(new java.awt.Color(200, 0, 0));
+            }
+
             txtTanggalSeleksi.setEnabled(false);
             txtNilaiSeleksi.setEnabled(false);
             cbSpesialisasi.setEnabled(false);
             cbStatusKelulusan.setEnabled(false);
-            
-            // Opsional: Beri warna background abu-abu agar visualnya jelas sedang terkunci
-            txtTanggalSeleksi.setBackground(new java.awt.Color(230, 230, 230));
+
             txtNilaiSeleksi.setBackground(new java.awt.Color(230, 230, 230));
             cbSpesialisasi.setBackground(new java.awt.Color(230, 230, 230));
             cbStatusKelulusan.setBackground(new java.awt.Color(230, 230, 230));
@@ -322,61 +332,86 @@ public class FormInputSeleksi extends javax.swing.JDialog {
 
     private void txtNilaiSeleksiKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNilaiSeleksiKeyReleased
         try {
-            int nilai = Integer.parseInt(txtNilaiSeleksi.getText());
+            int nilai = Integer.parseInt(txtNilaiSeleksi.getText().trim());
             if (nilai >= 70) {
                 cbStatusKelulusan.setSelectedItem("Lulus");
+            } else if (percobaanSekarang >= 3) {
+                cbStatusKelulusan.setSelectedItem("Gugur Permanen");
             } else {
                 cbStatusKelulusan.setSelectedItem("Mengulang");
             }
         } catch (NumberFormatException e) {
-            
+            // Abaikan saat sedang mengetik
         }
     }//GEN-LAST:event_txtNilaiSeleksiKeyReleased
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
         if (txtTanggalSeleksi.getDate() == null || txtNilaiSeleksi.getText().trim().isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Tanggal dan Nilai tidak boleh kosong!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Tanggal dan Nilai tidak boleh kosong!",
+                    "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
+
         try {
             int nilai = Integer.parseInt(txtNilaiSeleksi.getText().trim());
             if (nilai < 0 || nilai > 100) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Nilai seleksi harus berada di antara 0 sampai 100!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Nilai seleksi harus berada di antara 0 sampai 100!",
+                        "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            String idSel = txtIdSeleksi.getText();
+
+            String idSel = txtIdSeleksi.getText().trim();
             String jenis = cbSpesialisasi.getSelectedItem().toString();
             String statusHasil = cbStatusKelulusan.getSelectedItem().toString();
 
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
-            String tanggal = sdf.format(txtTanggalSeleksi.getDate());
-            Seleksi seleksiBaru = new Seleksi(idSel, pesertaAktif, jenis, tanggal, nilai, statusHasil);
-            DataStore.daftarSeleksi.add(seleksiBaru);
-
-            if (statusHasil.equals("Lulus")) {
-                pesertaAktif.setStatusSeleksi("Lulus");
-                pesertaAktif.setStatusKeberangkatan("Menunggu Dokumen"); 
-            } else if (statusHasil.equals("Gugur Permanen")) {
-                pesertaAktif.setStatusSeleksi("Gugur");
-                pesertaAktif.setStatusKeberangkatan("Dibatalkan");
+            // Jika percobaan ke-3 gagal, otomatis tetapkan Gugur Permanen
+            if (percobaanSekarang >= 3 && "Mengulang".equals(statusHasil)) {
+                statusHasil = "Gugur Permanen";
             }
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Hasil seleksi berhasil disimpan!");
-            this.dispose();
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            String tanggal = sdf.format(txtTanggalSeleksi.getDate());
+
+            Seleksi seleksiBaru = new Seleksi(idSel, pesertaAktif, jenis, tanggal, nilai, statusHasil);
+
+            // 1. Simpan riwayat seleksi ke tabel 'seleksi' MySQL
+            if (Database.SeleksiDAO.tambah(seleksiBaru)) {
+                // 2. Sinkronkan status akhir pada tabel 'peserta'
+                if ("Lulus".equals(statusHasil)) {
+                    pesertaAktif.setStatusSeleksi("Lulus");
+                    pesertaAktif.setStatusKeberangkatan("Menunggu Dokumen");
+                    Database.PesertaDAO.ubah(pesertaAktif);
+                } else if ("Gugur Permanen".equals(statusHasil)) {
+                    pesertaAktif.setStatusSeleksi("Gugur");
+                    pesertaAktif.setStatusKeberangkatan("Dibatalkan");
+                    Database.PesertaDAO.ubah(pesertaAktif);
+                } else {
+                    pesertaAktif.setStatusSeleksi("Mengulang");
+                    Database.PesertaDAO.ubah(pesertaAktif);
+                }
+
+                DataStore.muatUlang();
+
+                if (panelInduk != null) {
+                    panelInduk.loadStatistics();
+                    panelInduk.loadTableData("");
+                }
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Hasil seleksi berhasil disimpan!");
+                this.dispose();
+            }
 
         } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Input Nilai harus berupa angka (bilangan bulat)!", "Error Input", javax.swing.JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Input Nilai harus berupa angka (bilangan bulat)!",
+                    "Error Input", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
+        txtTanggalSeleksi.setDate(new java.util.Date());
         txtNilaiSeleksi.setText("");
-        txtTanggalSeleksi.setDate(null);
         cbSpesialisasi.setSelectedIndex(0);
         cbStatusKelulusan.setSelectedIndex(0);
-        txtIdSeleksi.setText(""); 
-
-        txtTanggalSeleksi.requestFocus();
     }//GEN-LAST:event_btnBatalActionPerformed
 
     /**
