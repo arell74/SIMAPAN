@@ -4,11 +4,21 @@
  */
 package Views.instruktur;
 
+import DataStore.DataStore;
+import Database.JadwalDAO;
+import Model.Jadwal;
+import java.awt.Color;
+import java.awt.Cursor;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author arelssi
  */
 public class CardJadwal extends javax.swing.JPanel {
+
+    private Jadwal jadwalAktif;
+    private Runnable onStatusUpdated;
 
     /**
      * Creates new form CardJadwal
@@ -16,22 +26,92 @@ public class CardJadwal extends javax.swing.JPanel {
     public CardJadwal() {
         initComponents();
         this.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, this.getPreferredSize().height));
+
+        btnStatus.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnStatus.setFocusPainted(false);
+        btnStatus.addActionListener(e -> aksiToggleStatus());
     }
-    
+
+    /**
+     * Mengisi data kartu langsung dari objek Model.Jadwal (terhubung ke MySQL)
+     */
+    public void setJadwalData(Jadwal jadwal) {
+        setJadwalData(jadwal, null);
+    }
+
+    /**
+     * Mengisi data kartu dari objek Model.Jadwal beserta callback refresh untuk panel induk
+     */
+    public void setJadwalData(Jadwal jadwal, Runnable onStatusUpdated) {
+        this.jadwalAktif = jadwal;
+        this.onStatusUpdated = onStatusUpdated;
+
+        if (jadwal == null) return;
+
+        String jamTampil = jadwal.getJamMulai();
+        if (jadwal.getDurasi() > 0) {
+            jamTampil += " (" + jadwal.getDurasi() + " mnt)";
+        }
+
+        setJadwalData(
+            jamTampil,
+            jadwal.getHari(),
+            jadwal.getNamaMateri(),
+            jadwal.getNamaKelas(),
+            jadwal.getStatusJadwal()
+        );
+    }
+
+    /**
+     * Mengisi data kartu secara manual (tetap dipertahankan untuk kompatibilitas)
+     */
     public void setJadwalData(String jam, String hari, String bab, String kelas, String status) {
-        lblJam3.setText(jam);
-        lblHari3.setText(hari);
-        lblBab.setText(bab);
-        lblKelas.setText(kelas);
-        btnStatus.setText(status);
+        String statusAman = (status != null && !status.trim().isEmpty()) ? status.trim() : "Terjadwal";
+
+        lblJam3.setText(jam != null ? jam : "-");
+        lblHari3.setText(hari != null ? hari : "-");
+        lblBab.setText(bab != null ? bab : "-");
+        lblKelas.setText(kelas != null ? kelas : "-");
+        btnStatus.setText(statusAman);
 
         // Atur warna tombol berdasarkan status
-        if (status.equalsIgnoreCase("Selesai")) {
-            btnStatus.setBackground(new java.awt.Color(100, 255, 100)); // Hijau
-            btnStatus.setForeground(java.awt.Color.BLACK);
+        if ("Selesai".equalsIgnoreCase(statusAman)) {
+            btnStatus.setBackground(new Color(46, 160, 67)); // Hijau
+            btnStatus.setForeground(Color.WHITE);
+        } else if ("Hari Ini".equalsIgnoreCase(statusAman) || "Berlangsung".equalsIgnoreCase(statusAman)) {
+            btnStatus.setBackground(new Color(220, 53, 69)); // Merah aksen
+            btnStatus.setForeground(Color.WHITE);
         } else {
-            btnStatus.setBackground(new java.awt.Color(255, 102, 102)); // Merah muda "Hari ini"
-            btnStatus.setForeground(java.awt.Color.WHITE);
+            btnStatus.setBackground(new Color(235, 235, 235)); // Abu-abu lembut ("Terjadwal")
+            btnStatus.setForeground(new Color(60, 60, 60));
+        }
+    }
+
+    private void aksiToggleStatus() {
+        if (jadwalAktif == null) return;
+
+        String statusSekarang = jadwalAktif.getStatusJadwal();
+        String statusBaru = "Selesai".equalsIgnoreCase(statusSekarang) ? "Terjadwal" : "Selesai";
+
+        int konfirmasi = JOptionPane.showConfirmDialog(
+            this,
+            "Ubah status jadwal \"" + jadwalAktif.getNamaMateri() + "\" menjadi \"" + statusBaru + "\"?",
+            "Konfirmasi Status Jadwal",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if (konfirmasi == JOptionPane.YES_OPTION) {
+            jadwalAktif.setStatusJadwal(statusBaru);
+            if (JadwalDAO.ubah(jadwalAktif)) {
+                DataStore.muatUlang();
+                setJadwalData(jadwalAktif, onStatusUpdated);
+
+                if (onStatusUpdated != null) {
+                    onStatusUpdated.run();
+                }
+            } else {
+                DataStore.muatUlang();
+            }
         }
     }
 

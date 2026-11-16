@@ -1,16 +1,14 @@
-package Views.instruktur; // Sesuaikan dengan nama package milikmu!
+package Views.instruktur;
 
 import DataStore.DataStore;
-import Model.Pengguna;
+import Database.PenggunaDAO;
 import Model.Instruktur;
-// Asumsi DataStore ada di package controller atau model, pastikan di-import jika beda package
-// import Controller.DataStore; 
+import Model.Pengguna;
 
 public class FormProfilInstruktur extends javax.swing.JDialog {
 
     private Instruktur instrukturAktif;
 
-    // Komponen UI dideklarasikan di tingkat kelas agar bisa diakses event listener
     private javax.swing.JTextField txtNama;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtNoHp;
@@ -20,35 +18,37 @@ public class FormProfilInstruktur extends javax.swing.JDialog {
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
 
-    // Constructor: Menangkap Frame Induk dan ID Pengguna
-   public FormProfilInstruktur(java.awt.Frame parent, boolean modal, String usernameLogin) {
+    public FormProfilInstruktur(java.awt.Frame parent, boolean modal, String usernameLogin) {
         super(parent, modal);
-        
-        // Cari Data Instruktur dari DataStore berdasarkan USERNAME
+
+        DataStore.muatUlang();
+
         for (Pengguna p : DataStore.daftarPengguna) {
-            // Gunakan getUsername() di sini!
-            if (p.getUsername().equals(usernameLogin) && p instanceof Instruktur) {
-                this.instrukturAktif = (Instruktur) p;
-                break;
+            if (p instanceof Instruktur) {
+                Instruktur ins = (Instruktur) p;
+                if ((ins.getUsername() != null && ins.getUsername().equals(usernameLogin))
+                        || (ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(usernameLogin))) {
+                    this.instrukturAktif = ins;
+                    break;
+                }
             }
         }
 
         if (this.instrukturAktif == null) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Data Instruktur tidak ditemukan!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-            this.dispose(); 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Data Instruktur tidak ditemukan!",
+                    "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            this.dispose();
             return;
         }
 
-        // 2. Inisialisasi Tampilan Murni
         setupUI();
-        
-        // 3. Pasang Event Listener (Telinga)
         setupListeners();
     }
 
     private void setupUI() {
         this.setTitle("Profil Instruktur");
-        this.setSize(380, 300);
+        this.setSize(390, 310);
         this.setLocationRelativeTo(this.getParent());
         this.setResizable(false);
 
@@ -56,12 +56,13 @@ public class FormProfilInstruktur extends javax.swing.JDialog {
         panel.setLayout(new java.awt.GridLayout(6, 2, 10, 15));
         panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Membuat dan Mengisi Data ke Komponen
         javax.swing.JLabel lblNama = new javax.swing.JLabel("Nama Lengkap:");
         txtNama = new javax.swing.JTextField(instrukturAktif.getNamaLengkap());
 
-        javax.swing.JLabel lblUser = new javax.swing.JLabel("Username:");
+        javax.swing.JLabel lblUser = new javax.swing.JLabel("Username (PK):");
         txtUser = new javax.swing.JTextField(instrukturAktif.getUsername());
+        txtUser.setEditable(false);
+        txtUser.setBackground(new java.awt.Color(240, 240, 240));
 
         javax.swing.JLabel lblNoHp = new javax.swing.JLabel("No. Telp / WhatsApp:");
         txtNoHp = new javax.swing.JTextField(instrukturAktif.getNoTelp());
@@ -76,16 +77,18 @@ public class FormProfilInstruktur extends javax.swing.JDialog {
         txtPass = new javax.swing.JPasswordField(instrukturAktif.getPassword());
         chkShowPass = new javax.swing.JCheckBox("👁");
         chkShowPass.setFocusPainted(false);
-        
+
         panelPass.add(txtPass, java.awt.BorderLayout.CENTER);
         panelPass.add(chkShowPass, java.awt.BorderLayout.EAST);
 
         btnBatal = new javax.swing.JButton("Batal");
+        btnBatal.setFocusPainted(false);
+
         btnSimpan = new javax.swing.JButton("Simpan");
         btnSimpan.setBackground(new java.awt.Color(122, 0, 0));
         btnSimpan.setForeground(java.awt.Color.WHITE);
+        btnSimpan.setFocusPainted(false);
 
-        // Susun ke dalam panel
         panel.add(lblNama); panel.add(txtNama);
         panel.add(lblUser); panel.add(txtUser);
         panel.add(lblNoHp); panel.add(txtNoHp);
@@ -97,43 +100,43 @@ public class FormProfilInstruktur extends javax.swing.JDialog {
     }
 
     private void setupListeners() {
-        chkShowPass.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (chkShowPass.isSelected()) {
-                    txtPass.setEchoChar((char) 0);
-                } else {
-                    txtPass.setEchoChar('•');
-                }
+        chkShowPass.addActionListener(evt -> {
+            if (chkShowPass.isSelected()) {
+                txtPass.setEchoChar((char) 0);
+            } else {
+                txtPass.setEchoChar('•');
             }
         });
 
-        btnBatal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                FormProfilInstruktur.this.dispose();
-            }
-        });
+        btnBatal.addActionListener(evt -> FormProfilInstruktur.this.dispose());
 
-        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                String namaBaru = txtNama.getText().trim();
-                String userBaru = txtUser.getText().trim();
-                String noHpBaru = txtNoHp.getText().trim();
-                String passBaru = new String(txtPass.getPassword());
+        btnSimpan.addActionListener(evt -> aksiSimpan());
+    }
 
-                if (namaBaru.isEmpty() || userBaru.isEmpty() || noHpBaru.isEmpty() || passBaru.isEmpty()) {
-                    javax.swing.JOptionPane.showMessageDialog(FormProfilInstruktur.this, "Semua kolom wajib diisi!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
+    private void aksiSimpan() {
+        String namaBaru = txtNama.getText().trim();
+        String noHpBaru = txtNoHp.getText().trim();
+        String passBaru = new String(txtPass.getPassword()).trim();
 
-                // Update memori DataStore
-                instrukturAktif.setNamaLengkap(namaBaru);
-                instrukturAktif.setUsername(userBaru);
-                instrukturAktif.setNoTelp(noHpBaru);
-                instrukturAktif.setPassword(passBaru);
+        if (namaBaru.isEmpty() || noHpBaru.isEmpty() || passBaru.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Semua kolom wajib diisi!",
+                    "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-                javax.swing.JOptionPane.showMessageDialog(FormProfilInstruktur.this, "Profil berhasil diperbarui!", "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-                FormProfilInstruktur.this.dispose();
-            }
-        });
+        instrukturAktif.setNamaLengkap(namaBaru);
+        instrukturAktif.setNoTelp(noHpBaru);
+        instrukturAktif.setPassword(passBaru);
+
+        if (PenggunaDAO.ubahInstruktur(instrukturAktif)) {
+            DataStore.muatUlang();
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Profil instruktur berhasil diperbarui ke database!",
+                    "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
+        } else {
+            DataStore.muatUlang();
+        }
     }
 }

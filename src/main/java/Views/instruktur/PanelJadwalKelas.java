@@ -5,12 +5,20 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Database.JadwalDAO;
 import Model.Instruktur;
 import Model.Jadwal;
 import Model.Pengguna;
 import Util.TabelUtil;
-import Util.TombolAksiEditor;
-import Util.TombolAksiRenderer;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -19,45 +27,80 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelJadwalKelas extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelJadwalKelas
-     */
     private String idInstrukturAktif;
     private int mingguAktif = 0;
-    
+    private boolean sedangUpdateNavigasi = false;
+    private final List<Jadwal> jadwalTampil = new ArrayList<>();
+
     public PanelJadwalKelas(String idInstruktur) {
         initComponents();
-        
+
         this.idInstrukturAktif = idInstruktur;
-        
+
         setupTable();
-        loadTableData();
+        updateNavigasiMinggu();
     }
-    
+
     private void setupTable() {
         tabelJadwal.setRowHeight(40);
-        TabelUtil.autoResizeKolom(tabelJadwal);
         javax.swing.table.JTableHeader header = tabelJadwal.getTableHeader();
-        
+
         header.setBackground(new java.awt.Color(122, 0, 0));
         header.setForeground(java.awt.Color.WHITE);
-        
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13));
         header.setOpaque(true);
+
+        // Klik ganda pada baris jadwal untuk mengubah status (Terjadwal <-> Selesai) ke MySQL
+        tabelJadwal.setToolTipText("Klik ganda pada baris untuk mengubah status jadwal");
+        tabelJadwal.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    int baris = tabelJadwal.getSelectedRow();
+                    if (baris >= 0 && baris < jadwalTampil.size()) {
+                        ubahStatusJadwal(jadwalTampil.get(baris));
+                    }
+                }
+            }
+        });
     }
-    
+
+    private void ubahStatusJadwal(Jadwal jadwal) {
+        String statusSekarang = jadwal.getStatusJadwal();
+        String statusBaru = "Selesai".equalsIgnoreCase(statusSekarang) ? "Terjadwal" : "Selesai";
+
+        int konfirmasi = JOptionPane.showConfirmDialog(
+            this,
+            "Ubah status materi \"" + jadwal.getNamaMateri() + "\" (" + jadwal.getHari() + ") menjadi \"" + statusBaru + "\"?",
+            "Konfirmasi Status Jadwal",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if (konfirmasi == JOptionPane.YES_OPTION) {
+            jadwal.setStatusJadwal(statusBaru);
+            if (JadwalDAO.ubah(jadwal)) {
+                loadTableData();
+            } else {
+                DataStore.muatUlang();
+            }
+        }
+    }
+
     private void loadTableData() {
+        DataStore.muatUlang();
+
         DefaultTableModel model = (DefaultTableModel) tabelJadwal.getModel();
-        model.setRowCount(0); // Kosongkan tabel sebelum diisi ulang
-        
-        // 1. LOGIKA ANTI-ERROR (Mencari ID Instruktur Asli)
+        model.setRowCount(0);
+        jadwalTampil.clear();
+
+        // 1. Cari ID Instruktur Asli (mendukung input berupa ID Instruktur maupun Username)
         String idAsli = this.idInstrukturAktif;
         for (Pengguna pgn : DataStore.daftarPengguna) {
             if (pgn instanceof Instruktur) {
                 Instruktur ins = (Instruktur) pgn;
-                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif)) || 
-                    (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
-                    idAsli = ins.getIdInstruktur(); // Dapatkan ID aslinya (misal: INS001)
+                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif))
+                        || (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
+                    idAsli = ins.getIdInstruktur();
                     break;
                 }
             }
@@ -65,54 +108,62 @@ public class PanelJadwalKelas extends javax.swing.JPanel {
 
         int no = 1;
 
-        // 2. LOOPING DATA JADWAL
+        // 2. Looping data jadwal milik instruktur aktif dari cache MySQL
         for (Jadwal j : DataStore.daftarJadwal) {
-            if (j.getIdInstruktur().equals(idAsli)) {
+            if (j.getIdInstruktur() != null && j.getIdInstruktur().equals(idAsli)) {
+                jadwalTampil.add(j);
                 model.addRow(new Object[]{
-                    no++,
+                    String.valueOf(no++),
                     j.getJamMulai(),
                     j.getHari(),
                     j.getNamaMateri(),
                     "Kelas " + j.getNamaKelas(),
                     j.getDurasi() + " Menit",
-                    j.getStatusJadwal(),
-                    ""
+                    j.getStatusJadwal()
                 });
             }
         }
+
+        String labelMinggu = (cbMinggu.getSelectedItem() != null) ? cbMinggu.getSelectedItem().toString() : "Minggu Ini";
+        lblTotalData.setText("Detail Jadwal " + labelMinggu + " (" + model.getRowCount() + " jadwal · klik ganda baris untuk ubah status)");
+
+        TabelUtil.autoResizeKolom(tabelJadwal);
     }
-    
+
     private void updateNavigasiMinggu() {
-        // Anggap minggu ini adalah Minggu ke-20 (Sesuai desain)
-        int mingguKe = 20 + mingguAktif;
+        LocalDate acuan = LocalDate.now().plusWeeks(mingguAktif);
+        LocalDate senin = acuan.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sabtu = senin.plusDays(5);
+
+        int mingguKe = acuan.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
         lblMingguKe.setText("Minggu ke-" + mingguKe);
 
-        // Ubah teks ComboBox dan Label Tanggal (Dummy) tanpa memicu event ComboBox dua kali
-        cbMinggu.removeActionListener(cbMinggu.getActionListeners()[0]); // Matikan sementara
+        Locale localeId = new Locale("id", "ID");
+        DateTimeFormatter fmtHari = DateTimeFormatter.ofPattern("d", localeId);
+        DateTimeFormatter fmtBulan = DateTimeFormatter.ofPattern("d MMM", localeId);
 
-        if (mingguAktif == 0) {
-            cbMinggu.setSelectedItem("Minggu ini");
-            lblTanggalBanner.setText("12 - 16 Mei");
-        } else if (mingguAktif == 1) {
-            cbMinggu.setSelectedItem("Minggu depan");
-            lblTanggalBanner.setText("19 - 23 Mei");
-        } else if (mingguAktif == -1) {
-            cbMinggu.setSelectedItem("Minggu lalu");
-            lblTanggalBanner.setText("5 - 9 Mei");
+        if (senin.getMonth() == sabtu.getMonth()) {
+            lblTanggalBanner.setText(senin.format(fmtHari) + " - " + sabtu.format(fmtBulan));
         } else {
-            // Jika diklik Next/Prev melebihi jangkauan dropdown
-            cbMinggu.setSelectedItem("Pilih Minggu"); 
-            lblTanggalBanner.setText("Rentang Tanggal Lain");
+            lblTanggalBanner.setText(senin.format(fmtBulan) + " - " + sabtu.format(fmtBulan));
         }
-        
-        cbMinggu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbMingguActionPerformed(evt);
-            }
-        });
 
-        // Terakhir: Panggil ulang data tabel (Agar isi tabel ikut menyesuaikan)
-        loadTableData(); 
+        sedangUpdateNavigasi = true;
+        try {
+            if (mingguAktif == 0) {
+                cbMinggu.setSelectedItem("Minggu Ini");
+            } else if (mingguAktif == 1) {
+                cbMinggu.setSelectedItem("Minggu Depan");
+            } else if (mingguAktif == -1) {
+                cbMinggu.setSelectedItem("Minggu Lalu");
+            } else {
+                cbMinggu.setSelectedIndex(-1);
+            }
+        } finally {
+            sedangUpdateNavigasi = false;
+        }
+
+        loadTableData();
     }
 
     
@@ -242,20 +293,20 @@ public class PanelJadwalKelas extends javax.swing.JPanel {
     }//GEN-LAST:event_btnPrevActionPerformed
 
     private void cbMingguActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbMingguActionPerformed
-        if (cbMinggu.getSelectedItem() != null) {
-            String pilihan = cbMinggu.getSelectedItem().toString();
-            
-            if (pilihan.equals("Minggu Ini")) {
-                mingguAktif = 0;
-            } else if (pilihan.equals("Minggu Depan")) {
-                mingguAktif = 1;
-            } else if (pilihan.equals("Minggu Lalu")) {
-                mingguAktif = -1;
-            }
-            
-            // Panggil pembaruan layar kecuali combobox itu sendiri
-            updateNavigasiMinggu();
+        if (sedangUpdateNavigasi || cbMinggu.getSelectedItem() == null) {
+            return;
         }
+
+        String pilihan = cbMinggu.getSelectedItem().toString();
+        if (pilihan.equals("Minggu Ini")) {
+            mingguAktif = 0;
+        } else if (pilihan.equals("Minggu Depan")) {
+            mingguAktif = 1;
+        } else if (pilihan.equals("Minggu Lalu")) {
+            mingguAktif = -1;
+        }
+
+        updateNavigasiMinggu();
     }//GEN-LAST:event_cbMingguActionPerformed
 
 

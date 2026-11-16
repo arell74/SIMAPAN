@@ -5,27 +5,24 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
-import Model.Dokumen;
+import Model.HasilKuis;
 import Model.Instruktur;
+import Model.Kuis;
+import Model.Materi;
 import Model.Pengguna;
 import Model.Peserta;
-import Model.Program;
 import Model.Seleksi;
 import Util.TabelUtil;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.Phrase;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -34,144 +31,169 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelLaporanInstruktur extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelLaporan
-     */
     private String idInstrukturAktif;
+    private boolean sedangMuatFilter = false;
+
     public PanelLaporanInstruktur(String idInstruktur) {
         initComponents();
         setPreferredSize(new java.awt.Dimension(980, 616));
         this.idInstrukturAktif = idInstruktur;
-        
+
         setupTable();
+        muatOpsiFilter();
         loadDataLaporan();
     }
-    
+
     private void setupTable() {
-        tabelLaporan.setRowHeight(40); 
-        
-        TabelUtil.autoResizeKolom(tabelLaporan);
+        tabelLaporan.setRowHeight(40);
+
         javax.swing.table.JTableHeader header = tabelLaporan.getTableHeader();
-        
         header.setBackground(new java.awt.Color(122, 0, 0));
         header.setForeground(java.awt.Color.WHITE);
-        
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13));
         header.setOpaque(true);
     }
-    
-    private void setupFilter() {
-        // Pasang pendengar ke Dropdown Periode
-        cbPeriode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadDataLaporan(); // Muat ulang tabel setiap kali dropdown berubah
-            }
-        });
 
-        // Pasang pendengar ke Dropdown Materi
-        cbMateri.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadDataLaporan(); // Muat ulang tabel setiap kali dropdown berubah
-            }
-        });
-    }
-    
-    private void generateLaporan() {
-        
-    }
-    
-    private void loadDataLaporan() {
-        DefaultTableModel model = (DefaultTableModel) tabelLaporan.getModel();
-        model.setRowCount(0);
-
-        // 1. Amankan ID Asli Instruktur
+    private String resolveIdInstruktur() {
         String idAsli = idInstrukturAktif;
-        for (Model.Pengguna pgn : DataStore.daftarPengguna) {
-            if (pgn instanceof Model.Instruktur) {
-                Model.Instruktur ins = (Model.Instruktur) pgn;
-                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif)) || 
-                    (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
+        for (Pengguna pgn : DataStore.daftarPengguna) {
+            if (pgn instanceof Instruktur) {
+                Instruktur ins = (Instruktur) pgn;
+                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif))
+                        || (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
                     idAsli = ins.getIdInstruktur();
+                    this.idInstrukturAktif = idAsli;
                     break;
                 }
             }
         }
+        return idAsli;
+    }
 
-        // Variabel untuk menghitung Kartu Statistik di atas
+    private void muatOpsiFilter() {
+        sedangMuatFilter = true;
+        try {
+            DataStore.muatUlang();
+            String idAsli = resolveIdInstruktur();
+
+            Object pilihanSebelumnya = cbMateri.getSelectedItem();
+            cbMateri.removeAllItems();
+            cbMateri.addItem("Semua Materi / Kuis");
+
+            for (Kuis k : DataStore.daftarKuis) {
+                if (idAsli != null && idAsli.equals(k.getIdInstruktur())) {
+                    cbMateri.addItem("[Kuis] " + k.getJudulKuis());
+                }
+            }
+            for (Materi m : DataStore.daftarMateri) {
+                if (idAsli != null && idAsli.equals(m.getIdInstruktur())) {
+                    cbMateri.addItem("[Materi] " + m.getJudul());
+                }
+            }
+
+            if (pilihanSebelumnya != null) {
+                cbMateri.setSelectedItem(pilihanSebelumnya);
+            }
+        } finally {
+            sedangMuatFilter = false;
+        }
+    }
+
+    private void generateLaporan() {
+        if (!sedangMuatFilter) {
+            loadDataLaporan();
+        }
+    }
+
+    private void loadDataLaporan() {
+        DataStore.muatUlang();
+
+        DefaultTableModel model = (DefaultTableModel) tabelLaporan.getModel();
+        model.setRowCount(0);
+
+        String idAsli = resolveIdInstruktur();
+        String filterMateri = (cbMateri.getSelectedItem() != null) ? cbMateri.getSelectedItem().toString() : "";
+        String judulKuisFilter = filterMateri.startsWith("[Kuis] ")
+                ? filterMateri.substring("[Kuis] ".length()).trim()
+                : null;
+
         int totalSiswa = 0;
-        int akumulasiRataKelas = 0;
         int siswaPerluPerhatian = 0;
-        
-        int totalPertemuanHadir = 0; 
+        int totalPertemuanHadir = 0;
         int totalPertemuanWajib = 0;
-
         int no = 1;
 
-        // 2. Looping Data Peserta
-        for (Model.Peserta p : DataStore.daftarPeserta) {
-            
-            // Filter peserta khusus untuk instruktur ini
-            if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idAsli)) {
+        for (Peserta p : DataStore.daftarPeserta) {
+            if (p.getInstrukturDamping() != null
+                    && p.getInstrukturDamping().getIdInstruktur().equals(idAsli)) {
                 totalSiswa++;
 
-                // === DATA SIMULASI NILAI ===
-                int baseScore = 75; 
-                for (Model.Seleksi s : DataStore.daftarSeleksi) {
-                    if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
-                        baseScore = s.getNilai();
-                        break;
+                // Kumpulkan skor aktual dari Seleksi & HasilKuis milik peserta ini
+                List<Integer> daftarSkor = new ArrayList<>();
+
+                if (judulKuisFilter == null) {
+                    for (Seleksi s : DataStore.daftarSeleksi) {
+                        if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                            daftarSkor.add(s.getNilai());
+                        }
                     }
                 }
 
-                int nilaiBab4 = baseScore;
-                int nilaiPercakapan = Math.min(100, baseScore + 5); 
-                int nilaiBab5 = Math.max(0, baseScore - 5);         
-                
-                int rataRataIndividu = (nilaiBab4 + nilaiPercakapan + nilaiBab5) / 3;
+                for (HasilKuis hk : DataStore.daftarHasilKuis) {
+                    if (p.getIdPeserta().equals(hk.getIdPeserta())) {
+                        if (judulKuisFilter == null || judulKuisFilter.equalsIgnoreCase(hk.getJudulKuis())) {
+                            daftarSkor.add(hk.getNilaiAkhir());
+                        }
+                    }
+                }
 
-                // === DATA KEHADIRAN (DISESUAIKAN DENGAN INPUT DASHBOARD) ===
-                // Asumsi: Siswa sudah mengikuti 10x pertemuan dasar + 1 pertemuan hari ini
-                int hadir = 10; 
+                int nilai1 = !daftarSkor.isEmpty() ? daftarSkor.get(0) : 0;
+                int nilai2 = daftarSkor.size() > 1 ? daftarSkor.get(1) : nilai1;
+                int nilai3 = daftarSkor.size() > 2 ? daftarSkor.get(2) : (daftarSkor.isEmpty() ? 0 : (nilai1 + nilai2) / 2);
+
+                int rataRataIndividu;
+                if (daftarSkor.isEmpty()) {
+                    rataRataIndividu = 0;
+                } else {
+                    int sum = 0;
+                    for (int skor : daftarSkor) {
+                        sum += skor;
+                    }
+                    rataRataIndividu = Math.round((float) sum / daftarSkor.size());
+                }
+
+                // Data kehadiran berdasarkan presensi aktual dari Dashboard Instruktur
+                int hadir = 0;
                 int izin = 0;
                 int alpha = 0;
-                
-                // Ambil status presensi hari ini
+
                 String statusHadir = p.getKehadiranHariIni();
                 if (statusHadir != null) {
                     if (statusHadir.equalsIgnoreCase("Hadir")) {
-                        hadir += 1; // Jika hari ini hadir, tambah ke hadir
+                        hadir = 1;
                     } else if (statusHadir.equalsIgnoreCase("Izin") || statusHadir.equalsIgnoreCase("Sakit")) {
-                        izin += 1;  // Sakit dan Izin masuk ke kolom Izin
+                        izin = 1;
                     } else if (statusHadir.equalsIgnoreCase("Alpa")) {
-                        alpha += 1; // Masuk ke kolom Alpha
+                        alpha = 1;
                     }
                 }
-                
-                // Variasi dummy tambahan: Jika nilainya kecil, anggap dia sering bolos di masa lalu
-                if (rataRataIndividu < 70) {
-                    hadir -= 2; 
-                    alpha += 2;
-                }
 
-                // Kalkulasi Kartu Statistik
-                akumulasiRataKelas += rataRataIndividu;
                 totalPertemuanHadir += hadir;
                 totalPertemuanWajib += (hadir + izin + alpha);
 
                 if (rataRataIndividu < 70) {
-                    siswaPerluPerhatian++; // Hitung yang nilainya di bawah standar
+                    siswaPerluPerhatian++;
                 }
 
                 String status = (rataRataIndividu >= 70) ? "Aman" : "Beresiko";
 
-                // 3. Masukkan ke Tabel
                 model.addRow(new Object[]{
                     no++,
                     p.getIdPeserta(),
                     p.getNamaLengkap(),
-                    nilaiBab4,
-                    nilaiPercakapan,
-                    nilaiBab5,
+                    nilai1,
+                    nilai2,
+                    nilai3,
                     rataRataIndividu,
                     hadir,
                     izin,
@@ -181,24 +203,21 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
             }
         }
 
-        // 4. Update Kartu Statistik di Header
         if (totalSiswa > 0) {
             lblTotalPeserta.setText(String.valueOf(totalSiswa));
-            
-            int rataKelas = akumulasiRataKelas / totalSiswa;
-            // PERBAIKAN TYPO: Pastikan nama label ini sesuai dengan label rata-rata kelas di NetBeans Anda
-            lblKehadiran.setText(String.valueOf(rataKelas)); 
-            
             lblPerluPerhatian.setText(String.valueOf(siswaPerluPerhatian));
-            
-            int persenHadir = (totalPertemuanHadir * 100) / totalPertemuanWajib;
+
+            int persenHadir = (totalPertemuanWajib > 0)
+                    ? (totalPertemuanHadir * 100) / totalPertemuanWajib
+                    : 0;
             lblKehadiran.setText(persenHadir + " %");
         } else {
             lblTotalPeserta.setText("0");
-            lblKehadiran.setText("0"); // PERBAIKAN TYPO
             lblPerluPerhatian.setText("0");
             lblKehadiran.setText("0 %");
         }
+
+        TabelUtil.autoResizeKolom(tabelLaporan);
     }
     
 
@@ -482,70 +501,75 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
     }//GEN-LAST:event_cbMateriActionPerformed
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
-        cbMateri.setSelectedIndex(0);
-        cbPeriode.setSelectedIndex(0);
-        generateLaporan();
+        sedangMuatFilter = true;
+        try {
+            if (cbMateri.getItemCount() > 0) {
+                cbMateri.setSelectedIndex(0);
+            }
+            if (cbPeriode.getItemCount() > 0) {
+                cbPeriode.setSelectedIndex(0);
+            }
+        } finally {
+            sedangMuatFilter = false;
+        }
+        muatOpsiFilter();
+        loadDataLaporan();
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
-        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-        fileChooser.setDialogTitle("Simpan Laporan Excel");
-        
-        javax.swing.filechooser.FileNameExtensionFilter filter = new javax.swing.filechooser.FileNameExtensionFilter("File Excel/CSV (*.csv)", "csv");
-        fileChooser.setFileFilter(filter);
+        DefaultTableModel model = (DefaultTableModel) tabelLaporan.getModel();
+        if (model.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this,
+                    "Tidak ada data laporan untuk diekspor!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan Laporan Excel / CSV");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("File Excel/CSV (*.csv)", "csv"));
 
         int userSelection = fileChooser.showSaveDialog(this);
-        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
-            
-            java.io.File fileToSave = fileChooser.getSelectedFile();
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
             String pathFile = fileToSave.getAbsolutePath();
 
-            // 2. Trik Cerdas: Tambahkan .csv otomatis kalau user lupa ngetik ekstensinya
             if (!pathFile.toLowerCase().endsWith(".csv")) {
-                fileToSave = new java.io.File(pathFile + ".csv");
+                fileToSave = new File(pathFile + ".csv");
             }
 
-            try {
-                // 3. Siapkan alat tulis (FileWriter) ke dalam file tersebut
-                java.io.FileWriter fw = new java.io.FileWriter(fileToSave);
-                java.io.BufferedWriter bw = new java.io.BufferedWriter(fw);
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tabelLaporan.getModel();
+            try (BufferedWriter bw = new BufferedWriter(
+                    new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
 
-                // 4. Tulis baris pertama: NAMA KOLOM (Header)
-                for (int i = 0; i < model.getColumnCount(); i++) {
-                    bw.write(model.getColumnName(i) + ","); // Pakai koma sebagai pemisah antar kolom (CSV)
-                }
-                bw.newLine(); // Pindah baris ke bawah (Enter)
-
-                // 5. Tulis isinya: DATA TABEL PER BARIS
-                for (int baris = 0; baris < model.getRowCount(); baris++) {
-                    for (int kolom = 0; kolom < model.getColumnCount(); kolom++) {
-                        Object data = model.getValueAt(baris, kolom);
-                        
-                        // Bersihkan data jika ada koma di dalam teks (misal: "Dian, S.Pd") agar tabel Excel tidak hancur
-                        String teksData = (data == null) ? "" : data.toString().replace(",", " ");
-                        
-                        bw.write(teksData + ",");
+                int colCount = model.getColumnCount();
+                for (int i = 0; i < colCount; i++) {
+                    bw.write(model.getColumnName(i));
+                    if (i < colCount - 1) {
+                        bw.write(",");
                     }
-                    bw.newLine(); // Pindah baris tiap selesai 1 murid
+                }
+                bw.newLine();
+
+                for (int baris = 0; baris < model.getRowCount(); baris++) {
+                    for (int kolom = 0; kolom < colCount; kolom++) {
+                        Object data = model.getValueAt(baris, kolom);
+                        String teksData = (data == null) ? "" : data.toString().replace(",", " ");
+                        bw.write(teksData);
+                        if (kolom < colCount - 1) {
+                            bw.write(",");
+                        }
+                    }
+                    bw.newLine();
                 }
 
-                // 6. Tutup file-nya agar tersimpan permanen
-                bw.close();
-                fw.close();
-
-                // 7. Berikan notifikasi sukses ke Instruktur
-                javax.swing.JOptionPane.showMessageDialog(this, 
-                    "Laporan berhasil diekspor!\nTersimpan di: " + fileToSave.getAbsolutePath(), 
-                    "Ekspor Berhasil", 
-                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Laporan berhasil diekspor!\nTersimpan di: " + fileToSave.getAbsolutePath(),
+                        "Ekspor Berhasil", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (Exception ex) {
-                // Jika error (misal disk penuh atau file sedang dibuka di aplikasi lain)
-                javax.swing.JOptionPane.showMessageDialog(this, 
-                    "Ups, gagal menyimpan file: " + ex.getMessage(), 
-                    "Ekspor Gagal", 
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Gagal menyimpan file: " + ex.getMessage(),
+                        "Ekspor Gagal", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnEksporActionPerformed

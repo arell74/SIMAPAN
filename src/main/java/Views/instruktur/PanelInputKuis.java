@@ -5,6 +5,7 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Database.KuisDAO;
 import Model.Instruktur;
 import Model.Kuis;
 import Model.Pengguna;
@@ -132,7 +133,50 @@ public class PanelInputKuis extends javax.swing.JPanel {
         return idAsli;
     }
 
+    private String generateIdKuis() {
+        int maxNum = 0;
+        for (Kuis k : DataStore.daftarKuis) {
+            if (k.getIdKuis() != null && k.getIdKuis().startsWith("KUIS")) {
+                try {
+                    int num = Integer.parseInt(k.getIdKuis().substring(4));
+                    if (num > maxNum) {
+                        maxNum = num;
+                    }
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return "KUIS" + String.format("%03d", maxNum + 1);
+    }
+
+    private int cariNomorSoalTertinggi() {
+        int maxNum = 0;
+        for (Kuis k : DataStore.daftarKuis) {
+            if (k.getDaftarSoal() != null) {
+                for (Soal s : k.getDaftarSoal()) {
+                    maxNum = Math.max(maxNum, ekstrakNomorSoal(s.getIdSoal()));
+                }
+            }
+        }
+        for (Soal s : soalSementara) {
+            maxNum = Math.max(maxNum, ekstrakNomorSoal(s.getIdSoal()));
+        }
+        return maxNum;
+    }
+
+    private int ekstrakNomorSoal(String idSoal) {
+        if (idSoal != null && idSoal.startsWith("SOAL")) {
+            try {
+                return Integer.parseInt(idSoal.substring(4));
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        return 0;
+    }
+
     private void loadDaftarKuis() {
+        DataStore.muatUlang();
+
         modelTabelKuis.setRowCount(0);
         kuisTampil.clear();
 
@@ -152,6 +196,7 @@ public class PanelInputKuis extends javax.swing.JPanel {
                 kuisTampil.add(k);
             }
         }
+        TabelUtil.autoResizeKolom(tabelKuis);
     }
 
     private void muatUlangTabelSoalSementara() {
@@ -165,6 +210,7 @@ public class PanelInputKuis extends javax.swing.JPanel {
                 s.getPoin()
             });
         }
+        TabelUtil.autoResizeKolom(tabelSoal);
     }
 
     private void resetFormSoal() {
@@ -511,7 +557,15 @@ public class PanelInputKuis extends javax.swing.JPanel {
             return;
         }
 
-        String idSoalBaru = "SOAL" + String.format("%03d", soalSementara.size() + 1);
+        if (poin <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Poin soal harus lebih dari 0!", "Peringatan",
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int nomorBerikutnya = cariNomorSoalTertinggi() + 1;
+        String idSoalBaru = "SOAL" + String.format("%03d", nomorBerikutnya);
         Soal soalBaru;
 
         if (Soal.TIPE_PILIHAN_GANDA.equals(tipe)) {
@@ -557,7 +611,7 @@ public class PanelInputKuis extends javax.swing.JPanel {
         String judul = txtJudulKuis.getText().trim();
         String kelasTarget = String.valueOf(cbKelasTargetKuis.getSelectedItem());
         String deskripsi = txtDeskripsiKuis.getText().trim();
-        int batasWaktu = ambilAngka(txtBatasWaktu.getText(), 0);
+        int batasWaktu = Math.max(0, ambilAngka(txtBatasWaktu.getText(), 0));
 
         if (judul.isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -573,21 +627,33 @@ public class PanelInputKuis extends javax.swing.JPanel {
             return;
         }
 
+        DataStore.muatUlang();
+
+        // Sinkronkan ulang ID setiap soal terhadap database terbaru sebelum insert
+        int nomorSoal = cariNomorSoalTertinggi();
+        for (Soal s : soalSementara) {
+            nomorSoal++;
+            s.setPertanyaan("SOAL" + String.format("%03d", nomorSoal));
+        }
+
         String idAsli = cariIdAsliInstruktur();
-        String idKuisBaru = "KUIS" + String.format("%03d", DataStore.daftarKuis.size() + 1);
+        String idKuisBaru = generateIdKuis();
         String tanggal = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
 
         Kuis kuisBaru = new Kuis(idKuisBaru, idAsli, judul, kelasTarget, deskripsi, batasWaktu,
             tanggal, new ArrayList<>(soalSementara));
-        DataStore.daftarKuis.add(kuisBaru);
 
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Kuis \"" + judul + "\" berhasil disimpan dengan " + kuisBaru.getJumlahSoal()
-                + " soal (total " + kuisBaru.getTotalPoin() + " poin) untuk " + kelasTarget + "!",
-            "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        if (KuisDAO.tambah(kuisBaru)) {
+            DataStore.muatUlang();
 
-        resetFormKuisPenuh();
-        loadDaftarKuis();
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Kuis \"" + judul + "\" berhasil disimpan ke database dengan " + kuisBaru.getJumlahSoal()
+                    + " soal (total " + kuisBaru.getTotalPoin() + " poin) untuk " + kelasTarget + "!",
+                "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            resetFormKuisPenuh();
+            loadDaftarKuis();
+        }
     }
 
     private void btnHapusKuisActionPerformed(java.awt.event.ActionEvent evt) {
@@ -600,13 +666,18 @@ public class PanelInputKuis extends javax.swing.JPanel {
         }
 
         int konfirmasi = javax.swing.JOptionPane.showConfirmDialog(this,
-            "Yakin ingin menghapus kuis ini beserta seluruh soalnya?", "Konfirmasi Hapus",
+            "Yakin ingin menghapus kuis ini beserta seluruh soalnya dari database?", "Konfirmasi Hapus",
             javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
 
         if (konfirmasi == javax.swing.JOptionPane.YES_OPTION) {
             Kuis kuisTerpilih = kuisTampil.get(baris);
-            DataStore.daftarKuis.remove(kuisTerpilih);
-            loadDaftarKuis();
+            if (KuisDAO.hapus(kuisTerpilih.getIdKuis())) {
+                DataStore.muatUlang();
+                loadDaftarKuis();
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Kuis berhasil dihapus dari database!", "Sukses",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            }
         }
     }
 

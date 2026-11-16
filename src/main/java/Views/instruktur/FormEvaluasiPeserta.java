@@ -1,11 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Database.CatatanEvaluasiDAO;
+import Database.PesertaDAO;
+import Database.SeleksiDAO;
 import Model.CatatanEvaluasi;
+import Model.Instruktur;
+import Model.Pengguna;
 import Model.Peserta;
 import Model.Seleksi;
 import java.awt.BorderLayout;
@@ -15,6 +16,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -31,25 +33,17 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  * Form Evaluasi Peserta.
- * Dibuka dari baris yang dipilih di tabel PanelInputNilai. Menampilkan
- * riwayat seleksi/tes peserta, form untuk menambah nilai seleksi baru,
- * serta catatan evaluasi berupa teks bebas dari instruktur.
- *
- * CATATAN: Form ini ditulis manual (bukan hasil generate NetBeans Matisse),
- * jadi sebaiknya diedit lewat tab "Source", bukan tab "Design".
- *
- * ASUMSI: getter Model.Seleksi mengikuti pola getIdSeleksi(), getPeserta(),
- * getJenisSeleksi(), getTanggal(), getNilai(), getStatus() berdasarkan
- * pemakaian constructor di DataStore. Sesuaikan jika nama aslinya berbeda.
+ * Dibuka dari baris yang dipilih di tabel PanelInputNilai.
+ * Terhubung ke tabel seleksi, peserta, dan catatan_evaluasi di MySQL.
  *
  * @author arelssi
  */
-public class FormEvaluasiPeserta extends javax.swing.JFrame {
+public class FormEvaluasiPeserta extends javax.swing.JDialog {
 
     private static final Color MAROON = new Color(122, 0, 0);
 
     private final Peserta pesertaAktif;
-    private final String idInstrukturAktif;
+    private final String idInstrukturAsli;
 
     private JTable tabelRiwayatSeleksi;
     private DefaultTableModel modelRiwayat;
@@ -58,24 +52,47 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
     private JTextField txtTanggalSeleksi;
     private JTextField txtNilaiSeleksi;
     private JCheckBox chkGugurPermanen;
+    private JButton btnSimpanNilai;
 
     private JTextArea txtCatatanBaru;
     private JTextArea txtRiwayatCatatan;
 
     public FormEvaluasiPeserta(java.awt.Frame parent, boolean modal, Peserta peserta, String idInstruktur) {
+        super(parent, modal);
         this.pesertaAktif = peserta;
-        this.idInstrukturAktif = idInstruktur;
+        this.idInstrukturAsli = resolveIdInstruktur(idInstruktur);
 
         initComponents();
         setTitle("Form Evaluasi Peserta");
-        setSize(720, 600);
+        setSize(740, 610);
         setLocationRelativeTo(parent);
         setResizable(false);
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
+        DataStore.muatUlang();
         muatDataHeader();
         muatRiwayatSeleksi();
         muatRiwayatCatatan();
+    }
+
+    /**
+     * Memastikan ID instruktur yang dipakai sesuai kolom PK tabel instruktur (mis. INS001),
+     * meskipun parameter yang dikirim berupa username login.
+     */
+    private String resolveIdInstruktur(String idAtauUsername) {
+        if (idAtauUsername == null) {
+            return null;
+        }
+        for (Pengguna pgn : DataStore.daftarPengguna) {
+            if (pgn instanceof Instruktur) {
+                Instruktur ins = (Instruktur) pgn;
+                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idAtauUsername))
+                        || (ins.getUsername() != null && ins.getUsername().equals(idAtauUsername))) {
+                    return ins.getIdInstruktur();
+                }
+            }
+        }
+        return idAtauUsername;
     }
 
     private void muatDataHeader() {
@@ -83,7 +100,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
             return;
         }
         lblNamaHeader.setText(pesertaAktif.getNamaLengkap());
-        lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · " + pesertaAktif.getKelas() + " · Level " + pesertaAktif.getLevelBahasa());
+        lblIdHeader.setText(pesertaAktif.getIdPeserta() + " · " + safe(pesertaAktif.getKelas()) + " · Level " + safe(pesertaAktif.getLevelBahasa()));
         lblStatusSaatIni.setText("Status Seleksi Saat Ini: " + safe(pesertaAktif.getStatusSeleksi()));
     }
 
@@ -96,8 +113,10 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         if (pesertaAktif == null) {
             return;
         }
+        int jumlahPercobaan = 0;
         for (Seleksi s : DataStore.daftarSeleksi) {
             if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
+                jumlahPercobaan++;
                 modelRiwayat.addRow(new Object[]{
                     s.getTanggalSeleksi(),
                     s.getJenisSeleksi(),
@@ -109,6 +128,21 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         if (modelRiwayat.getRowCount() == 0) {
             modelRiwayat.addRow(new Object[]{"-", "Belum ada riwayat seleksi", "-", "-"});
         }
+
+        // Kunci form input seleksi jika percobaan sudah mencapai 3x atau status sudah final
+        boolean sudahFinal = "Lulus".equalsIgnoreCase(pesertaAktif.getStatusSeleksi())
+                || "Gugur".equalsIgnoreCase(pesertaAktif.getStatusSeleksi())
+                || "Gugur Permanen".equalsIgnoreCase(pesertaAktif.getStatusSeleksi());
+        boolean terkunci = jumlahPercobaan >= 3 || sudahFinal;
+
+        cbJenisSeleksi.setEnabled(!terkunci);
+        txtTanggalSeleksi.setEnabled(!terkunci);
+        txtNilaiSeleksi.setEnabled(!terkunci);
+        chkGugurPermanen.setEnabled(!terkunci);
+        btnSimpanNilai.setEnabled(!terkunci);
+        if (terkunci) {
+            btnSimpanNilai.setText(sudahFinal ? "Status Seleksi Final" : "Batas 3x Percobaan");
+        }
     }
 
     private void muatRiwayatCatatan() {
@@ -117,7 +151,6 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
             return;
         }
         StringBuilder sb = new StringBuilder();
-        // Tampilkan dari yang terbaru (asumsi entri baru ditambahkan di akhir list)
         ArrayList<CatatanEvaluasi> milikPeserta = new ArrayList<>();
         for (CatatanEvaluasi c : DataStore.daftarCatatanEvaluasi) {
             if (c.getPeserta() != null && c.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
@@ -130,7 +163,10 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         }
         for (int i = milikPeserta.size() - 1; i >= 0; i--) {
             CatatanEvaluasi c = milikPeserta.get(i);
-            sb.append("[").append(c.getTanggal()).append(" · ").append(c.getIdInstruktur()).append("]\n");
+            Instruktur ins = DataStore.cariInstruktur(c.getIdInstruktur());
+            String namaIns = (ins != null) ? ins.getNamaLengkap() + " (" + c.getIdInstruktur() + ")" : c.getIdInstruktur();
+
+            sb.append("[").append(c.getTanggal()).append(" · ").append(namaIns).append("]\n");
             sb.append(c.getIsiCatatan()).append("\n");
             sb.append("------------------------------------------------------\n");
         }
@@ -138,20 +174,43 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         txtRiwayatCatatan.setCaretPosition(0);
     }
 
+    private String generateIdCatatan() {
+        int max = 0;
+        for (CatatanEvaluasi c : DataStore.daftarCatatanEvaluasi) {
+            String id = c.getIdCatatan();
+            if (id != null && id.toUpperCase().startsWith("CTT")) {
+                try {
+                    int angka = Integer.parseInt(id.substring(3).trim());
+                    if (angka > max) {
+                        max = angka;
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return String.format("CTT%03d", max + 1);
+    }
+
     private void simpanNilaiSeleksi() {
         if (pesertaAktif == null) {
             return;
         }
 
-        String jenis = (String) cbJenisSeleksi.getSelectedItem();
-        String tanggal = txtTanggalSeleksi.getText() == null ? "" : txtTanggalSeleksi.getText().trim();
+        Object jenisObj = cbJenisSeleksi.getSelectedItem();
+        String jenis = (jenisObj != null) ? jenisObj.toString().trim() : "";
+        String tanggal = (txtTanggalSeleksi.getText() == null) ? "" : txtTanggalSeleksi.getText().trim();
 
-        if (tanggal.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Tanggal tidak boleh kosong.", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+        if (jenis.isEmpty() || tanggal.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Jenis seleksi dan tanggal tidak boleh kosong.",
+                    "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (!tanggal.matches("^\\d{2}/\\d{2}/\\d{4}$")) {
-            JOptionPane.showMessageDialog(this, "Format tanggal harus dd/MM/yyyy, contoh: 01/10/2025", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+
+        try {
+            LocalDate.parse(tanggal, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException dtpe) {
+            JOptionPane.showMessageDialog(this, "Format tanggal harus YYYY-MM-DD, contoh: 2026-11-16",
+                    "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -159,44 +218,57 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         try {
             nilai = Integer.parseInt(txtNilaiSeleksi.getText().trim());
         } catch (NumberFormatException nfe) {
-            JOptionPane.showMessageDialog(this, "Nilai harus berupa angka.", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Nilai harus berupa angka bulat.",
+                    "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (nilai < 0 || nilai > 100) {
-            JOptionPane.showMessageDialog(this, "Nilai harus berada di rentang 0-100.", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Nilai harus berada di rentang 0 - 100.",
+                    "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String status;
-        if (chkGugurPermanen.isSelected()) {
-            status = "Gugur Permanen";
-        } else if (nilai >= 70) {
-            status = "Lulus";
-        } else {
-            status = "Tidak Lulus";
+        // Hitung percobaan ke berapa saat ini
+        int jumlahSebelumnya = 0;
+        for (Seleksi s : DataStore.daftarSeleksi) {
+            if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(pesertaAktif.getIdPeserta())) {
+                jumlahSebelumnya++;
+            }
         }
 
-        try {
-            String idSeleksi = "SEL" + System.currentTimeMillis();
-            Seleksi seleksiBaru = new Seleksi(idSeleksi, pesertaAktif, jenis, tanggal, nilai, status);
-            DataStore.daftarSeleksi.add(seleksiBaru);
+        String statusHasil;
+        if (chkGugurPermanen.isSelected()) {
+            statusHasil = "Gugur Permanen";
+        } else if (nilai >= 70) {
+            statusHasil = "Lulus";
+        } else if (jumlahSebelumnya + 1 >= 3) {
+            statusHasil = "Gugur Permanen";
+        } else {
+            statusHasil = "Mengulang";
+        }
 
-            // Sinkronkan status seleksi terbaru ke data peserta secara keseluruhan
-            pesertaAktif.setStatusSeleksi(status);
+        String idSeleksi = SeleksiDAO.idBerikutnya();
+        Seleksi seleksiBaru = new Seleksi(idSeleksi, pesertaAktif, jenis, tanggal, nilai, statusHasil);
+
+        if (SeleksiDAO.tambah(seleksiBaru)) {
+            if ("Lulus".equals(statusHasil)) {
+                pesertaAktif.setStatusSeleksi("Lulus");
+                pesertaAktif.setStatusKeberangkatan("Menunggu Dokumen");
+            } else if ("Gugur Permanen".equals(statusHasil)) {
+                pesertaAktif.setStatusSeleksi("Gugur");
+                pesertaAktif.setStatusKeberangkatan("Dibatalkan");
+            } else {
+                pesertaAktif.setStatusSeleksi("Mengulang");
+            }
+            PesertaDAO.ubah(pesertaAktif);
+            DataStore.muatUlang();
 
             muatRiwayatSeleksi();
             muatDataHeader();
             txtNilaiSeleksi.setText("");
             chkGugurPermanen.setSelected(false);
 
-            JOptionPane.showMessageDialog(this, "Nilai seleksi berhasil disimpan!");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Gagal menyimpan nilai seleksi: " + ex.getMessage(),
-                    "Terjadi Kesalahan",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Nilai seleksi berhasil disimpan ke database!");
         }
     }
 
@@ -205,29 +277,23 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
             return;
         }
 
-        String isi = txtCatatanBaru.getText() == null ? "" : txtCatatanBaru.getText().trim();
+        String isi = (txtCatatanBaru.getText() == null) ? "" : txtCatatanBaru.getText().trim();
         if (isi.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Catatan evaluasi tidak boleh kosong.", "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Catatan evaluasi tidak boleh kosong.",
+                    "Input Tidak Valid", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        try {
-            String idCatatan = "CTT" + System.currentTimeMillis();
-            String tanggalHariIni = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            CatatanEvaluasi catatanBaru = new CatatanEvaluasi(idCatatan, pesertaAktif, idInstrukturAktif, tanggalHariIni, isi);
-            DataStore.daftarCatatanEvaluasi.add(catatanBaru);
+        String idCatatan = generateIdCatatan();
+        String tanggalHariIni = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        CatatanEvaluasi catatanBaru = new CatatanEvaluasi(idCatatan, pesertaAktif, idInstrukturAsli, tanggalHariIni, isi);
 
+        if (CatatanEvaluasiDAO.tambah(catatanBaru)) {
+            DataStore.muatUlang();
             muatRiwayatCatatan();
             txtCatatanBaru.setText("");
 
-            JOptionPane.showMessageDialog(this, "Catatan evaluasi berhasil disimpan!");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Gagal menyimpan catatan: " + ex.getMessage(),
-                    "Terjadi Kesalahan",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Catatan evaluasi berhasil disimpan ke database!");
         }
     }
 
@@ -240,8 +306,6 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
     private void initComponents() {
         getContentPane().setLayout(new BorderLayout());
 
-        // Label status dibuat di awal karena dipakai oleh buatPanelKiri()
-        // yang dipanggil sebelum bagian bawah method ini selesai.
         lblStatusSaatIni = new JLabel("Status Seleksi Saat Ini: -");
         lblStatusSaatIni.setFont(new Font("Inter", Font.PLAIN, 11));
         lblStatusSaatIni.setForeground(new Color(90, 90, 90));
@@ -249,7 +313,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         // ---------- HEADER ----------
         JPanel panelHeader = new JPanel();
         panelHeader.setBackground(MAROON);
-        panelHeader.setPreferredSize(new Dimension(720, 64));
+        panelHeader.setPreferredSize(new Dimension(740, 64));
         panelHeader.setLayout(null);
 
         lblNamaHeader = new JLabel("-");
@@ -269,7 +333,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         btnTutupHeader.setForeground(Color.WHITE);
         btnTutupHeader.setBorderPainted(false);
         btnTutupHeader.setFocusPainted(false);
-        btnTutupHeader.setBounds(670, 17, 30, 30);
+        btnTutupHeader.setBounds(690, 17, 30, 30);
         btnTutupHeader.addActionListener(e -> dispose());
         panelHeader.add(btnTutupHeader);
 
@@ -277,7 +341,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
 
         // ---------- BODY ----------
         JPanel panelBody = new JPanel();
-        panelBody.setLayout(new java.awt.GridLayout(1, 2, 10, 0));
+        panelBody.setLayout(new java.awt.GridLayout(1, 2, 12, 0));
         panelBody.setBackground(new Color(248, 248, 248));
         panelBody.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -325,7 +389,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         tabelRiwayatSeleksi = new JTable(modelRiwayat);
         tabelRiwayatSeleksi.setRowHeight(26);
         JScrollPane scrollRiwayat = new JScrollPane(tabelRiwayatSeleksi);
-        scrollRiwayat.setPreferredSize(new Dimension(320, 200));
+        scrollRiwayat.setPreferredSize(new Dimension(330, 200));
         panel.add(scrollRiwayat, java.awt.BorderLayout.CENTER);
 
         // ---- Form tambah nilai seleksi baru ----
@@ -343,20 +407,21 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         });
         cbJenisSeleksi.setEditable(true);
 
-        txtTanggalSeleksi = new JTextField(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        txtTanggalSeleksi = new JTextField(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         txtNilaiSeleksi = new JTextField();
         chkGugurPermanen = new JCheckBox("Tandai Gugur Permanen");
+        chkGugurPermanen.setBackground(Color.WHITE);
 
         panelForm.add(new JLabel("Jenis Seleksi:"));
         panelForm.add(cbJenisSeleksi);
-        panelForm.add(new JLabel("Tanggal (dd/MM/yyyy):"));
+        panelForm.add(new JLabel("Tanggal (YYYY-MM-DD):"));
         panelForm.add(txtTanggalSeleksi);
         panelForm.add(new JLabel("Nilai (0-100):"));
         panelForm.add(txtNilaiSeleksi);
         panelForm.add(new JLabel());
         panelForm.add(chkGugurPermanen);
 
-        JButton btnSimpanNilai = new JButton("Simpan Nilai Seleksi");
+        btnSimpanNilai = new JButton("Simpan Nilai Seleksi");
         btnSimpanNilai.setBackground(MAROON);
         btnSimpanNilai.setForeground(Color.WHITE);
         btnSimpanNilai.setFocusPainted(false);
@@ -388,7 +453,7 @@ public class FormEvaluasiPeserta extends javax.swing.JFrame {
         txtRiwayatCatatan.setWrapStyleWord(true);
         txtRiwayatCatatan.setFont(new Font("Inter", Font.PLAIN, 12));
         JScrollPane scrollCatatan = new JScrollPane(txtRiwayatCatatan);
-        scrollCatatan.setPreferredSize(new Dimension(320, 260));
+        scrollCatatan.setPreferredSize(new Dimension(330, 260));
         panelTengah.add(scrollCatatan, java.awt.BorderLayout.CENTER);
 
         panel.add(panelTengah, java.awt.BorderLayout.CENTER);

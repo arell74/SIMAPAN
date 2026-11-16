@@ -5,7 +5,11 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Model.HasilKuis;
 import Model.Instruktur;
+import Model.Jadwal;
+import Model.Materi;
+import Model.Pengguna;
 import Model.Peserta;
 import Model.Seleksi;
 import Util.TabelUtil;
@@ -28,134 +32,149 @@ import javax.swing.table.JTableHeader;
  */
 public class PanelDashboardInstruktur extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelDashboardInstruktur
-     */
     private String idInstrukturAktif;
-    private Model.Instruktur instrukturAktif;
-    
+    private Instruktur instrukturAktif;
+
     public PanelDashboardInstruktur(String idInstruktur) {
         initComponents();
-        
+
         this.idInstrukturAktif = idInstruktur;
-        System.out.println("DEBUG: ID Instruktur yang masuk ke panel adalah -> " + idInstruktur);
-        
+
+        DataStore.muatUlang();
         loadDataDashboard();
         setupTablePresensi();
         loadJadwalDinamis();
     }
-    
+
     private void setupTablePresensi() {
-         tabelPresensi.setRowHeight(35);
-         JComboBox<String> cbKehadiran = new JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
-         tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(cbKehadiran));
+        tabelPresensi.setRowHeight(35);
+        JComboBox<String> cbKehadiran = new JComboBox<>(new String[]{"Hadir", "Izin", "Sakit", "Alpa"});
+        tabelPresensi.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(cbKehadiran));
 
-         loadTabelPresensi();
+        loadTabelPresensi();
+        TabelUtil.autoResizeKolom(tabelPresensi);
 
-         TabelUtil.autoResizeKolom(tabelPresensi);
+        JTableHeader header = tabelPresensi.getTableHeader();
+        header.setBackground(new Color(122, 0, 0));
+        header.setForeground(Color.WHITE);
+        header.setFont(new Font("Inter", Font.BOLD, 13));
+        header.setOpaque(true);
+    }
 
-         JTableHeader header = tabelPresensi.getTableHeader();
-         header.setBackground(new Color(122, 0, 0));
-         header.setForeground(Color.WHITE);
-         header.setFont(new Font("Inter", Font.BOLD, 13)); 
-         header.setOpaque(true);
-     }
-    
     private void loadTabelPresensi() {
         DefaultTableModel model = (DefaultTableModel) tabelPresensi.getModel();
         model.setRowCount(0);
-        
-        if (instrukturAktif == null) return; 
-        
-        // 1. Ambil teks dari kolom pencarian, ubah ke huruf kecil semua agar pencarian tidak sensitif huruf besar/kecil
+
+        if (instrukturAktif == null) {
+            return;
+        }
+
         String keyword = txtCari.getText().trim().toLowerCase();
-        
+
         int no = 1;
-        for (Model.Peserta p : DataStore.daftarPeserta) {
-            
-            // 2. Filter utama: pastikan ini adalah anak didik dari instruktur yang sedang login
-            if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) { 
-                
-                // 3. Logika Pencarian
+        for (Peserta p : DataStore.daftarPeserta) {
+            if (p.getInstrukturDamping() != null
+                    && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) {
+
                 boolean cocok = true;
-                
-                // Jika kolom pencarian tidak kosong, maka lakukan pengecekan
                 if (!keyword.isEmpty()) {
-                    String id = p.getIdPeserta().toLowerCase();
-                    String nama = p.getNamaLengkap().toLowerCase();
-                    
-                    // Jika teks yang dicari TIDAK ADA di ID dan TIDAK ADA di Nama, lewati data ini
+                    String id = p.getIdPeserta() != null ? p.getIdPeserta().toLowerCase() : "";
+                    String nama = p.getNamaLengkap() != null ? p.getNamaLengkap().toLowerCase() : "";
                     if (!id.contains(keyword) && !nama.contains(keyword)) {
                         cocok = false;
                     }
                 }
-                
-                // 4. Masukkan ke tabel jika cocok
+
                 if (cocok) {
                     model.addRow(new Object[]{
                         no++,
                         p.getIdPeserta(),
                         p.getNamaLengkap(),
                         p.getLevelBahasa(),
-                        p.getKehadiranHariIni() 
+                        p.getKehadiranHariIni()
                     });
                 }
             }
         }
     }
-    
+
     private void loadDataDashboard() {
-        // Cari instruktur berdasarkan ID/Username
-        for (Model.Pengguna pgn : DataStore.daftarPengguna) {
-            if (pgn instanceof Model.Instruktur) {
-                Model.Instruktur ins = (Model.Instruktur) pgn;
+        for (Pengguna pgn : DataStore.daftarPengguna) {
+            if (pgn instanceof Instruktur) {
+                Instruktur ins = (Instruktur) pgn;
                 boolean cocokIDInstruktur = ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif);
                 boolean cocokUsername = ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif);
-                
-                if (cocokIDInstruktur || cocokUsername) { 
+
+                if (cocokIDInstruktur || cocokUsername) {
                     this.idInstrukturAktif = ins.getIdInstruktur();
-                    this.instrukturAktif = ins; // Simpan ke variabel global
+                    this.instrukturAktif = ins;
                     break;
                 }
             }
         }
 
+        Locale localeId = new Locale("id", "ID");
+        Date sekarang = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd MMMM yyyy", localeId);
+        lblTanggalPresensi.setText(sdf.format(sekarang));
+
         if (instrukturAktif != null) {
-            // 1. Update Teks Banner & Profil secara DINAMIS
             lblNamaInstruktur.setText(instrukturAktif.getNamaLengkap());
-            lblSpesialisasi.setText("Instruktur aktif - " + instrukturAktif.getSpesialisasi()); 
-            
-            // Mengambil kelas dan level JLPT dinamis dari model Instruktur
+            lblSpesialisasi.setText("Instruktur aktif - " + (instrukturAktif.getSpesialisasi() != null ? instrukturAktif.getSpesialisasi() : "-"));
+
             String kelas = instrukturAktif.getKelasDiampu() != null ? instrukturAktif.getKelasDiampu() : "Belum Ada Kelas";
             String level = instrukturAktif.getLevelJlpt() != null ? instrukturAktif.getLevelJlpt() : "-";
             lblInfoInstruktur.setText(instrukturAktif.getIdInstruktur() + " - KELAS " + kelas.toUpperCase() + " - LEVEL JLPT " + level);
-            
-            // 2. Hitung Statistik (Siswa, Rata-rata)
+            jLabel5.setText("Minggu ini · Kelas " + kelas);
+
+            // Badge materi aktif hari ini pada kartu Presensi
+            String hariIni = new SimpleDateFormat("EEEE", localeId).format(sekarang);
+            String materiAktif = null;
+            for (Jadwal j : DataStore.daftarJadwal) {
+                if (idInstrukturAktif.equals(j.getIdInstruktur()) && hariIni.equalsIgnoreCase(j.getHari())) {
+                    materiAktif = j.getNamaMateri();
+                    break;
+                }
+            }
+            if (materiAktif == null) {
+                for (Materi m : DataStore.daftarMateri) {
+                    if (idInstrukturAktif.equals(m.getIdInstruktur())) {
+                        materiAktif = m.getJudul();
+                    }
+                }
+            }
+            jLabel3.setText(materiAktif != null ? materiAktif : "Kelas " + kelas);
+
+            // Hitung Statistik Siswa & Rata-rata Nilai
             int jumlahSiswa = 0;
             int akumulasiNilai = 0;
             int jumlahNilai = 0;
-            
-            for (Model.Peserta p : DataStore.daftarPeserta) {
-                
-                if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) { 
-                    
-                    jumlahSiswa++; // Hitung sebagai siswanya instruktur ini
-                    
-                    for (Model.Seleksi s : DataStore.daftarSeleksi) {
-                        if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+
+            for (Peserta p : DataStore.daftarPeserta) {
+                if (p.getInstrukturDamping() != null
+                        && p.getInstrukturDamping().getIdInstruktur().equals(instrukturAktif.getIdInstruktur())) {
+
+                    jumlahSiswa++;
+
+                    for (Seleksi s : DataStore.daftarSeleksi) {
+                        if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
                             akumulasiNilai += s.getNilai();
+                            jumlahNilai++;
+                        }
+                    }
+
+                    for (HasilKuis hk : DataStore.daftarHasilKuis) {
+                        if (p.getIdPeserta().equals(hk.getIdPeserta())) {
+                            akumulasiNilai += hk.getNilaiAkhir();
                             jumlahNilai++;
                         }
                     }
                 }
             }
-            
+
             lblTotalSiswa.setText(String.valueOf(jumlahSiswa));
             int rataRata = (jumlahNilai > 0) ? (akumulasiNilai / jumlahNilai) : 0;
             lblRataNilai.setText(String.valueOf(rataRata));
-            
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", new java.util.Locale("id", "ID"));
-            lblTanggalPresensi.setText(sdf.format(new java.util.Date()));
         }
     }
 
@@ -163,28 +182,20 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         pnlWadahJadwal.removeAll();
         int jumlahJadwal = 0;
 
-        for (Model.Jadwal j : DataStore.daftarJadwal) {
-            if (j.getIdInstruktur().equals(idInstrukturAktif)) {
-                
-                jumlahJadwal++; 
-                // Asumsi CardJadwal adalah custom component yang sudah kamu buat
+        for (Jadwal j : DataStore.daftarJadwal) {
+            if (j.getIdInstruktur() != null && j.getIdInstruktur().equals(idInstrukturAktif)) {
+                jumlahJadwal++;
+
                 CardJadwal kartu = new CardJadwal();
-                kartu.setJadwalData(
-                    j.getJamMulai(), 
-                    j.getHari(), 
-                    j.getNamaMateri(), 
-                    "Kelas " + j.getNamaKelas() + " - " + j.getDurasi() + " Menit", 
-                    j.getStatusJadwal()
-                );
-                
+                kartu.setJadwalData(j, this::loadJadwalDinamis);
                 kartu.setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 pnlWadahJadwal.add(kartu);
                 pnlWadahJadwal.add(Box.createRigidArea(new Dimension(0, 10)));
             }
         }
-        
-        lblTotalJadwal.setText(String.valueOf(jumlahJadwal)); 
+
+        lblTotalJadwal.setText(String.valueOf(jumlahJadwal));
 
         pnlWadahJadwal.add(Box.createVerticalGlue());
         pnlWadahJadwal.revalidate();
@@ -497,26 +508,20 @@ public class PanelDashboardInstruktur extends javax.swing.JPanel {
         int jumlahBaris = model.getRowCount();
         int tersimpan = 0;
 
-        // Looping seluruh baris di tabel
         for (int i = 0; i < jumlahBaris; i++) {
-            // Kolom 1 adalah ID Peserta, Kolom 4 adalah Status Kehadiran
             String idPesertaTabel = model.getValueAt(i, 1).toString();
             String statusKehadiran = model.getValueAt(i, 4).toString();
 
-            // Cari peserta di DataStore dan update kehadirannya
-            for (Model.Peserta p : DataStore.daftarPeserta) {
-                if (p.getIdPeserta().equals(idPesertaTabel)) {
-                    p.setKehadiranHariIni(statusKehadiran);
-                    tersimpan++;
-                    break;
-                }
+            Peserta p = DataStore.cariPeserta(idPesertaTabel);
+            if (p != null) {
+                p.setKehadiranHariIni(statusKehadiran);
+                tersimpan++;
             }
         }
 
-        // Tampilkan pesan sukses
-        javax.swing.JOptionPane.showMessageDialog(this, 
-            "Berhasil menyimpan presensi untuk " + tersimpan + " siswa hari ini!", 
-            "Simpan Sukses", 
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Berhasil menyimpan presensi untuk " + tersimpan + " siswa hari ini!",
+            "Simpan Sukses",
             javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jButton1ActionPerformed
 

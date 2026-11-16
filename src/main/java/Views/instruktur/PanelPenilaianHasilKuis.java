@@ -1,12 +1,17 @@
 package Views.instruktur;
 
+import DataStore.DataStore;
+import Database.HasilKuisDAO;
 import Model.HasilKuis;
 import Model.JawabanSoal;
 import Model.Peserta;
+import Util.TabelUtil;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Window;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
@@ -36,7 +42,9 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
 
     public PanelPenilaianHasilKuis(HasilKuis hasil, Peserta peserta, String idInstruktur) {
         this.hasilAktif = hasil;
-        this.pesertaAktif = peserta;
+        this.pesertaAktif = (peserta != null)
+                ? peserta
+                : (hasil != null ? DataStore.cariPeserta(hasil.getIdPeserta()) : null);
         this.idInstrukturAktif = idInstruktur;
 
         initComponents();
@@ -47,10 +55,15 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
     }
 
     private void muatDataHeader() {
-        if (this.hasilAktif != null && this.pesertaAktif != null) {
+        if (this.hasilAktif != null) {
             String idPeserta = this.hasilAktif.getIdPeserta();
-            lblIdHeader.setText("ID Peserta: " + idPeserta);
-            lblNamaHeader.setText("Penilaian Kuis Peserta"); 
+            String namaPeserta = (this.pesertaAktif != null) ? this.pesertaAktif.getNamaLengkap() : idPeserta;
+            String judulKuis = (this.hasilAktif.getJudulKuis() != null) ? this.hasilAktif.getJudulKuis() : "Kuis";
+
+            lblNamaHeader.setText(judulKuis + " — " + namaPeserta);
+            lblIdHeader.setText("ID Peserta: " + idPeserta
+                    + "  ·  Tanggal Pengerjaan: " + this.hasilAktif.getTanggalPengerjaan()
+                    + "  ·  Status: " + this.hasilAktif.getStatus());
         } else {
             lblNamaHeader.setText("Belum Ada Data Terpilih");
             lblIdHeader.setText("Silakan kembali dan pilih peserta dari tabel terlebih dahulu.");
@@ -59,11 +72,11 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
 
     private void muatTabelJawaban() {
         modelJawaban.setRowCount(0);
-        
+
         if (this.hasilAktif == null || this.hasilAktif.getDaftarJawaban() == null) {
-            return; 
+            return;
         }
-        
+
         int no = 1;
         for (JawabanSoal j : hasilAktif.getDaftarJawaban()) {
             String jawabanSiswa = (j.getJawabanSiswa() == null || j.getJawabanSiswa().isEmpty())
@@ -80,6 +93,7 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
                 j.isSudahDinilai() ? "Sudah Dinilai" : "Belum Dinilai"
             });
         }
+        TabelUtil.autoResizeKolom(tabelJawaban);
         perbaruiPreviewNilai();
     }
 
@@ -96,12 +110,12 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
             lblNilaiPreview.setText("Total Poin: - / -     |     Perkiraan Nilai Akhir: -");
             return;
         }
-        
+
         int totalMaks = hasilAktif.getTotalPoinMaksimal();
         int totalDapat = 0;
         for (int i = 0; i < modelJawaban.getRowCount(); i++) {
             try {
-                totalDapat += Integer.parseInt(modelJawaban.getValueAt(i, KOLOM_POIN_DIPEROLEH).toString());
+                totalDapat += Integer.parseInt(modelJawaban.getValueAt(i, KOLOM_POIN_DIPEROLEH).toString().trim());
             } catch (NumberFormatException ignore) {
             }
         }
@@ -111,23 +125,30 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
 
     private void simpanPenilaian() {
         if (this.hasilAktif == null) {
-            JOptionPane.showMessageDialog(this, 
-                    "Tidak ada data peserta yang dinilai!", 
+            JOptionPane.showMessageDialog(this,
+                    "Tidak ada data peserta yang dinilai!",
                     "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
+        // Pastikan perubahan terakhir di sel tabel langsung ter-commit sebelum dibaca
+        if (tabelJawaban.isEditing() && tabelJawaban.getCellEditor() != null) {
+            tabelJawaban.getCellEditor().stopCellEditing();
+        }
+
         ArrayList<JawabanSoal> daftarJawabanAsli = hasilAktif.getDaftarJawaban();
 
+        // 1. Validasi seluruh baris Essay terlebih dahulu
         int[] poinBaru = new int[daftarJawabanAsli.size()];
         for (int i = 0; i < daftarJawabanAsli.size(); i++) {
             JawabanSoal j = daftarJawabanAsli.get(i);
             if (j.isPilihanGanda()) {
-                poinBaru[i] = j.getPoinDiperoleh(); 
+                poinBaru[i] = j.getPoinDiperoleh();
                 continue;
             }
 
-            String isiPoin = modelJawaban.getValueAt(i, KOLOM_POIN_DIPEROLEH).toString().trim();
+            Object rawPoin = modelJawaban.getValueAt(i, KOLOM_POIN_DIPEROLEH);
+            String isiPoin = (rawPoin != null) ? rawPoin.toString().trim() : "";
             int poin;
             try {
                 poin = Integer.parseInt(isiPoin);
@@ -146,6 +167,7 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
             poinBaru[i] = poin;
         }
 
+        // 2. Terapkan nilai ke objek JawabanSoal & catatan ke HasilKuis
         for (int i = 0; i < daftarJawabanAsli.size(); i++) {
             JawabanSoal j = daftarJawabanAsli.get(i);
             if (!j.isPilihanGanda()) {
@@ -153,41 +175,54 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
                 j.setSudahDinilai(true);
             }
         }
-
         hasilAktif.setCatatanInstruktur(txtCatatan.getText().trim());
 
-        muatTabelJawaban();
-        JOptionPane.showMessageDialog(this,
-                "Penilaian berhasil disimpan!\nStatus hasil kuis: " + hasilAktif.getStatus());
+        // 3. Simpan perubahan secara permanen ke MySQL
+        if (HasilKuisDAO.ubah(hasilAktif)) {
+            DataStore.muatUlang();
+            muatDataHeader();
+            muatTabelJawaban();
+
+            JOptionPane.showMessageDialog(this,
+                    "Penilaian berhasil disimpan ke database!\n"
+                    + "Nilai Akhir: " + hasilAktif.getNilaiAkhir() + "\n"
+                    + "Status hasil kuis: " + hasilAktif.getStatus(),
+                    "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            DataStore.muatUlang();
+        }
     }
 
-    // ==================== UI (Dimodifikasi menjadi JPanel) ====================
+    private void kembaliKeDaftar() {
+        Window ancestor = SwingUtilities.getWindowAncestor(this);
+        if (ancestor instanceof InstrukturFrame) {
+            ((InstrukturFrame) ancestor).showPanel(new PanelDaftarHasilKuis(idInstrukturAktif));
+        }
+    }
+
+    // ==================== UI ====================
 
     private void initComponents() {
-        // Menggunakan BorderLayout langsung pada panel ini
         setLayout(new BorderLayout());
         setBackground(new Color(248, 248, 248));
 
         // ---------- HEADER ----------
         JPanel panelHeader = new JPanel();
         panelHeader.setBackground(MAROON);
-        panelHeader.setPreferredSize(new Dimension(100, 64)); // Lebar menyesuaikan otomatis
+        panelHeader.setPreferredSize(new Dimension(100, 64));
         panelHeader.setLayout(null);
 
         lblNamaHeader = new JLabel("-");
         lblNamaHeader.setForeground(Color.WHITE);
         lblNamaHeader.setFont(new Font("Inter", Font.BOLD, 15));
-        lblNamaHeader.setBounds(20, 10, 600, 22);
+        lblNamaHeader.setBounds(20, 10, 880, 22);
         panelHeader.add(lblNamaHeader);
 
         lblIdHeader = new JLabel("-");
         lblIdHeader.setForeground(Color.WHITE);
         lblIdHeader.setFont(new Font("Inter", Font.PLAIN, 11));
-        lblIdHeader.setBounds(20, 32, 600, 16);
+        lblIdHeader.setBounds(20, 32, 880, 16);
         panelHeader.add(lblIdHeader);
-
-        // Tombol X dihapus karena tidak cocok untuk JPanel. 
-        // Diganti dengan tombol "Kembali" di bagian bawah.
 
         add(panelHeader, BorderLayout.NORTH);
 
@@ -208,20 +243,26 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                if (column != KOLOM_POIN_DIPEROLEH) return false;
+                if (column != KOLOM_POIN_DIPEROLEH) {
+                    return false;
+                }
                 Object tipe = getValueAt(row, 1);
                 return tipe != null && tipe.toString().equalsIgnoreCase("Essay");
             }
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 0 || columnIndex == 5 || columnIndex == 6) return Object.class;
+                if (columnIndex == 0 || columnIndex == 5 || columnIndex == 6) {
+                    return Object.class;
+                }
                 return String.class;
             }
         };
 
         modelJawaban.addTableModelListener(e -> {
-            if (e.getColumn() == KOLOM_POIN_DIPEROLEH) perbaruiPreviewNilai();
+            if (e.getColumn() == KOLOM_POIN_DIPEROLEH) {
+                perbaruiPreviewNilai();
+            }
         });
 
         tabelJawaban = new JTable(modelJawaban);
@@ -269,20 +310,15 @@ public class PanelPenilaianHasilKuis extends javax.swing.JPanel {
 
         JButton btnKembali = new JButton("Kembali");
         btnKembali.setFocusPainted(false);
-        btnKembali.addActionListener(e -> {
-            // TODO: Panggil fungsi untuk berpindah ke panel tabel peserta di sini
-            // Contoh: 
-            // FrameUtama parent = (FrameUtama) javax.swing.SwingUtilities.getWindowAncestor(this);
-            // parent.showPanel(new PanelDaftarNilai(...));
-            
-            JOptionPane.showMessageDialog(this, "Kembali ke halaman sebelumnya.");
-        });
+        btnKembali.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnKembali.addActionListener(e -> kembaliKeDaftar());
         panelFooter.add(btnKembali);
-        
+
         JButton btnSimpan = new JButton("Simpan Penilaian");
         btnSimpan.setBackground(MAROON);
         btnSimpan.setForeground(Color.WHITE);
         btnSimpan.setFocusPainted(false);
+        btnSimpan.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSimpan.addActionListener(e -> simpanPenilaian());
         panelFooter.add(btnSimpan);
 
