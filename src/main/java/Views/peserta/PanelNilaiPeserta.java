@@ -6,8 +6,21 @@ package Views.peserta;
 
 import DataStore.DataStore;
 import Model.HasilKuis;
+import Model.Peserta;
 import Model.Seleksi;
 import Util.TabelUtil;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Objects;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -27,11 +40,24 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
 
         setupTabelNilaiMateri();
         setupTabelHasilKuis();
-        
+
         loadSemuaData();
     }
 
+    private void resolveIdPeserta() {
+        for (Peserta p : DataStore.daftarPeserta) {
+            if ((p.getIdPeserta() != null && p.getIdPeserta().equals(idPesertaAktif))
+                    || (p.getUsername() != null && p.getUsername().equals(idPesertaAktif))) {
+                this.idPesertaAktif = p.getIdPeserta();
+                break;
+            }
+        }
+    }
+
     private void loadSemuaData() {
+        DataStore.muatUlang();
+        resolveIdPeserta();
+
         loadNilaiMateri();
         loadHasilKuis();
     }
@@ -66,19 +92,27 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         };
         tabelHasilKuis.setModel(modelTabelHasilKuis);
         dandaniHeaderTabel(tabelHasilKuis);
+
+        tabelHasilKuis.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && tabelHasilKuis.getSelectedRow() != -1) {
+                    btnLihatCatatanActionPerformed(null);
+                }
+            }
+        });
     }
 
-    private void dandaniHeaderTabel(javax.swing.JTable tabel) {
-        tabel.setSelectionBackground(new java.awt.Color(230, 240, 255)); // Biru muda ala macOS
-        tabel.setSelectionForeground(new java.awt.Color(0, 50, 150));
-        tabel.setShowVerticalLines(false); // Estetika modern
-        tabel.setGridColor(new java.awt.Color(240, 240, 240));
+    private void dandaniHeaderTabel(JTable tabel) {
+        tabel.setSelectionBackground(new Color(230, 240, 255));
+        tabel.setSelectionForeground(new Color(0, 50, 150));
+        tabel.setShowVerticalLines(false);
+        tabel.setGridColor(new Color(240, 240, 240));
 
-        TabelUtil.autoResizeKolom(tabel);
         javax.swing.table.JTableHeader header = tabel.getTableHeader();
-        header.setBackground(new java.awt.Color(40, 40, 40));
-        header.setForeground(java.awt.Color.WHITE);
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
+        header.setBackground(new Color(40, 40, 40));
+        header.setForeground(Color.WHITE);
+        header.setFont(new Font("Inter", Font.BOLD, 12));
         header.setOpaque(true);
     }
 
@@ -89,9 +123,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         int jumlahData = 0;
 
         for (Seleksi s : DataStore.daftarSeleksi) {
-            if (s.getPeserta() != null && s.getPeserta().getIdPeserta() != null
-                    && s.getPeserta().getIdPeserta().equals(idPesertaAktif)) {
-                
+            if (s.getPeserta() != null && Objects.equals(s.getPeserta().getIdPeserta(), idPesertaAktif)) {
                 modelTabelNilaiMateri.addRow(new Object[]{
                     no++,
                     s.getJenisSeleksi(),
@@ -99,7 +131,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
                     s.getNilai(),
                     s.getStatusHasil()
                 });
-                
+
                 totalNilai += s.getNilai();
                 jumlahData++;
             }
@@ -112,6 +144,8 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
             lblRataMateri.setText("Rata-rata Nilai: -");
             modelTabelNilaiMateri.addRow(new Object[]{"-", "Belum ada nilai materi yang diinput instruktur", "-", "-", "-"});
         }
+
+        TabelUtil.autoResizeKolom(tabelNilaiMateri);
     }
 
     private void loadHasilKuis() {
@@ -121,9 +155,9 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         int jumlahKuis = 0;
 
         for (HasilKuis h : DataStore.daftarHasilKuis) {
-            if (h.getIdPeserta() != null && h.getIdPeserta().equals(idPesertaAktif)) {
+            if (Objects.equals(h.getIdPeserta(), idPesertaAktif)) {
                 String catatan = h.getCatatanInstruktur();
-                if (catatan == null || catatan.isEmpty()) {
+                if (catatan == null || catatan.trim().isEmpty()) {
                     catatan = "Tidak ada catatan";
                 }
 
@@ -135,7 +169,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
                     h.getStatus(),
                     catatan
                 });
-                
+
                 totalNilaiKuis += h.getNilaiAkhir();
                 jumlahKuis++;
             }
@@ -148,6 +182,8 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
             lblRataKuis.setText("Rata-rata Kuis: -");
             modelTabelHasilKuis.addRow(new Object[]{"-", "Belum ada kuis yang dikerjakan", "-", "-", "-", "-"});
         }
+
+        TabelUtil.autoResizeKolom(tabelHasilKuis);
     }
 
     @SuppressWarnings("unchecked")
@@ -166,7 +202,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
 
         lblRataMateri = new javax.swing.JLabel();
         lblRataMateri.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
-        lblRataMateri.setForeground(new java.awt.Color(20, 120, 40)); // Warna hijau positif
+        lblRataMateri.setForeground(new java.awt.Color(20, 120, 40));
         lblRataMateri.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblRataMateri.setText("Rata-rata Nilai: 0");
         add(lblRataMateri, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 20, 200, 20));
@@ -202,7 +238,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         btnLihatCatatan.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
         btnLihatCatatan.setForeground(new java.awt.Color(255, 255, 255));
         btnLihatCatatan.setText("Lihat Catatan Penuh");
-        btnLihatCatatan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnLihatCatatan.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLihatCatatan.setFocusPainted(false);
         btnLihatCatatan.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -216,7 +252,7 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         btnRefresh.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
         btnRefresh.setForeground(new java.awt.Color(50, 50, 50));
         btnRefresh.setText("Segarkan Data");
-        btnRefresh.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnRefresh.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnRefresh.setFocusPainted(false);
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -242,29 +278,31 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
     private void btnLihatCatatanActionPerformed(java.awt.event.ActionEvent evt) {
         int baris = tabelHasilKuis.getSelectedRow();
         if (baris == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(this,
                 "Pilih dahulu kuis yang ingin dilihat catatannya dari tabel!", "Peringatan",
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+                JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String judul = modelTabelHasilKuis.getValueAt(baris, 1).toString();
-        String catatan = modelTabelHasilKuis.getValueAt(baris, 5).toString();
+        String judul = String.valueOf(modelTabelHasilKuis.getValueAt(baris, 1));
+        String catatan = String.valueOf(modelTabelHasilKuis.getValueAt(baris, 5));
 
-        if (judul.equals("Belum ada kuis yang dikerjakan")) return; // Proteksi baris kosong
+        if ("Belum ada kuis yang dikerjakan".equals(judul)) {
+            return;
+        }
 
-        javax.swing.JTextArea areaCatatan = new javax.swing.JTextArea(catatan);
+        JTextArea areaCatatan = new JTextArea(catatan);
         areaCatatan.setLineWrap(true);
         areaCatatan.setWrapStyleWord(true);
         areaCatatan.setEditable(false);
-        areaCatatan.setFont(new java.awt.Font("Inter", 0, 13));
-        areaCatatan.setMargin(new java.awt.Insets(10, 10, 10, 10));
+        areaCatatan.setFont(new Font("Inter", Font.PLAIN, 13));
+        areaCatatan.setMargin(new Insets(10, 10, 10, 10));
 
-        javax.swing.JScrollPane scrollCatatan = new javax.swing.JScrollPane(areaCatatan);
-        scrollCatatan.setPreferredSize(new java.awt.Dimension(400, 200));
+        JScrollPane scrollCatatan = new JScrollPane(areaCatatan);
+        scrollCatatan.setPreferredSize(new Dimension(400, 200));
 
-        javax.swing.JOptionPane.showMessageDialog(this, scrollCatatan,
-            "Evaluasi Instruktur - " + judul, javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, scrollCatatan,
+            "Evaluasi Instruktur - " + judul, JOptionPane.INFORMATION_MESSAGE);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

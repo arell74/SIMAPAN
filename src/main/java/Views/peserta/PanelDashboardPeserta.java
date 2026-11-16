@@ -9,7 +9,10 @@ import Model.HasilKuis;
 import Model.Kuis;
 import Model.Materi;
 import Model.Peserta;
+import Model.Program;
 import Model.Seleksi;
+import java.awt.Color;
+import java.util.Objects;
 
 /**
  * Dashboard ringkasan untuk Peserta: menyapa dengan nama, program & kelasnya, 
@@ -25,13 +28,14 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
     public PanelDashboardPeserta(String idPeserta) {
         initComponents();
         this.idPesertaAktif = idPeserta;
-        setBackground(new java.awt.Color(245, 245, 245)); // Background abu-abu muda agar kartu lebih menonjol
+        setBackground(new Color(245, 245, 245));
         muatRingkasan();
     }
 
     private Peserta cariPesertaAktif() {
         for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta() != null && p.getIdPeserta().equals(idPesertaAktif)) {
+            if ((p.getIdPeserta() != null && p.getIdPeserta().equals(idPesertaAktif))
+                    || (p.getUsername() != null && p.getUsername().equals(idPesertaAktif))) {
                 return p;
             }
         }
@@ -39,16 +43,20 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
     }
 
     private void muatRingkasan() {
+        DataStore.muatUlang();
+
         Peserta pesertaAktif = cariPesertaAktif();
         String kelasPeserta = "Belum Ditentukan";
 
         if (pesertaAktif != null) {
-            kelasPeserta = pesertaAktif.getKelas();
-            
-            // Mengambil nama program dari DataStore berdasarkan ID Program yang dimiliki peserta
+            this.idPesertaAktif = pesertaAktif.getIdPeserta();
+            if (pesertaAktif.getKelas() != null && !pesertaAktif.getKelas().trim().isEmpty()) {
+                kelasPeserta = pesertaAktif.getKelas();
+            }
+
             String namaProgram = "Program Belum Ditentukan";
-            for (Model.Program prg : DataStore.daftarProgram) {
-                if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {
+            for (Program prg : DataStore.daftarProgram) {
+                if (Objects.equals(prg.getIdProgram(), pesertaAktif.getProgram())) {
                     namaProgram = prg.getNamaProgram();
                     break;
                 }
@@ -56,29 +64,31 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
 
             lblSapaan.setText("Selamat Datang, " + pesertaAktif.getNamaLengkap() + "!");
             lblInfoKelas.setText("Program: " + namaProgram + "  |  Kelas: " + kelasPeserta + "  |  Level: " + pesertaAktif.getLevelBahasa());
-            
-            // Set Status Seleksi di kartu ke-4
-            lblStatusSeleksi.setText(pesertaAktif.getStatusSeleksi());
-            
-            // Ubah warna teks status berdasarkan kondisinya
-            if ("Lulus".equalsIgnoreCase(pesertaAktif.getStatusSeleksi())) {
-                lblStatusSeleksi.setForeground(new java.awt.Color(20, 120, 40)); // Hijau
-            } else if (pesertaAktif.getStatusSeleksi().contains("Gugur")) {
-                lblStatusSeleksi.setForeground(new java.awt.Color(180, 40, 40)); // Merah
+
+            String statusSeleksi = (pesertaAktif.getStatusSeleksi() != null && !pesertaAktif.getStatusSeleksi().trim().isEmpty())
+                    ? pesertaAktif.getStatusSeleksi()
+                    : "Menunggu";
+            lblStatusSeleksi.setText(statusSeleksi);
+
+            if ("Lulus".equalsIgnoreCase(statusSeleksi)) {
+                lblStatusSeleksi.setForeground(new Color(20, 120, 40)); // Hijau
+            } else if (statusSeleksi.toLowerCase().contains("gugur") || statusSeleksi.toLowerCase().contains("tidak")) {
+                lblStatusSeleksi.setForeground(new Color(180, 40, 40)); // Merah
             } else {
-                lblStatusSeleksi.setForeground(new java.awt.Color(200, 100, 0)); // Oranye untuk Menunggu
+                lblStatusSeleksi.setForeground(new Color(200, 100, 0)); // Oranye untuk Menunggu
             }
-            
+
         } else {
             lblSapaan.setText("Halo!");
             lblInfoKelas.setText("Data peserta tidak ditemukan");
             lblStatusSeleksi.setText("-");
         }
 
-        // Hitung Materi
+        // Hitung Materi sesuai kelas peserta
         int jumlahMateri = 0;
         for (Materi m : DataStore.daftarMateri) {
-            if ("Semua Kelas".equals(m.getKelasTarget()) || m.getKelasTarget().equals(kelasPeserta)) {
+            String target = m.getKelasTarget();
+            if ("Semua Kelas".equalsIgnoreCase(target) || Objects.equals(kelasPeserta, target)) {
                 jumlahMateri++;
             }
         }
@@ -87,20 +97,28 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
         // Hitung Kuis Belum Dikerjakan
         int jumlahKuisBelum = 0;
         for (Kuis k : DataStore.daftarKuis) {
-            boolean untukKelasIni = "Semua Kelas".equals(k.getKelasTarget()) || k.getKelasTarget().equals(kelasPeserta);
+            String target = k.getKelasTarget();
+            boolean untukKelasIni = "Semua Kelas".equalsIgnoreCase(target) || Objects.equals(kelasPeserta, target);
             if (untukKelasIni && !sudahDikerjakan(k.getIdKuis())) {
                 jumlahKuisBelum++;
             }
         }
         lblJumlahKuis.setText(String.valueOf(jumlahKuisBelum));
+        lblJumlahKuis.setForeground(jumlahKuisBelum > 0 ? new Color(180, 40, 40) : new Color(40, 40, 40));
 
-        // Hitung Rata-rata Nilai
+        // Hitung Rata-rata Nilai (gabungan nilai seleksi & hasil kuis yang sudah selesai dinilai)
         int totalNilai = 0;
         int jumlahNilai = 0;
         for (Seleksi s : DataStore.daftarSeleksi) {
-            if (s.getPeserta() != null && s.getPeserta().getIdPeserta() != null
-                    && s.getPeserta().getIdPeserta().equals(idPesertaAktif)) {
+            if (s.getPeserta() != null && Objects.equals(s.getPeserta().getIdPeserta(), idPesertaAktif)) {
                 totalNilai += s.getNilai();
+                jumlahNilai++;
+            }
+        }
+        for (HasilKuis h : DataStore.daftarHasilKuis) {
+            if (Objects.equals(h.getIdPeserta(), idPesertaAktif)
+                    && "Selesai Dinilai".equalsIgnoreCase(h.getStatus())) {
+                totalNilai += h.getNilaiAkhir();
                 jumlahNilai++;
             }
         }
@@ -109,7 +127,7 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
 
     private boolean sudahDikerjakan(String idKuis) {
         for (HasilKuis h : DataStore.daftarHasilKuis) {
-            if (h.getIdKuis().equals(idKuis) && h.getIdPeserta().equals(idPesertaAktif)) {
+            if (Objects.equals(h.getIdKuis(), idKuis) && Objects.equals(h.getIdPeserta(), idPesertaAktif)) {
                 return true;
             }
         }
@@ -124,7 +142,7 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
 
         // ================= HEADER SAMBUTAN =================
         panelSambutan = new javax.swing.JPanel();
-        panelSambutan.setBackground(new java.awt.Color(122, 0, 0)); // Warna identitas LPK
+        panelSambutan.setBackground(new java.awt.Color(122, 0, 0));
         panelSambutan.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         lblSapaan = new javax.swing.JLabel();
@@ -142,38 +160,27 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
         add(panelSambutan, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 900, 110));
 
         // ================= KARTU RINGKASAN (4 Kolom) =================
-        // Lebar total area 900px. Dibagi 4 kartu (lebar 210px) + 3 celah (lebar 20px) = 900px.
-        
-        // Kartu 1: Materi
         panelKartuMateri = buatKartuRingkasan("Materi Tersedia");
         lblJumlahMateri = ambilLabelData(panelKartuMateri);
         add(panelKartuMateri, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 210, 110));
 
-        // Kartu 2: Kuis
         panelKartuKuis = buatKartuRingkasan("Kuis Tertunda");
         lblJumlahKuis = ambilLabelData(panelKartuKuis);
-        // Jika ada kuis tertunda, kita bisa set warnanya jadi merah nanti di logic
         add(panelKartuKuis, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 150, 210, 110));
 
-        // Kartu 3: Nilai
         panelKartuNilai = buatKartuRingkasan("Rata-rata Nilai");
         lblRataRata = ambilLabelData(panelKartuNilai);
         add(panelKartuNilai, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 150, 210, 110));
-        
-        // Kartu 4: Status Seleksi
+
         panelKartuStatus = buatKartuRingkasanTeks("Status Seleksi");
         lblStatusSeleksi = ambilLabelData(panelKartuStatus);
         add(panelKartuStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 150, 210, 110));
-        
+
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * Helper untuk membuat kartu berisi ANGKA besar.
-     */
     private javax.swing.JPanel buatKartuRingkasan(String judul) {
         javax.swing.JPanel panel = new javax.swing.JPanel();
         panel.setBackground(new java.awt.Color(255, 255, 255));
-        // Menggunakan border transparan atau abu-abu halus agar elegan (macOS style)
         panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210), 1, true));
         panel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -185,17 +192,14 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
 
         javax.swing.JLabel lblData = new javax.swing.JLabel();
         lblData.setName("lblData");
-        lblData.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 36)); // Diperbesar sedikit agar lebih gagah
-        lblData.setForeground(new java.awt.Color(40, 40, 40)); // Warna abu tua, bukan merah (agar netral)
+        lblData.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 36));
+        lblData.setForeground(new java.awt.Color(40, 40, 40));
         lblData.setText("0");
         panel.add(lblData, new org.netbeans.lib.awtextra.AbsoluteConstraints(15, 45, 180, 45));
 
         return panel;
     }
-    
-    /**
-     * Helper untuk membuat kartu berisi TEKS (seperti status), font disesuaikan.
-     */
+
     private javax.swing.JPanel buatKartuRingkasanTeks(String judul) {
         javax.swing.JPanel panel = new javax.swing.JPanel();
         panel.setBackground(new java.awt.Color(255, 255, 255));
@@ -210,8 +214,8 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
 
         javax.swing.JLabel lblData = new javax.swing.JLabel();
         lblData.setName("lblData");
-        lblData.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 16)); // Font lebih kecil untuk teks
-        lblData.setForeground(new java.awt.Color(40, 40, 40)); 
+        lblData.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 16));
+        lblData.setForeground(new java.awt.Color(40, 40, 40));
         lblData.setText("-");
         panel.add(lblData, new org.netbeans.lib.awtextra.AbsoluteConstraints(15, 45, 180, 45));
 
@@ -233,11 +237,11 @@ public class PanelDashboardPeserta extends javax.swing.JPanel {
     private javax.swing.JLabel lblJumlahMateri;
     private javax.swing.JLabel lblRataRata;
     private javax.swing.JLabel lblSapaan;
-    private javax.swing.JLabel lblStatusSeleksi; // Tambahan variabel baru
+    private javax.swing.JLabel lblStatusSeleksi;
     private javax.swing.JPanel panelKartuKuis;
     private javax.swing.JPanel panelKartuMateri;
     private javax.swing.JPanel panelKartuNilai;
-    private javax.swing.JPanel panelKartuStatus; // Tambahan variabel baru
+    private javax.swing.JPanel panelKartuStatus;
     private javax.swing.JPanel panelSambutan;
     // End of variables declaration//GEN-END:variables
 }

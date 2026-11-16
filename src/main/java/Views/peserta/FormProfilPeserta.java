@@ -5,8 +5,12 @@
 package Views.peserta;
 
 import DataStore.DataStore;
+import Database.PesertaDAO;
 import Model.Pengguna;
 import Model.Peserta;
+import Model.Program;
+import java.util.Objects;
+import javax.swing.JOptionPane;
 
 /**
  * Form pop-up untuk menampilkan profil Peserta.
@@ -24,17 +28,19 @@ public class FormProfilPeserta extends javax.swing.JDialog {
     public FormProfilPeserta(java.awt.Frame parent, boolean modal, String username) {
         super(parent, modal);
         initComponents();
-        
+
         this.usernameAktif = username;
         setTitle("Profil Saya - LPK Yuuki");
         setSize(580, 640);
-        setLocationRelativeTo(parent); 
+        setLocationRelativeTo(parent);
         setResizable(false);
-        
+
         loadDataProfil();
     }
 
     private void loadDataProfil() {
+        DataStore.muatUlang();
+
         for (Pengguna p : DataStore.daftarPengguna) {
             if (p.getUsername() != null && p.getUsername().equals(usernameAktif)) {
                 if (p instanceof Peserta) {
@@ -50,10 +56,10 @@ public class FormProfilPeserta extends javax.swing.JDialog {
             txtNik.setText(pesertaAktif.getNik());
             txtNama.setText(pesertaAktif.getNamaLengkap());
             txtGender.setText(pesertaAktif.getJenisKelamin());
-            
+
             String namaProgram = "Belum Ditentukan";
-            for (Model.Program prg : DataStore.daftarProgram) {
-                if (prg.getIdProgram().equals(pesertaAktif.getProgram())) {
+            for (Program prg : DataStore.daftarProgram) {
+                if (Objects.equals(prg.getIdProgram(), pesertaAktif.getProgram())) {
                     namaProgram = prg.getNamaProgram();
                     break;
                 }
@@ -61,8 +67,8 @@ public class FormProfilPeserta extends javax.swing.JDialog {
             txtProgram.setText(namaProgram);
             txtKelasLevel.setText(pesertaAktif.getKelas() + " (Level " + pesertaAktif.getLevelBahasa() + ")");
             txtStatus.setText(pesertaAktif.getStatusSeleksi() + " | " + pesertaAktif.getStatusKeberangkatan());
-            
-            String namaInstruktur = (pesertaAktif.getInstrukturDamping() != null) 
+
+            String namaInstruktur = (pesertaAktif.getInstrukturDamping() != null)
                     ? pesertaAktif.getInstrukturDamping().getNamaLengkap() : "Belum Ada";
             txtInstruktur.setText(namaInstruktur);
 
@@ -72,7 +78,7 @@ public class FormProfilPeserta extends javax.swing.JDialog {
             txtUsername.setText(pesertaAktif.getUsername());
             txtPassword.setText(pesertaAktif.getPassword());
         } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Data profil tidak ditemukan!", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Data profil tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
     }
@@ -113,7 +119,6 @@ public class FormProfilPeserta extends javax.swing.JDialog {
         jLabel11 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
         
-        // Checkbox Show Password (TAMBAHAN BARU)
         chkShowPassword = new javax.swing.JCheckBox();
         
         jLabel12 = new javax.swing.JLabel();
@@ -218,7 +223,6 @@ public class FormProfilPeserta extends javax.swing.JDialog {
         txtPassword.setFont(fontField);
         panelUtama.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 465, 250, 30));
 
-        // --- KONFIGURASI CHECKBOX SHOW PASSWORD ---
         chkShowPassword.setText("Tampilkan Password");
         chkShowPassword.setBackground(new java.awt.Color(255, 255, 255));
         chkShowPassword.setFont(new java.awt.Font("Inter", 0, 11));
@@ -264,52 +268,76 @@ public class FormProfilPeserta extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     // === LOGIKA SHOW/HIDE PASSWORD ===
-    private void chkShowPasswordActionPerformed(java.awt.event.ActionEvent evt) {                                                
+    private void chkShowPasswordActionPerformed(java.awt.event.ActionEvent evt) {
         if (chkShowPassword.isSelected()) {
-            txtPassword.setEchoChar((char) 0); // Menampilkan teks asli (huruf)
+            txtPassword.setEchoChar((char) 0);
         } else {
-            txtPassword.setEchoChar('\u2022'); // Menyembunyikan teks (menjadi karakter bulat solid)
+            txtPassword.setEchoChar('\u2022');
         }
-    } 
+    }
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {
+        if (pesertaAktif == null) {
+            return;
+        }
+
         String noHpBaru = txtNoHp.getText().trim();
         String alamatBaru = txtAlamat.getText().trim();
         String usernameBaru = txtUsername.getText().trim();
         String passwordBaru = new String(txtPassword.getPassword()).trim();
 
         if (usernameBaru.isEmpty() || passwordBaru.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Username dan Password tidak boleh kosong!", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                "Username dan Password tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         for (Pengguna p : DataStore.daftarPengguna) {
-            if (p.getUsername().equals(usernameBaru) && p != pesertaAktif) {
-                javax.swing.JOptionPane.showMessageDialog(this, 
-                    "Username sudah digunakan oleh akun lain! Silakan pilih yang lain.", "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
-                return;
+            if (p.getUsername() != null && p.getUsername().equalsIgnoreCase(usernameBaru)) {
+                boolean akunSendiri = (p instanceof Peserta)
+                        && Objects.equals(((Peserta) p).getIdPeserta(), pesertaAktif.getIdPeserta());
+                if (!akunSendiri) {
+                    JOptionPane.showMessageDialog(this,
+                        "Username sudah digunakan oleh akun lain! Silakan pilih yang lain.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
             }
         }
+
+        // Simpan nilai lama untuk rollback jika update DB gagal
+        String noHpLama = pesertaAktif.getNoHp();
+        String alamatLama = pesertaAktif.getAlamat();
+        String usernameLama = pesertaAktif.getUsername();
+        String passwordLama = pesertaAktif.getPassword();
 
         pesertaAktif.setNoHp(noHpBaru);
         pesertaAktif.setAlamat(alamatBaru);
         pesertaAktif.setUsername(usernameBaru);
         pesertaAktif.setPassword(passwordBaru);
 
-        DataStore.penggunaLogin.setUsername(usernameBaru);
-        DataStore.penggunaLogin.setPassword(passwordBaru);
+        if (PesertaDAO.ubah(pesertaAktif)) {
+            if (DataStore.penggunaLogin != null) {
+                DataStore.penggunaLogin.setUsername(usernameBaru);
+                DataStore.penggunaLogin.setPassword(passwordBaru);
+            }
+            DataStore.muatUlang();
 
-        javax.swing.JOptionPane.showMessageDialog(this, 
-            "Profil dan data akun berhasil diperbarui!", "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-        
-        this.dispose();
+            JOptionPane.showMessageDialog(this,
+                "Profil dan data akun berhasil disimpan ke database!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            this.dispose();
+        } else {
+            pesertaAktif.setNoHp(noHpLama);
+            pesertaAktif.setAlamat(alamatLama);
+            pesertaAktif.setUsername(usernameLama);
+            pesertaAktif.setPassword(passwordLama);
+            DataStore.muatUlang();
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSimpan;
     private javax.swing.JButton btnTutup;
-    private javax.swing.JCheckBox chkShowPassword; // Deklarasi variabel baru
+    private javax.swing.JCheckBox chkShowPassword;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -342,4 +370,4 @@ public class FormProfilPeserta extends javax.swing.JDialog {
     private javax.swing.JTextField txtStatus;
     private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables
-}   
+}

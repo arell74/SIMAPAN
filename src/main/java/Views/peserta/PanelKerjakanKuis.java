@@ -5,6 +5,7 @@
 package Views.peserta;
 
 import DataStore.DataStore;
+import Database.HasilKuisDAO;
 import Model.HasilKuis;
 import Model.JawabanSoal;
 import Model.Kuis;
@@ -13,8 +14,10 @@ import Model.Soal;
 import Util.TabelUtil;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Objects;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -38,12 +41,13 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         this.idPesertaAktif = idPeserta;
 
         setupTabelDaftar();
-        loadDaftarKuis(""); // Muat semua kuis saat awal
+        loadDaftarKuis("");
     }
 
     private Peserta cariPesertaAktif() {
         for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta() != null && p.getIdPeserta().equals(idPesertaAktif)) {
+            if ((p.getIdPeserta() != null && p.getIdPeserta().equals(idPesertaAktif))
+                    || (p.getUsername() != null && p.getUsername().equals(idPesertaAktif))) {
                 return p;
             }
         }
@@ -52,11 +56,28 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
 
     private boolean sudahDikerjakan(String idKuis) {
         for (HasilKuis h : DataStore.daftarHasilKuis) {
-            if (h.getIdKuis().equals(idKuis) && h.getIdPeserta().equals(idPesertaAktif)) {
+            if (Objects.equals(h.getIdKuis(), idKuis) && Objects.equals(h.getIdPeserta(), idPesertaAktif)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private String buatIdHasilBaru() {
+        int max = 0;
+        for (HasilKuis h : DataStore.daftarHasilKuis) {
+            String id = h.getIdHasil();
+            if (id != null && id.startsWith("HSL")) {
+                try {
+                    int num = Integer.parseInt(id.substring(3));
+                    if (num > max) {
+                        max = num;
+                    }
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return String.format("HSL%03d", max + 1);
     }
 
     private void setupTabelDaftar() {
@@ -72,14 +93,12 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
             }
         };
         tabelDaftarKuis.setModel(modelTabelDaftar);
-        
-        // Styling Tabel Modern
+
         tabelDaftarKuis.setSelectionBackground(new java.awt.Color(230, 240, 255));
         tabelDaftarKuis.setSelectionForeground(new java.awt.Color(0, 50, 150));
         tabelDaftarKuis.setShowVerticalLines(false);
         tabelDaftarKuis.setGridColor(new java.awt.Color(240, 240, 240));
 
-        TabelUtil.autoResizeKolom(tabelDaftarKuis);
         javax.swing.table.JTableHeader header = tabelDaftarKuis.getTableHeader();
         header.setBackground(new java.awt.Color(40, 40, 40));
         header.setForeground(java.awt.Color.WHITE);
@@ -87,19 +106,28 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         header.setOpaque(true);
     }
 
-    // Overload method untuk mendukung pencarian
     private void loadDaftarKuis(String keyword) {
+        DataStore.muatUlang();
+
         modelTabelDaftar.setRowCount(0);
         kuisTampil.clear();
 
         Peserta pesertaAktif = cariPesertaAktif();
-        String kelasPeserta = (pesertaAktif != null) ? pesertaAktif.getKelas() : "";
+        String kelasPeserta = "";
+        if (pesertaAktif != null) {
+            this.idPesertaAktif = pesertaAktif.getIdPeserta();
+            kelasPeserta = (pesertaAktif.getKelas() != null) ? pesertaAktif.getKelas() : "";
+        }
+
+        String kataKunci = (keyword == null) ? "" : keyword.trim().toLowerCase();
 
         int no = 1;
         for (Kuis k : DataStore.daftarKuis) {
-            boolean untukKelasIni = "Semua Kelas".equals(k.getKelasTarget()) || k.getKelasTarget().equals(kelasPeserta);
-            boolean cocokPencarian = keyword.isEmpty() || k.getJudulKuis().toLowerCase().contains(keyword.toLowerCase());
-            
+            String target = k.getKelasTarget();
+            boolean untukKelasIni = "Semua Kelas".equalsIgnoreCase(target) || Objects.equals(kelasPeserta, target);
+            String judul = (k.getJudulKuis() != null) ? k.getJudulKuis() : "";
+            boolean cocokPencarian = kataKunci.isEmpty() || judul.toLowerCase().contains(kataKunci);
+
             if (untukKelasIni && !sudahDikerjakan(k.getIdKuis()) && cocokPencarian) {
                 modelTabelDaftar.addRow(new Object[]{
                     no++,
@@ -112,8 +140,9 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
                 kuisTampil.add(k);
             }
         }
-        
+
         jLabelInfoKuis.setText("Tersedia " + kuisTampil.size() + " kuis untuk dikerjakan");
+        TabelUtil.autoResizeKolom(tabelDaftarKuis);
     }
 
     private void bangunFormSoal(Kuis kuis) {
@@ -122,26 +151,23 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         String deskripsi = (kuis.getDeskripsi() == null || kuis.getDeskripsi().isEmpty())
                 ? "Tidak ada instruksi tambahan." : kuis.getDeskripsi();
         String infoWaktu = kuis.getBatasWaktuMenit() == 0 ? "Tanpa batas waktu" : (kuis.getBatasWaktuMenit() + " menit");
-        
+
         lblDeskripsiKerjakan.setText("<html>" + deskripsi + "<br/><br/><b>Total:</b> " + kuis.getJumlahSoal() + " Soal &nbsp;|&nbsp; <b>Waktu:</b> " + infoWaktu + "</html>");
 
         panelDaftarSoalDinamis.removeAll();
         daftarInputJawaban.clear();
         panelDaftarSoalDinamis.setLayout(new javax.swing.BoxLayout(panelDaftarSoalDinamis, javax.swing.BoxLayout.Y_AXIS));
 
-        // Tambahkan ruang kosong sedikit di atas agar tidak terlalu mepet dengan header
         panelDaftarSoalDinamis.add(javax.swing.Box.createVerticalStrut(15));
 
         int nomor = 1;
         for (Soal soal : kuis.getDaftarSoal()) {
             javax.swing.JPanel panelSatuSoal = buatPanelSatuSoal(nomor, soal);
             panelSatuSoal.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
-            
-            // Batasi lebar maksimal agar nyaman dibaca (tidak terlalu memanjang ke ujung layar)
             panelSatuSoal.setMaximumSize(new java.awt.Dimension(850, panelSatuSoal.getPreferredSize().height));
-            
+
             panelDaftarSoalDinamis.add(panelSatuSoal);
-            panelDaftarSoalDinamis.add(javax.swing.Box.createVerticalStrut(20)); // Celah antar soal lebih renggang
+            panelDaftarSoalDinamis.add(javax.swing.Box.createVerticalStrut(20));
             nomor++;
         }
 
@@ -150,14 +176,10 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         scrollSoal.getVerticalScrollBar().setValue(0);
     }
 
-    /**
-     * Membuat 1 blok soal dengan desain kartu yang bersih dan lega.
-     */
     private javax.swing.JPanel buatPanelSatuSoal(int nomor, Soal soal) {
         javax.swing.JPanel panel = new javax.swing.JPanel();
         panel.setBackground(new java.awt.Color(255, 255, 255));
-        
-        // Padding dalam (EmptyBorder) diperbesar menjadi 20px agar lega
+
         panel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
             javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 210, 210), 1, true),
             javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20)
@@ -166,10 +188,10 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
 
         javax.swing.JLabel lblPertanyaan = new javax.swing.JLabel(
             "<html><span style='color:#7A0000;'><b>Soal " + nomor + "</b> (" + soal.getPoin() + " poin)</span><br/><br/>" + soal.getPertanyaan() + "</html>");
-        lblPertanyaan.setFont(new java.awt.Font("Inter", 0, 14)); // Font pertanyaan diperbesar
+        lblPertanyaan.setFont(new java.awt.Font("Inter", 0, 14));
         lblPertanyaan.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
         panel.add(lblPertanyaan);
-        panel.add(javax.swing.Box.createVerticalStrut(15)); // Jarak antara pertanyaan dan pilihan jawaban
+        panel.add(javax.swing.Box.createVerticalStrut(15));
 
         if (soal.isPilihanGanda()) {
             ButtonGroup grup = new ButtonGroup();
@@ -181,13 +203,13 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
                 javax.swing.JRadioButton radio = new javax.swing.JRadioButton(label[i] + ". " + isiPilihan[i]);
                 radio.setActionCommand(label[i]);
                 radio.setBackground(new java.awt.Color(255, 255, 255));
-                radio.setFont(new java.awt.Font("Inter", 0, 13)); // Font jawaban
+                radio.setFont(new java.awt.Font("Inter", 0, 13));
                 radio.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
                 radio.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-                
+
                 grup.add(radio);
                 panel.add(radio);
-                panel.add(javax.swing.Box.createVerticalStrut(8)); // Jarak antar pilihan ganda
+                panel.add(javax.swing.Box.createVerticalStrut(8));
             }
 
             daftarInputJawaban.add(grup);
@@ -197,7 +219,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
             areaJawaban.setLineWrap(true);
             areaJawaban.setWrapStyleWord(true);
             areaJawaban.setFont(new java.awt.Font("Inter", 0, 13));
-            areaJawaban.setMargin(new java.awt.Insets(10, 10, 10, 10)); // Padding dalam text area
+            areaJawaban.setMargin(new java.awt.Insets(10, 10, 10, 10));
 
             javax.swing.JScrollPane scrollJawaban = new javax.swing.JScrollPane(areaJawaban);
             scrollJawaban.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
@@ -267,7 +289,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         panelDaftar.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 65, 100, 32));
 
         btnKerjakan = new javax.swing.JButton();
-        btnKerjakan.setBackground(new java.awt.Color(20, 120, 40)); // Warna hijau untuk aksi utama (Call to Action)
+        btnKerjakan.setBackground(new java.awt.Color(20, 120, 40));
         btnKerjakan.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
         btnKerjakan.setForeground(new java.awt.Color(255, 255, 255));
         btnKerjakan.setText("Kerjakan Kuis Terpilih");
@@ -305,7 +327,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         panelInfoKerjakan.setBackground(new java.awt.Color(255, 255, 255));
         panelInfoKerjakan.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(210, 210, 210)));
         panelInfoKerjakan.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        panelInfoKerjakan.setPreferredSize(new java.awt.Dimension(940, 100)); // Ditinggikan sedikit
+        panelInfoKerjakan.setPreferredSize(new java.awt.Dimension(940, 100));
 
         btnKembali = new javax.swing.JButton();
         btnKembali.setBackground(new java.awt.Color(240, 240, 240));
@@ -341,7 +363,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         scrollSoal = new javax.swing.JScrollPane();
         scrollSoal.setBorder(null);
         scrollSoal.setViewportView(panelDaftarSoalDinamis);
-        scrollSoal.getVerticalScrollBar().setUnitIncrement(20); // Scroll lebih mulus
+        scrollSoal.getVerticalScrollBar().setUnitIncrement(20);
         panelKerjakan.add(scrollSoal, java.awt.BorderLayout.CENTER);
 
         panelBawahKerjakan = new javax.swing.JPanel();
@@ -362,8 +384,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
                 btnSubmitJawabanActionPerformed(evt);
             }
         });
-        
-        // Memposisikan tombol submit di kanan bawah agar terasa seperti tombol "Next/Finish" konvensional
+
         panelBawahKerjakan.add(btnSubmitJawaban, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 15, 210, 42));
 
         panelKerjakan.add(panelBawahKerjakan, java.awt.BorderLayout.SOUTH);
@@ -376,13 +397,21 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
     private void btnKerjakanActionPerformed(java.awt.event.ActionEvent evt) {
         int baris = tabelDaftarKuis.getSelectedRow();
         if (baris == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(this,
                 "Pilih dahulu kuis yang ingin dikerjakan dari tabel!", "Peringatan",
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+                JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        kuisSedangDikerjakan = kuisTampil.get(baris);
+        Kuis kuisDipilih = kuisTampil.get(baris);
+        if (kuisDipilih.getDaftarSoal() == null || kuisDipilih.getDaftarSoal().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Kuis ini belum memiliki butir soal. Silakan hubungi instruktur.", "Informasi",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        kuisSedangDikerjakan = kuisDipilih;
         bangunFormSoal(kuisSedangDikerjakan);
 
         java.awt.CardLayout cl = (java.awt.CardLayout) panelKartuUtama.getLayout();
@@ -390,6 +419,14 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
     }
 
     private void btnKembaliActionPerformed(java.awt.event.ActionEvent evt) {
+        int konfirmasi = JOptionPane.showConfirmDialog(this,
+            "Jawaban yang belum dikumpulkan akan hilang. Yakin ingin membatalkan?",
+            "Konfirmasi Batal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (konfirmasi != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        kuisSedangDikerjakan = null;
         java.awt.CardLayout cl = (java.awt.CardLayout) panelKartuUtama.getLayout();
         cl.show(panelKartuUtama, KARTU_DAFTAR);
     }
@@ -414,17 +451,17 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
         }
 
         if (jumlahBelumDijawab > 0) {
-            int lanjut = javax.swing.JOptionPane.showConfirmDialog(this,
+            int lanjut = JOptionPane.showConfirmDialog(this,
                 "Masih ada " + jumlahBelumDijawab + " soal yang belum dijawab.\nYakin ingin mengumpulkan jawaban sekarang?",
-                "Konfirmasi Submit", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
-            if (lanjut != javax.swing.JOptionPane.YES_OPTION) {
+                "Konfirmasi Submit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (lanjut != JOptionPane.YES_OPTION) {
                 return;
             }
         } else {
-             int lanjut = javax.swing.JOptionPane.showConfirmDialog(this,
+            int lanjut = JOptionPane.showConfirmDialog(this,
                 "Anda sudah menjawab seluruh soal.\nKumpulkan jawaban sekarang?",
-                "Konfirmasi Submit", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
-            if (lanjut != javax.swing.JOptionPane.YES_OPTION) {
+                "Konfirmasi Submit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (lanjut != JOptionPane.YES_OPTION) {
                 return;
             }
         }
@@ -441,7 +478,7 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
                 int poin = benar ? soal.getPoin() : 0;
 
                 daftarJawaban.add(new JawabanSoal(soal.getIdSoal(), soal.getTipeSoal(), soal.getPertanyaan(),
-                    jawabanTerpilih, soal.getKunciJawaban(), soal.getPoin(), poin, true));
+                    jawabanTerpilih == null ? "" : jawabanTerpilih, soal.getKunciJawaban(), soal.getPoin(), poin, true));
 
             } else {
                 String jawabanEssay = ((javax.swing.JTextArea) input).getText().trim();
@@ -451,31 +488,34 @@ public class PanelKerjakanKuis extends javax.swing.JPanel {
             }
         }
 
-        String idHasilBaru = "HSL" + String.format("%03d", DataStore.daftarHasilKuis.size() + 1);
+        DataStore.muatUlang();
+        String idHasilBaru = buatIdHasilBaru();
         String tanggal = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(new java.util.Date());
 
         HasilKuis hasilBaru = new HasilKuis(idHasilBaru, kuisSedangDikerjakan.getIdKuis(),
             kuisSedangDikerjakan.getJudulKuis(), idPesertaAktif, tanggal, daftarJawaban);
 
-        DataStore.daftarHasilKuis.add(hasilBaru);
+        if (HasilKuisDAO.tambah(hasilBaru)) {
+            DataStore.muatUlang();
 
-        int jumlahEssayMenunggu = hasilBaru.getJumlahEssayBelumDinilai();
-        String pesanHasil = "Jawaban berhasil dikumpulkan!\n\n"
-            + "Skor Pilihan Ganda (Otomatis): " + hasilBaru.getTotalPoinDiperoleh()
-            + " / " + hasilBaru.getTotalPoinMaksimal() + " poin";
-        
-        if (jumlahEssayMenunggu > 0) {
-            pesanHasil += "\n\nMenunggu instruktur menilai " + jumlahEssayMenunggu + " soal Essay Anda.";
+            int jumlahEssayMenunggu = hasilBaru.getJumlahEssayBelumDinilai();
+            String pesanHasil = "Jawaban berhasil dikumpulkan dan disimpan ke database!\n\n"
+                + "Skor Pilihan Ganda (Otomatis): " + hasilBaru.getTotalPoinDiperoleh()
+                + " / " + hasilBaru.getTotalPoinMaksimal() + " poin";
+
+            if (jumlahEssayMenunggu > 0) {
+                pesanHasil += "\n\nMenunggu instruktur menilai " + jumlahEssayMenunggu + " soal Essay Anda.";
+            }
+
+            JOptionPane.showMessageDialog(this, pesanHasil,
+                "Kuis Selesai", JOptionPane.INFORMATION_MESSAGE);
+
+            kuisSedangDikerjakan = null;
+            loadDaftarKuis("");
+
+            java.awt.CardLayout cl = (java.awt.CardLayout) panelKartuUtama.getLayout();
+            cl.show(panelKartuUtama, KARTU_DAFTAR);
         }
-
-        javax.swing.JOptionPane.showMessageDialog(this, pesanHasil,
-            "Kuis Selesai", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
-        kuisSedangDikerjakan = null;
-        loadDaftarKuis(""); // Refresh tabel
-
-        java.awt.CardLayout cl = (java.awt.CardLayout) panelKartuUtama.getLayout();
-        cl.show(panelKartuUtama, KARTU_DAFTAR);
     }
 
     private String ambilJawabanTerpilih(ButtonGroup grup) {
