@@ -28,8 +28,7 @@ public class PesertaDAO {
             "UPDATE peserta SET nik=?, tanggal_lahir=?, jenis_kelamin=?, no_hp=?, agama=?, alamat=?, "
             + "id_program=?, id_instruktur=?, level_bahasa=?, status_pembayaran=?, kelas=?, "
             + "status_seleksi=?, status_keberangkatan=? WHERE id_peserta=?";
-
-    /** Panggil setelah instruktur termuat, karena Peserta butuh objek Instruktur. */
+    
     public static ArrayList<Peserta> ambilSemua() {
         ArrayList<Peserta> hasil = new ArrayList<>();
         String sql = "SELECT pe.*, pg.password, pg.nama_lengkap "
@@ -39,12 +38,11 @@ public class PesertaDAO {
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                // id_instruktur boleh NULL -> instrukturDamping null (sudah ditangani di panel/form)
                 Instruktur ins = DataStore.cariInstruktur(rs.getString("id_instruktur"));
                 Peserta p = new Peserta(
                         rs.getString("username"), rs.getString("password"),
                         rs.getString("id_peserta"), rs.getString("nik"), rs.getString("nama_lengkap"),
-                        rs.getString("tanggal_lahir"),          // DATE -> "yyyy-MM-dd"
+                        rs.getString("tanggal_lahir"),          
                         rs.getString("jenis_kelamin"), rs.getString("no_hp"),
                         rs.getString("agama"), rs.getString("alamat"),
                         rs.getString("id_program"), ins, rs.getString("level_bahasa"),

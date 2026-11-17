@@ -115,7 +115,6 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         }
     }
  
-    // DIUBAH: menghapus lewat DAO (MySQL), bukan removeIf() pada list di memori
     private void hapusData(int baris) {
         String idPeserta = tabelPeserta.getValueAt(baris, 1).toString();
         String nama = tabelPeserta.getValueAt(baris, 2).toString();

@@ -681,131 +681,142 @@ public class PanelLaporan extends javax.swing.JPanel {
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Simpan Laporan PDF");
-        
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setDialogTitle("Simpan Laporan PDF");
+//        
+//        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
+//
+//        int userSelection = fileChooser.showSaveDialog(this);
+//
+//        if (userSelection == JFileChooser.APPROVE_OPTION) {
+//            java.io.File fileToSave = fileChooser.getSelectedFile();
+//            
+//            String filePath = fileToSave.getAbsolutePath();
+//            if (!filePath.toLowerCase().endsWith(".pdf")) {
+//                filePath += ".pdf";
+//            }
+//
+//            try {
+//                // 1. SEMBUNYIKAN TOMBOL DAN KESELURUHAN PANEL TABEL
+//                btnReset.setVisible(false);
+//                btnEkspor.setVisible(false);
+//                panelTabel.setVisible(false);
+//
+//                int fullWidth = this.getWidth();
+//                int fullHeight = this.getHeight();
+//                
+//                BufferedImage imageCapture = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_RGB);
+//                Graphics2D g2d = imageCapture.createGraphics();
+//                this.printAll(g2d); 
+//                g2d.dispose();
+//
+//                btnReset.setVisible(true);
+//                btnEkspor.setVisible(true);
+//                panelTabel.setVisible(true);
+//                int batasCropBawah = panelTabel.getY(); 
+//                if (batasCropBawah == 0) batasCropBawah = fullHeight / 2; 
+//                BufferedImage croppedImage = imageCapture.getSubimage(0, 0, fullWidth, batasCropBawah);
+//
+//
+//                // 3. SETUP DOKUMEN PDF
+//                Document document = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
+//                PdfWriter.getInstance(document, new FileOutputStream(filePath));
+//                document.open();
+//
+//                // --- HALAMAN 1: DASHBOARD & RINGKASAN EKSEKUTIF ---
+//                com.itextpdf.text.Font fontJudul = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+//                com.itextpdf.text.Font fontTanggal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.GRAY);
+//                com.itextpdf.text.Font fontDeskripsi = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
+//                
+//                // Judul
+//                com.itextpdf.text.Paragraph judulLaporan = new com.itextpdf.text.Paragraph("LAPORAN STATISTIK PEMAGANGAN - LPK YUUKI KUNINGAN", fontJudul);
+//                judulLaporan.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+//                document.add(judulLaporan);
+//                
+//                // Tanggal
+//                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
+//                String waktuCetak = sdf.format(new java.util.Date());
+//                com.itextpdf.text.Paragraph infoCetak = new com.itextpdf.text.Paragraph("Dicetak pada: " + waktuCetak, fontTanggal);
+//                infoCetak.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+//                document.add(infoCetak);
+//                
+//                document.add(new com.itextpdf.text.Paragraph(" ")); 
+//
+//                Image pdfImage = Image.getInstance(croppedImage, null);
+//                pdfImage.scaleToFit(document.getPageSize().getWidth() - 60, document.getPageSize().getHeight() - 150);
+//                pdfImage.setAlignment(Image.ALIGN_CENTER);
+//                document.add(pdfImage);
+//
+//                document.add(new com.itextpdf.text.Paragraph(" "));
+//                String teksRingkasan = "Ringkasan Eksekutif:\n" +
+//                                       "Berdasarkan visualisasi data di atas, laporan ini merepresentasikan distribusi kelulusan " +
+//                                       "dan kesiapan dokumen dari seluruh peserta yang terdaftar di sistem. Rincian detail dari masing-masing " +
+//                                       "peserta (termasuk nomor paspor dan jadwal keberangkatan) dapat dilihat pada halaman lampiran berikutnya.";
+//                                       
+//                com.itextpdf.text.Paragraph ringkasan = new com.itextpdf.text.Paragraph(teksRingkasan, fontDeskripsi);
+//                ringkasan.setAlignment(com.itextpdf.text.Element.ALIGN_JUSTIFIED);
+//                document.add(ringkasan);
+//
+//                document.newPage();
+//
+//                com.itextpdf.text.Paragraph judulTabel = new com.itextpdf.text.Paragraph("Lampiran: Rincian Data Keberangkatan Peserta", fontJudul);
+//                judulTabel.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+//                judulTabel.setSpacingAfter(20f); 
+//                document.add(judulTabel);
+//
+//                int jumlahKolom = tabelLaporan.getColumnCount();
+//                PdfPTable pdfTable = new PdfPTable(jumlahKolom);
+//                pdfTable.setWidthPercentage(100); 
+//
+//                com.itextpdf.text.Font fontHeader = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 11, com.itextpdf.text.Font.BOLD);
+//                for (int i = 0; i < jumlahKolom; i++) {
+//                    PdfPCell cell = new PdfPCell(new Phrase(tabelLaporan.getColumnName(i), fontHeader));
+//                    cell.setBackgroundColor(com.itextpdf.text.BaseColor.LIGHT_GRAY);
+//                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+//                    cell.setPadding(6f);
+//                    pdfTable.addCell(cell);
+//                }
+//
+//                com.itextpdf.text.Font fontData = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10);
+//                for (int baris = 0; baris < tabelLaporan.getRowCount(); baris++) {
+//                    for (int kolom = 0; kolom < jumlahKolom; kolom++) {
+//                        Object nilaiCell = tabelLaporan.getValueAt(baris, kolom);
+//                        String teksCell = (nilaiCell == null) ? "" : nilaiCell.toString();
+//                        
+//                        PdfPCell cell = new PdfPCell(new Phrase(teksCell, fontData));
+//                        cell.setPadding(5f);
+//                        pdfTable.addCell(cell);
+//                    }
+//                }
+//
+//                document.add(pdfTable);
+//                document.close();
+//
+//                JOptionPane.showMessageDialog(this, 
+//                    "Berhasil!\nLaporan tersimpan di: " + filePath, 
+//                    "Ekspor Sukses", JOptionPane.INFORMATION_MESSAGE);
+//
+//            } catch (Exception e) {
+//                btnReset.setVisible(true);
+//                btnEkspor.setVisible(true);
+//                panelTabel.setVisible(true); 
+//                
+//                JOptionPane.showMessageDialog(this, 
+//                    "Gagal mengekspor laporan: " + e.getMessage(), 
+//                    "Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        }
+        java.util.Map<String, Object> param = new java.util.HashMap<>();
+            String namaAdmin = (DataStore.penggunaLogin != null)
+                    ? DataStore.penggunaLogin.getNamaLengkap()
+                    : "Admin LPK Yuuki";
+            param.put("nama_admin", namaAdmin);
 
-        int userSelection = fileChooser.showSaveDialog(this);
-
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            java.io.File fileToSave = fileChooser.getSelectedFile();
-            
-            String filePath = fileToSave.getAbsolutePath();
-            if (!filePath.toLowerCase().endsWith(".pdf")) {
-                filePath += ".pdf";
-            }
-
-            try {
-                // 1. SEMBUNYIKAN TOMBOL DAN KESELURUHAN PANEL TABEL
-                btnReset.setVisible(false);
-                btnEkspor.setVisible(false);
-                panelTabel.setVisible(false);
-
-                int fullWidth = this.getWidth();
-                int fullHeight = this.getHeight();
-                
-                BufferedImage imageCapture = new BufferedImage(fullWidth, fullHeight, BufferedImage.TYPE_INT_RGB);
-                Graphics2D g2d = imageCapture.createGraphics();
-                this.printAll(g2d); 
-                g2d.dispose();
-
-                btnReset.setVisible(true);
-                btnEkspor.setVisible(true);
-                panelTabel.setVisible(true);
-                int batasCropBawah = panelTabel.getY(); 
-                if (batasCropBawah == 0) batasCropBawah = fullHeight / 2; 
-                BufferedImage croppedImage = imageCapture.getSubimage(0, 0, fullWidth, batasCropBawah);
-
-
-                // 3. SETUP DOKUMEN PDF
-                Document document = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
-                PdfWriter.getInstance(document, new FileOutputStream(filePath));
-                document.open();
-
-                // --- HALAMAN 1: DASHBOARD & RINGKASAN EKSEKUTIF ---
-                com.itextpdf.text.Font fontJudul = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
-                com.itextpdf.text.Font fontTanggal = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL, com.itextpdf.text.BaseColor.GRAY);
-                com.itextpdf.text.Font fontDeskripsi = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
-                
-                // Judul
-                com.itextpdf.text.Paragraph judulLaporan = new com.itextpdf.text.Paragraph("LAPORAN STATISTIK PEMAGANGAN - LPK YUUKI KUNINGAN", fontJudul);
-                judulLaporan.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                document.add(judulLaporan);
-                
-                // Tanggal
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
-                String waktuCetak = sdf.format(new java.util.Date());
-                com.itextpdf.text.Paragraph infoCetak = new com.itextpdf.text.Paragraph("Dicetak pada: " + waktuCetak, fontTanggal);
-                infoCetak.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                document.add(infoCetak);
-                
-                document.add(new com.itextpdf.text.Paragraph(" ")); 
-
-                Image pdfImage = Image.getInstance(croppedImage, null);
-                pdfImage.scaleToFit(document.getPageSize().getWidth() - 60, document.getPageSize().getHeight() - 150);
-                pdfImage.setAlignment(Image.ALIGN_CENTER);
-                document.add(pdfImage);
-
-                document.add(new com.itextpdf.text.Paragraph(" "));
-                String teksRingkasan = "Ringkasan Eksekutif:\n" +
-                                       "Berdasarkan visualisasi data di atas, laporan ini merepresentasikan distribusi kelulusan " +
-                                       "dan kesiapan dokumen dari seluruh peserta yang terdaftar di sistem. Rincian detail dari masing-masing " +
-                                       "peserta (termasuk nomor paspor dan jadwal keberangkatan) dapat dilihat pada halaman lampiran berikutnya.";
-                                       
-                com.itextpdf.text.Paragraph ringkasan = new com.itextpdf.text.Paragraph(teksRingkasan, fontDeskripsi);
-                ringkasan.setAlignment(com.itextpdf.text.Element.ALIGN_JUSTIFIED);
-                document.add(ringkasan);
-
-                document.newPage();
-
-                com.itextpdf.text.Paragraph judulTabel = new com.itextpdf.text.Paragraph("Lampiran: Rincian Data Keberangkatan Peserta", fontJudul);
-                judulTabel.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                judulTabel.setSpacingAfter(20f); 
-                document.add(judulTabel);
-
-                int jumlahKolom = tabelLaporan.getColumnCount();
-                PdfPTable pdfTable = new PdfPTable(jumlahKolom);
-                pdfTable.setWidthPercentage(100); 
-
-                com.itextpdf.text.Font fontHeader = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 11, com.itextpdf.text.Font.BOLD);
-                for (int i = 0; i < jumlahKolom; i++) {
-                    PdfPCell cell = new PdfPCell(new Phrase(tabelLaporan.getColumnName(i), fontHeader));
-                    cell.setBackgroundColor(com.itextpdf.text.BaseColor.LIGHT_GRAY);
-                    cell.setHorizontalAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-                    cell.setPadding(6f);
-                    pdfTable.addCell(cell);
-                }
-
-                com.itextpdf.text.Font fontData = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10);
-                for (int baris = 0; baris < tabelLaporan.getRowCount(); baris++) {
-                    for (int kolom = 0; kolom < jumlahKolom; kolom++) {
-                        Object nilaiCell = tabelLaporan.getValueAt(baris, kolom);
-                        String teksCell = (nilaiCell == null) ? "" : nilaiCell.toString();
-                        
-                        PdfPCell cell = new PdfPCell(new Phrase(teksCell, fontData));
-                        cell.setPadding(5f);
-                        pdfTable.addCell(cell);
-                    }
-                }
-
-                document.add(pdfTable);
-                document.close();
-
-                JOptionPane.showMessageDialog(this, 
-                    "Berhasil!\nLaporan tersimpan di: " + filePath, 
-                    "Ekspor Sukses", JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (Exception e) {
-                btnReset.setVisible(true);
-                btnEkspor.setVisible(true);
-                panelTabel.setVisible(true); 
-                
-                JOptionPane.showMessageDialog(this, 
-                    "Gagal mengekspor laporan: " + e.getMessage(), 
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+            Util.ReportUtil.tampilkanLaporan(
+                    this,
+                    "/Reports/LaporanDataPesertaAdmin.jrxml",
+                    param
+            );
     }//GEN-LAST:event_btnEksporActionPerformed
 
 

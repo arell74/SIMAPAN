@@ -65,7 +65,6 @@ public class DataStore {
             String k = kehadiran.get(p.getIdPeserta());
             if (k != null) p.setKehadiranHariIni(k);
         }
-        // Peserta adalah turunan Pengguna -> ikut masuk daftarPengguna (polimorfisme, login peserta).
         daftarPengguna.addAll(daftarPeserta);
 
         daftarSeleksi.clear();

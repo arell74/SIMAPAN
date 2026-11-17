@@ -260,6 +260,20 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
             }
         });
         add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 290, 140, 32));
+        
+        btnCetakTranskrip = new javax.swing.JButton();
+        btnCetakTranskrip.setBackground(new java.awt.Color(20, 120, 40));
+        btnCetakTranskrip.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 12));
+        btnCetakTranskrip.setForeground(new java.awt.Color(255, 255, 255));
+        btnCetakTranskrip.setText("Cetak Transkrip");
+        btnCetakTranskrip.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCetakTranskrip.setFocusPainted(false);
+        btnCetakTranskrip.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCetakTranskripActionPerformed(evt);
+            }
+        });
+        add(btnCetakTranskrip, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 290, 150, 32));
 
         panelTabelHasilKuis = new javax.swing.JPanel();
         panelTabelHasilKuis.setBackground(new java.awt.Color(255, 255, 255));
@@ -304,6 +318,12 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(this, scrollCatatan,
             "Evaluasi Instruktur - " + judul, JOptionPane.INFORMATION_MESSAGE);
     }
+    
+    private void btnCetakTranskripActionPerformed(java.awt.event.ActionEvent evt) {
+        java.util.Map<String, Object> param = new java.util.HashMap<>();
+        param.put("id_peserta", idPesertaAktif);
+        Util.ReportUtil.tampilkanLaporan(this, "/Reports/TranskripNilaiPeserta.jrxml", param);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLihatCatatan;
@@ -318,5 +338,6 @@ public class PanelNilaiPeserta extends javax.swing.JPanel {
     private javax.swing.JScrollPane scrollNilaiMateri;
     private javax.swing.JTable tabelHasilKuis;
     private javax.swing.JTable tabelNilaiMateri;
+    private javax.swing.JButton btnCetakTranskrip;
     // End of variables declaration//GEN-END:variables
 }

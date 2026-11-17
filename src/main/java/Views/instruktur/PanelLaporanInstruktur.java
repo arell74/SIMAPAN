@@ -517,61 +517,103 @@ public class PanelLaporanInstruktur extends javax.swing.JPanel {
     }//GEN-LAST:event_btnResetActionPerformed
 
     private void btnEksporActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEksporActionPerformed
-        DefaultTableModel model = (DefaultTableModel) tabelLaporan.getModel();
-        if (model.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this,
-                    "Tidak ada data laporan untuk diekspor!",
-                    "Peringatan", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Simpan Laporan Excel / CSV");
-        fileChooser.setFileFilter(new FileNameExtensionFilter("File Excel/CSV (*.csv)", "csv"));
-
-        int userSelection = fileChooser.showSaveDialog(this);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fileChooser.getSelectedFile();
-            String pathFile = fileToSave.getAbsolutePath();
-
-            if (!pathFile.toLowerCase().endsWith(".csv")) {
-                fileToSave = new File(pathFile + ".csv");
+//        DefaultTableModel model = (DefaultTableModel) tabelLaporan.getModel();
+//        if (model.getRowCount() == 0) {
+//            JOptionPane.showMessageDialog(this,
+//                    "Tidak ada data laporan untuk diekspor!",
+//                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+//            return;
+//        }
+//
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setDialogTitle("Simpan Laporan Excel / CSV");
+//        fileChooser.setFileFilter(new FileNameExtensionFilter("File Excel/CSV (*.csv)", "csv"));
+//
+//        int userSelection = fileChooser.showSaveDialog(this);
+//        if (userSelection == JFileChooser.APPROVE_OPTION) {
+//            File fileToSave = fileChooser.getSelectedFile();
+//            String pathFile = fileToSave.getAbsolutePath();
+//
+//            if (!pathFile.toLowerCase().endsWith(".csv")) {
+//                fileToSave = new File(pathFile + ".csv");
+//            }
+//
+//            try (BufferedWriter bw = new BufferedWriter(
+//                    new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
+//
+//                int colCount = model.getColumnCount();
+//                for (int i = 0; i < colCount; i++) {
+//                    bw.write(model.getColumnName(i));
+//                    if (i < colCount - 1) {
+//                        bw.write(",");
+//                    }
+//                }
+//                bw.newLine();
+//
+//                for (int baris = 0; baris < model.getRowCount(); baris++) {
+//                    for (int kolom = 0; kolom < colCount; kolom++) {
+//                        Object data = model.getValueAt(baris, kolom);
+//                        String teksData = (data == null) ? "" : data.toString().replace(",", " ");
+//                        bw.write(teksData);
+//                        if (kolom < colCount - 1) {
+//                            bw.write(",");
+//                        }
+//                    }
+//                    bw.newLine();
+//                }
+//
+//                JOptionPane.showMessageDialog(this,
+//                        "Laporan berhasil diekspor!\nTersimpan di: " + fileToSave.getAbsolutePath(),
+//                        "Ekspor Berhasil", JOptionPane.INFORMATION_MESSAGE);
+//
+//            } catch (Exception ex) {
+//                JOptionPane.showMessageDialog(this,
+//                        "Gagal menyimpan file: " + ex.getMessage(),
+//                        "Ekspor Gagal", JOptionPane.ERROR_MESSAGE);
+//            }
+//        }
+        if (tabelLaporan.getRowCount() == 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Tidak ada data peserta pada tabel untuk dicetak.",
+                        "Informasi", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                return;
             }
 
-            try (BufferedWriter bw = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(fileToSave), StandardCharsets.UTF_8))) {
+            java.util.Map<String, Object> param = new java.util.HashMap<>();
 
-                int colCount = model.getColumnCount();
-                for (int i = 0; i < colCount; i++) {
-                    bw.write(model.getColumnName(i));
-                    if (i < colCount - 1) {
-                        bw.write(",");
-                    }
-                }
-                bw.newLine();
-
-                for (int baris = 0; baris < model.getRowCount(); baris++) {
-                    for (int kolom = 0; kolom < colCount; kolom++) {
-                        Object data = model.getValueAt(baris, kolom);
-                        String teksData = (data == null) ? "" : data.toString().replace(",", " ");
-                        bw.write(teksData);
-                        if (kolom < colCount - 1) {
-                            bw.write(",");
-                        }
-                    }
-                    bw.newLine();
-                }
-
-                JOptionPane.showMessageDialog(this,
-                        "Laporan berhasil diekspor!\nTersimpan di: " + fileToSave.getAbsolutePath(),
-                        "Ekspor Berhasil", JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Gagal menyimpan file: " + ex.getMessage(),
-                        "Ekspor Gagal", JOptionPane.ERROR_MESSAGE);
+            // Ambil data instruktur yang sedang login
+            if (DataStore.penggunaLogin instanceof Model.Instruktur) {
+                Model.Instruktur ins = (Model.Instruktur) DataStore.penggunaLogin;
+                param.put("nama_instruktur", ins.getNamaLengkap());
+                param.put("id_instruktur", ins.getIdInstruktur());
+                param.put("kelas_diampu", ins.getKelasDiampu() != null ? ins.getKelasDiampu() : "-");
+                param.put("spesialisasi", (ins.getSpesialisasi() != null ? ins.getSpesialisasi() : "-")
+                        + " (" + (ins.getLevelJlpt() != null ? ins.getLevelJlpt() : "-") + ")");
+            } else {
+                param.put("nama_instruktur", "Instruktur LPK Yuuki");
+                param.put("id_instruktur", "-");
+                param.put("kelas_diampu", "Semua Kelas");
+                param.put("spesialisasi", "-");
             }
-        }
+
+            // Parameter filter & kartu ringkasan KPI
+            param.put("filter_periode", cbPeriode.getSelectedItem() != null ? cbPeriode.getSelectedItem().toString() : "Semua");
+            param.put("filter_materi", cbMateri.getSelectedItem() != null ? cbMateri.getSelectedItem().toString() : "Semua Materi");
+            param.put("total_peserta", lblTotalPeserta.getText());
+            param.put("kehadiran_kelas", lblKehadiran.getText());
+            param.put("rata_rata_nilai", lblRataNilai.getText());
+            param.put("perlu_perhatian", lblPerluPerhatian.getText());
+
+            net.sf.jasperreports.engine.data.JRTableModelDataSource dataSource =
+                    new net.sf.jasperreports.engine.data.JRTableModelDataSource(tabelLaporan.getModel());
+
+            Util.ReportUtil.tampilkanLaporanDataSource(
+                    this,
+                    "/Reports/LaporanEvaluasiInstruktur.jrxml",
+                    param,
+                    dataSource,
+                    "SIMAPAN - Laporan Evaluasi Kelas Instruktur"
+            );
     }//GEN-LAST:event_btnEksporActionPerformed
 
 
