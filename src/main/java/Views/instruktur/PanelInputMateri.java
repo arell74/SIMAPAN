@@ -5,10 +5,16 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Database.MateriDAO;
 import Model.Instruktur;
 import Model.Materi;
 import Model.Pengguna;
 import Util.TabelUtil;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 
@@ -110,7 +116,25 @@ public class PanelInputMateri extends javax.swing.JPanel {
         return idAsli;
     }
 
+    private String generateIdMateri() {
+        int maxNum = 0;
+        for (Materi m : DataStore.daftarMateri) {
+            if (m.getIdMateri() != null && m.getIdMateri().startsWith("MAT")) {
+                try {
+                    int num = Integer.parseInt(m.getIdMateri().substring(3));
+                    if (num > maxNum) {
+                        maxNum = num;
+                    }
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return "MAT" + String.format("%03d", maxNum + 1);
+    }
+
     private void loadDataMateri() {
+        DataStore.muatUlang();
+
         modelTabel.setRowCount(0);
         materiTampil.clear();
 
@@ -130,6 +154,7 @@ public class PanelInputMateri extends javax.swing.JPanel {
                 materiTampil.add(m);
             }
         }
+        TabelUtil.autoResizeKolom(tabelMateri);
     }
 
     private void resetForm() {
@@ -310,7 +335,7 @@ public class PanelInputMateri extends javax.swing.JPanel {
         int pilihan = fileChooser.showOpenDialog(this);
 
         if (pilihan == javax.swing.JFileChooser.APPROVE_OPTION) {
-            java.io.File fileTerpilih = fileChooser.getSelectedFile();
+            File fileTerpilih = fileChooser.getSelectedFile();
             txtPathFile.setText(fileTerpilih.getAbsolutePath());
         }
     }
@@ -327,9 +352,14 @@ public class PanelInputMateri extends javax.swing.JPanel {
             return;
         }
 
+        DataStore.muatUlang();
+
         String idAsli = cariIdAsliInstruktur();
-        String idMateriBaru = "MAT" + String.format("%03d", DataStore.daftarMateri.size() + 1);
+        String idMateriBaru = generateIdMateri();
         String tanggal = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+
+        Materi materiBaru;
+        Path targetFileTersalin = null;
 
         if ("Teks".equals(tipe)) {
             String isiTeks = txtAreaIsiTeks.getText().trim();
@@ -340,9 +370,8 @@ public class PanelInputMateri extends javax.swing.JPanel {
                 return;
             }
 
-            Materi materiBaru = new Materi(idMateriBaru, idAsli, judul, kelasTarget,
+            materiBaru = new Materi(idMateriBaru, idAsli, judul, kelasTarget,
                 "Teks", isiTeks, null, null, tanggal);
-            DataStore.daftarMateri.add(materiBaru);
 
         } else {
             String pathAsli = txtPathFile.getText().trim();
@@ -355,23 +384,22 @@ public class PanelInputMateri extends javax.swing.JPanel {
 
             try {
                 String folderTujuan = System.getProperty("user.dir") + "/Brankas_Materi/" + idAsli;
-                java.io.File direktori = new java.io.File(folderTujuan);
+                File direktori = new File(folderTujuan);
                 if (!direktori.exists()) {
                     direktori.mkdirs();
                 }
 
-                java.io.File fileAsli = new java.io.File(pathAsli);
+                File fileAsli = new File(pathAsli);
                 String namaAsli = fileAsli.getName();
                 String ekstensi = namaAsli.contains(".") ? namaAsli.substring(namaAsli.lastIndexOf(".")) : "";
                 String namaFileBaru = idMateriBaru + ekstensi;
 
-                java.nio.file.Path sumberPath = java.nio.file.Paths.get(pathAsli);
-                java.nio.file.Path targetPath = java.nio.file.Paths.get(folderTujuan, namaFileBaru);
-                java.nio.file.Files.copy(sumberPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                Path sumberPath = Paths.get(pathAsli);
+                targetFileTersalin = Paths.get(folderTujuan, namaFileBaru);
+                Files.copy(sumberPath, targetFileTersalin, StandardCopyOption.REPLACE_EXISTING);
 
-                Materi materiBaru = new Materi(idMateriBaru, idAsli, judul, kelasTarget,
+                materiBaru = new Materi(idMateriBaru, idAsli, judul, kelasTarget,
                     "File", null, namaAsli, namaFileBaru, tanggal);
-                DataStore.daftarMateri.add(materiBaru);
 
             } catch (Exception e) {
                 javax.swing.JOptionPane.showMessageDialog(this,
@@ -382,12 +410,21 @@ public class PanelInputMateri extends javax.swing.JPanel {
             }
         }
 
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "Materi \"" + judul + "\" berhasil diupload untuk " + kelasTarget + "!",
-            "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        if (MateriDAO.tambah(materiBaru)) {
+            DataStore.muatUlang();
 
-        resetForm();
-        loadDataMateri();
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Materi \"" + judul + "\" berhasil disimpan ke database untuk " + kelasTarget + "!",
+                "Sukses", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            resetForm();
+            loadDataMateri();
+        } else if (targetFileTersalin != null) {
+            try {
+                Files.deleteIfExists(targetFileTersalin);
+            } catch (Exception ignore) {
+            }
+        }
     }
 
     private void btnHapusMateriActionPerformed(java.awt.event.ActionEvent evt) {
@@ -400,13 +437,32 @@ public class PanelInputMateri extends javax.swing.JPanel {
         }
 
         int konfirmasi = javax.swing.JOptionPane.showConfirmDialog(this,
-            "Yakin ingin menghapus materi ini?", "Konfirmasi Hapus",
+            "Yakin ingin menghapus materi ini dari database?", "Konfirmasi Hapus",
             javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
 
         if (konfirmasi == javax.swing.JOptionPane.YES_OPTION) {
             Materi materiTerpilih = materiTampil.get(baris);
-            DataStore.daftarMateri.remove(materiTerpilih);
-            loadDataMateri();
+            if (MateriDAO.hapus(materiTerpilih.getIdMateri())) {
+                if ("File".equalsIgnoreCase(materiTerpilih.getTipe())
+                        && materiTerpilih.getNamaFileTersimpan() != null) {
+                    try {
+                        Path fileBrankas = Paths.get(
+                            System.getProperty("user.dir"),
+                            "Brankas_Materi",
+                            materiTerpilih.getIdInstruktur(),
+                            materiTerpilih.getNamaFileTersimpan()
+                        );
+                        Files.deleteIfExists(fileBrankas);
+                    } catch (Exception ignore) {
+                    }
+                }
+
+                DataStore.muatUlang();
+                loadDataMateri();
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Materi berhasil dihapus dari database!", "Sukses",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            }
         }
     }
 

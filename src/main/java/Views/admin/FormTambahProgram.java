@@ -13,26 +13,29 @@ import DataStore.DataStore;
  */
 public class FormTambahProgram extends javax.swing.JFrame {
 
-    private Views.admin.PanelDataProgram panelInduk; 
+    private Views.admin.PanelDataProgram panelInduk;
 
-    // UBAH CONSTRUCTOR MENJADI SEPERTI INI:
     public FormTambahProgram(Views.admin.PanelDataProgram panelInduk) {
         initComponents();
-        this.setLocationRelativeTo(null); // Biar pop-up muncul pas di tengah layar
-        
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
+        this.setTitle("Tambah Program Baru");
+
         this.panelInduk = panelInduk;
-        
+
         siapkanForm();
     }
-    
+
     private void siapkanForm() {
-        int jumlahProgram = DataStore.daftarProgram.size() + 1;
-        
-        String idBaru = String.format("PRG%03d", jumlahProgram); 
-        
-        txtIdProgram.setText(idBaru);
+        // Ambil ID berikutnya langsung dari MySQL (PRG001, PRG002, dst.)
+        txtIdProgram.setText(Database.ProgramDAO.idBerikutnya());
         txtIdProgram.setEditable(false);
-        
+
+        // Atur model angka agar tidak bisa bernilai minus
+        txtBiaya.setModel(new javax.swing.SpinnerNumberModel(0.0, 0.0, 1_000_000_000.0, 100_000.0));
+        txtKuota.setModel(new javax.swing.SpinnerNumberModel(10, 1, 1_000, 1));
+
         cbBidangUsaha.removeAllItems();
         cbBidangUsaha.addItem("Pabrik / Perakitan");
         cbBidangUsaha.addItem("Kesehatan / Lansia");
@@ -40,7 +43,7 @@ public class FormTambahProgram extends javax.swing.JFrame {
         cbBidangUsaha.addItem("Konstruksi");
         cbBidangUsaha.addItem("Lainnya...");
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -215,48 +218,51 @@ public class FormTambahProgram extends javax.swing.JFrame {
     }//GEN-LAST:event_btnBatalActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        // 1. Ambil data dari semua inputan
-        String idProgram = txtIdProgram.getText();
+        String idProgram = txtIdProgram.getText().trim();
         String namaProgram = txtNamaProgram.getText().trim();
         String bidangUsaha = cbBidangUsaha.getSelectedItem().toString();
-        
+
         if (namaProgram.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Nama Program tidak boleh kosong!", "Peringatan", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Nama Program tidak boleh kosong!", "Peringatan",
                 javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        int biaya = 0;
+
+        double biaya = 0;
         int kuota = 0;
         try {
-            // Jika kamu pakai JSpinner, gunakan .getValue(). Jika JTextField, gunakan .getText()
-            // Di sini saya asumsikan kamu pakai JSpinner (karena ada panah atas bawah di screenshot)
-            biaya = (Integer) txtKuota.getValue();
-            kuota = (Integer) txtKuota.getValue();
-            
+            txtBiaya.commitEdit();
+            txtKuota.commitEdit();
+
+            biaya = ((Number) txtBiaya.getValue()).doubleValue();
+            kuota = ((Number) txtKuota.getValue()).intValue();
+
             if (biaya < 0 || kuota <= 0) {
-                javax.swing.JOptionPane.showMessageDialog(this, 
-                    "Biaya tidak boleh minus dan Kuota harus lebih dari 0!", "Peringatan", 
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Biaya tidak boleh minus dan Kuota harus lebih dari 0!", "Peringatan",
                     javax.swing.JOptionPane.WARNING_MESSAGE);
                 return;
             }
         } catch (Exception e) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Input Biaya dan Kuota harus berupa angka yang valid!", "Error", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Input Biaya dan Kuota harus berupa angka yang valid!", "Error",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         Program programBaru = new Program(idProgram, namaProgram, bidangUsaha, biaya, kuota);
-        DataStore.daftarProgram.add(programBaru);
-        
-        if (panelInduk != null) {
-            panelInduk.loadTableData("");
+
+        if (Database.ProgramDAO.tambah(programBaru)) {
+            DataStore.muatUlang();
+
+            if (panelInduk != null) {
+                panelInduk.loadTableData("");
+            }
+
+            javax.swing.JOptionPane.showMessageDialog(this, "Program Baru Berhasil Ditambahkan!");
+            this.dispose();
         }
-        
-        javax.swing.JOptionPane.showMessageDialog(this, "Program Baru Berhasil Ditambahkan!");
-        this.dispose();
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     /**

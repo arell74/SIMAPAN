@@ -17,27 +17,11 @@ public abstract class Pengguna {
     public String getPassword() { return password; }
     public String getNamaLengkap() { return namaLengkap; }
     public String getRole() { return role; }
-
-    public void setNamaLengkap(String namaLengkap) {
-        this.namaLengkap = namaLengkap;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-    
-
-    public boolean validasiLogin(String u, String p) {
-        return this.username.equals(u) && this.password.equals(p);
-    }
+    public void setNamaLengkap(String namaLengkap) { this.namaLengkap = namaLengkap; }
+    public void setUsername(String username) { this.username = username; }
+    public void setPassword(String password) { this.password = password; }
+    public void setRole(String role) { this.role = role; }
+    public boolean validasiLogin(String u, String p) { return this.username.equals(u) && this.password.equals(p); }
 
     // Abstract Method 
     public abstract String getMenuOtoritas();

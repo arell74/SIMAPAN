@@ -1,19 +1,28 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package Views.peserta;
 
+import DataStore.DataStore;
+import Model.Pengguna;
+import Model.Peserta;
 import Views.admin.FormLogin;
 import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-/*
+/**
+ *
  * @author arelssi
  */
 public class PesertaFrame extends javax.swing.JFrame {
 
     private String idPeserta;
 
-    private void showPanel(JPanel panel) {
+    public void showPanel(JPanel panel) {
         mainContent.removeAll();
 
         mainContent.setLayout(new java.awt.BorderLayout());
@@ -56,28 +65,54 @@ public class PesertaFrame extends javax.swing.JFrame {
 
         this.idPeserta = idPeserta;
 
+        DataStore.muatUlang();
+
         lblTanggal.setText(new java.text.SimpleDateFormat("EEEE, dd MMMM yyyy",
                 new java.util.Locale("id", "ID")).format(new java.util.Date()));
 
-        Model.Peserta pesertaAktif = cariPesertaAktif();
-        if (pesertaAktif != null) {
-            lblNamaPeserta.setText(pesertaAktif.getNamaLengkap());
-        }
+        muatInfoHeaderPeserta();
 
         showPanel(new Views.peserta.PanelDashboardPeserta(this.idPeserta));
         setActiveButton(btnDashboard);
     }
 
+    private void muatInfoHeaderPeserta() {
+        Peserta pesertaAktif = cariPesertaAktif();
+        if (pesertaAktif != null) {
+            this.idPeserta = pesertaAktif.getIdPeserta();
+            String namaLengkap = pesertaAktif.getNamaLengkap();
+            lblNamaPeserta.setText(namaLengkap);
+            lblHalamanSub.setText("Selamat datang, " + namaLengkap);
+
+            if (namaLengkap != null && !namaLengkap.isEmpty()) {
+                btnProfile.setText(String.valueOf(namaLengkap.charAt(0)).toUpperCase());
+            }
+        }
+    }
+
     /**
-     * Mencari data Model.Peserta berdasarkan idPeserta yang sedang login.
+     * Mencari data Model.Peserta berdasarkan idPeserta atau username yang sedang login.
      */
-    private Model.Peserta cariPesertaAktif() {
-        for (Model.Peserta p : DataStore.DataStore.daftarPeserta) {
-            if (p.getIdPeserta() != null && p.getIdPeserta().equals(idPeserta)) {
+    private Peserta cariPesertaAktif() {
+        for (Peserta p : DataStore.daftarPeserta) {
+            if ((p.getIdPeserta() != null && p.getIdPeserta().equals(idPeserta))
+                    || (p.getUsername() != null && p.getUsername().equals(idPeserta))) {
                 return p;
             }
         }
         return null;
+    }
+
+    public void bukaLihatMateri() {
+        btnLihatMateriActionPerformed(null);
+    }
+
+    public void bukaKerjakanKuis() {
+        btnKerjakanKuisActionPerformed(null);
+    }
+
+    public void bukaLihatNilai() {
+        btnLihatNilaiActionPerformed(null);
     }
 
     /**
@@ -105,8 +140,7 @@ public class PesertaFrame extends javax.swing.JFrame {
         lblHalamanSub = new javax.swing.JLabel();
         lblTanggal = new javax.swing.JLabel();
         lblNamaPeserta = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabelAvatar = new javax.swing.JLabel();
+        btnProfile = new javax.swing.JButton();
         mainContent = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -240,39 +274,32 @@ public class PesertaFrame extends javax.swing.JFrame {
 
         lblTanggal.setFont(new java.awt.Font("Inter", 0, 11));
         lblTanggal.setForeground(new java.awt.Color(140, 140, 140));
+        lblTanggal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblTanggal.setText("Selasa, 12 Mei 2026");
         lblTanggal.setPreferredSize(new java.awt.Dimension(240, 16));
-        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 10, 230, 20));
+        panelHeadr.add(lblTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 12, 240, 20));
 
         lblNamaPeserta.setFont(new java.awt.Font("Inter", 1, 12));
         lblNamaPeserta.setForeground(new java.awt.Color(40, 40, 40));
+        lblNamaPeserta.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblNamaPeserta.setText("Peserta");
         lblNamaPeserta.setPreferredSize(new java.awt.Dimension(210, 16));
-        panelHeadr.add(lblNamaPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 30, 230, -1));
+        panelHeadr.add(lblNamaPeserta, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 32, 240, -1));
 
-        jPanel1.setBackground(new java.awt.Color(255, 235, 235));
-
-        jLabelAvatar.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 15));
-        jLabelAvatar.setText("S");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(16, 16, 16)
-                .addComponent(jLabelAvatar)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(13, Short.MAX_VALUE)
-                .addComponent(jLabelAvatar)
-                .addContainerGap())
-        );
-
-        panelHeadr.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 10, 40, 40));
+        btnProfile.setBackground(new java.awt.Color(255, 235, 235));
+        btnProfile.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 16));
+        btnProfile.setForeground(new java.awt.Color(122, 0, 0));
+        btnProfile.setText("U");
+        btnProfile.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        btnProfile.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnProfile.setFocusPainted(false);
+        btnProfile.setToolTipText("Lihat Profil Saya");
+        btnProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProfileActionPerformed(evt);
+            }
+        });
+        panelHeadr.add(btnProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 12, 40, 40));
 
         mainContent.setBackground(new java.awt.Color(245, 245, 245));
         mainContent.setName("mainContent"); // NOI18N
@@ -313,7 +340,8 @@ public class PesertaFrame extends javax.swing.JFrame {
 
     private void btnDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDashboardActionPerformed
         lblHalamanJudul.setText("Dashboard");
-        lblHalamanSub.setText("Selamat datang, Peserta");
+        Peserta p = cariPesertaAktif();
+        lblHalamanSub.setText(p != null ? "Selamat datang, " + p.getNamaLengkap() : "Selamat datang, Peserta");
 
         showPanel(new Views.peserta.PanelDashboardPeserta(idPeserta));
         setActiveButton(btnDashboard);
@@ -343,18 +371,46 @@ public class PesertaFrame extends javax.swing.JFrame {
         setActiveButton(btnLihatNilai);
     }//GEN-LAST:event_btnLihatNilaiActionPerformed
 
+    private void btnProfileActionPerformed(java.awt.event.ActionEvent evt) {
+        String unameLogin = null;
+        if (DataStore.penggunaLogin != null) {
+            unameLogin = DataStore.penggunaLogin.getUsername();
+        } else {
+            Peserta p = cariPesertaAktif();
+            if (p != null) {
+                unameLogin = p.getUsername();
+            } else {
+                for (Pengguna u : DataStore.daftarPengguna) {
+                    if (idPeserta != null && idPeserta.equals(u.getUsername())) {
+                        unameLogin = u.getUsername();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (unameLogin != null) {
+            FormProfilPeserta form = new FormProfilPeserta(this, true, unameLogin);
+            form.setVisible(true);
+
+            DataStore.muatUlang();
+            muatInfoHeaderPeserta();
+        } else {
+            JOptionPane.showMessageDialog(this, "Anda belum login!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        int konfirmasi = javax.swing.JOptionPane.showConfirmDialog(this,
+        int konfirmasi = JOptionPane.showConfirmDialog(this,
             "Apakah Anda yakin ingin keluar dari sistem?",
             "Konfirmasi Logout",
-            javax.swing.JOptionPane.YES_NO_OPTION,
-            javax.swing.JOptionPane.QUESTION_MESSAGE);
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE);
 
-        if (konfirmasi == javax.swing.JOptionPane.YES_OPTION) {
-
+        if (konfirmasi == JOptionPane.YES_OPTION) {
+            DataStore.penggunaLogin = null;
             FormLogin formLogin = new FormLogin();
             formLogin.setVisible(true);
-
             this.dispose();
         }
     }//GEN-LAST:event_btnLogoutActionPerformed
@@ -370,17 +426,16 @@ public class PesertaFrame extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnKerjakanKuis;
     private javax.swing.JButton btnLihatMateri;
     private javax.swing.JButton btnLihatNilai;
     private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnProfile;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabelAvatar;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lblHalamanJudul;
@@ -390,5 +445,5 @@ public class PesertaFrame extends javax.swing.JFrame {
     private javax.swing.JPanel mainContent;
     private javax.swing.JPanel panelHeadr;
     private javax.swing.JPanel sidebar;
-    // End of variables declaration
+    // End of variables declaration//GEN-END:variables
 }

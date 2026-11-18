@@ -20,7 +20,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
     private JButton btnTutupHeader;
 
     private JPanel panelBody;
-    
+
     // Kolom Kiri: Info Peserta
     private JLabel lblSectionPeserta;
     private JSeparator separatorPeserta;
@@ -53,7 +53,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
     private final Color BG_READONLY = new Color(240, 240, 240);
     private final Color TXT_ABU = new Color(90, 90, 90);
     private final Color TXT_UTAMA = new Color(10, 10, 10);
-    
+
     private final Font FONT_BOLD_10 = new Font("Inter", Font.BOLD, 10);
     private final Font FONT_BOLD_11 = new Font("Inter", Font.BOLD, 11);
     private final Font FONT_PLAIN_11 = new Font("Inter", Font.PLAIN, 11);
@@ -65,8 +65,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
     public FormDetailDokumen(java.awt.Frame parent, boolean modal, String idDokumen) {
         super(parent, modal);
         this.idTarget = idDokumen;
-        
-        // Setup Window Dialog - Diperlebar sedikit agar muat teks nama file panjang
+
         this.setTitle("Detail Kelengkapan Dokumen Peserta");
         this.setSize(680, 480);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -85,7 +84,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         // ==========================================
         panelHeader = new JPanel(new AbsoluteLayout());
         panelHeader.setBackground(MAROON_UTAMA);
-        
+
         lblJudulHeader = new JLabel("Map Kelengkapan Dokumen");
         lblJudulHeader.setForeground(Color.WHITE);
         lblJudulHeader.setFont(FONT_BOLD_16);
@@ -126,7 +125,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblNamaPeserta.setForeground(TXT_ABU);
         lblNamaPeserta.setFont(FONT_BOLD_11);
         panelBody.add(lblNamaPeserta, new AbsoluteConstraints(20, 50, 280, 20));
-        
+
         txtNamaPeserta = createReadOnlyField();
         panelBody.add(txtNamaPeserta, new AbsoluteConstraints(20, 70, 280, 30));
 
@@ -134,7 +133,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblIdPeserta.setForeground(TXT_ABU);
         lblIdPeserta.setFont(FONT_BOLD_11);
         panelBody.add(lblIdPeserta, new AbsoluteConstraints(20, 110, 280, 20));
-        
+
         txtIdPeserta = createReadOnlyField();
         panelBody.add(txtIdPeserta, new AbsoluteConstraints(20, 130, 280, 30));
 
@@ -142,11 +141,10 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblTanggalBerangkat.setForeground(TXT_ABU);
         lblTanggalBerangkat.setFont(FONT_BOLD_11);
         panelBody.add(lblTanggalBerangkat, new AbsoluteConstraints(20, 170, 280, 20));
-        
-        txtTanggalBerangkat = createReadOnlyField();
-        txtTanggalBerangkat.setForeground(new Color(0, 100, 0)); // Aksen hijau
-        panelBody.add(txtTanggalBerangkat, new AbsoluteConstraints(20, 190, 280, 30));
 
+        txtTanggalBerangkat = createReadOnlyField();
+        txtTanggalBerangkat.setForeground(new Color(0, 100, 0));
+        panelBody.add(txtTanggalBerangkat, new AbsoluteConstraints(20, 190, 280, 30));
 
         // --- KOLOM KANAN (Status Kelengkapan Berkas) ---
         lblSectionDokumen = new JLabel("STATUS KELENGKAPAN BERKAS");
@@ -162,7 +160,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblKtp.setForeground(TXT_ABU);
         lblKtp.setFont(FONT_BOLD_11);
         panelBody.add(lblKtp, new AbsoluteConstraints(340, 50, 300, 20));
-        
+
         txtKtp = createReadOnlyField();
         panelBody.add(txtKtp, new AbsoluteConstraints(340, 70, 300, 30));
 
@@ -171,7 +169,7 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblPaspor.setForeground(TXT_ABU);
         lblPaspor.setFont(FONT_BOLD_11);
         panelBody.add(lblPaspor, new AbsoluteConstraints(340, 110, 300, 20));
-        
+
         txtPaspor = createReadOnlyField();
         panelBody.add(txtPaspor, new AbsoluteConstraints(340, 130, 300, 30));
 
@@ -180,21 +178,20 @@ public class FormDetailDokumen extends javax.swing.JDialog {
         lblMcu.setForeground(TXT_ABU);
         lblMcu.setFont(FONT_BOLD_11);
         panelBody.add(lblMcu, new AbsoluteConstraints(340, 170, 300, 20));
-        
+
         txtMcu = createReadOnlyField();
         panelBody.add(txtMcu, new AbsoluteConstraints(340, 190, 300, 30));
-        
+
         // 4. Visa
         lblVisa = new JLabel("Visa / Izin Tinggal");
         lblVisa.setForeground(TXT_ABU);
         lblVisa.setFont(FONT_BOLD_11);
         panelBody.add(lblVisa, new AbsoluteConstraints(340, 230, 300, 20));
-        
+
         txtVisa = createReadOnlyField();
         panelBody.add(txtVisa, new AbsoluteConstraints(340, 250, 300, 30));
 
         this.getContentPane().add(panelBody, new AbsoluteConstraints(0, 68, 680, 320));
-
 
         // ==========================================
         // 3. PANEL FOOTER (Tombol Aksi)
@@ -234,65 +231,88 @@ public class FormDetailDokumen extends javax.swing.JDialog {
 
     /**
      * Helper memformat tampilan status berkas
-     * Menghasilkan: ✅ 3208xxx (ktp.jpg) atau ❌ Belum Diinput
+     * Menghasilkan: ✅ 3208xxx  [ktp.jpg] atau ❌ Belum Diinput
      */
     private String formatStatusBerkas(String nomor, String namaFile) {
-        if (nomor == null || nomor.trim().isEmpty() || nomor.equals("-")) {
+        boolean adaNomor = (nomor != null && !nomor.trim().isEmpty() && !nomor.equals("-"));
+        boolean adaFile = (namaFile != null && !namaFile.trim().isEmpty());
+
+        if (!adaNomor && !adaFile) {
             return "❌ Belum Diinput";
         }
-        
-        String file = (namaFile != null && !namaFile.trim().isEmpty()) ? namaFile : "Tanpa Lampiran";
-        return "✅ " + nomor + "  [" + file + "]";
+
+        String labelNomor = adaNomor ? nomor : "Tersedia";
+        String file = adaFile ? namaFile : "Tanpa Lampiran";
+        return "✅ " + labelNomor + "  [" + file + "]";
     }
 
     private void loadData() {
+        // Pastikan cache DataStore memuat data terbaru dari MySQL
+        DataStore.muatUlang();
+
         boolean dataDitemukan = false;
-        
+
         for (Dokumen dok : DataStore.daftarDokumen) {
             if (dok.getIdDokumen().equals(idTarget)) {
                 this.dokumenTarget = dok;
-                
+
                 // 1. Set Identitas Peserta
                 if (dok.getPeserta() != null) {
-                    txtIdPeserta.setText(dok.getPeserta().getIdPeserta()); 
-                    // Asumsi getNamaLengkap ada dari inheritance Pengguna
-                    txtNamaPeserta.setText(dok.getPeserta().getNamaLengkap()); 
+                    txtIdPeserta.setText(dok.getPeserta().getIdPeserta());
+                    txtNamaPeserta.setText(dok.getPeserta().getNamaLengkap());
                 } else {
                     txtIdPeserta.setText("-");
                     txtNamaPeserta.setText("Data Peserta Tidak Valid");
                 }
-                
-                txtTanggalBerangkat.setText(dok.getTanggalBerangkat() != null ? dok.getTanggalBerangkat() : "Belum ditentukan");
 
-                // 2. Set Status Checklist Berkas menggunakan helper formatStatusBerkas
+                String tglBerangkat = dok.getTanggalBerangkat();
+                txtTanggalBerangkat.setText((tglBerangkat != null && !tglBerangkat.trim().isEmpty())
+                        ? tglBerangkat
+                        : "Belum ditentukan");
+
+                // 2. Set Status Checklist Berkas
                 txtKtp.setText(formatStatusBerkas(dok.getNikKtp(), dok.getFileKtp()));
                 txtPaspor.setText(formatStatusBerkas(dok.getNoPaspor(), dok.getFilePaspor()));
                 txtMcu.setText(formatStatusBerkas(dok.getHasilMcu(), dok.getFileMcu()));
                 txtVisa.setText(formatStatusBerkas(dok.getNoVisa(), dok.getFileVisa()));
-                
-                // Warnai hijau jika sudah ada inputan agar visualnya lebih intuitif
-                if (txtKtp.getText().startsWith("✅")) txtKtp.setForeground(new Color(0, 100, 0));
-                if (txtPaspor.getText().startsWith("✅")) txtPaspor.setForeground(new Color(0, 100, 0));
-                if (txtMcu.getText().startsWith("✅")) txtMcu.setForeground(new Color(0, 100, 0));
-                if (txtVisa.getText().startsWith("✅")) txtVisa.setForeground(new Color(0, 100, 0));
+
+                // Reset & atur warna indikator status
+                aturWarnaField(txtKtp);
+                aturWarnaField(txtPaspor);
+                aturWarnaField(txtMcu);
+                aturWarnaField(txtVisa);
 
                 dataDitemukan = true;
                 break;
             }
         }
-        
+
         if (!dataDitemukan) {
-            JOptionPane.showMessageDialog(this, "Data Dokumen tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Data Dokumen tidak ditemukan di database!", "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
     }
 
+    private void aturWarnaField(JTextField field) {
+        if (field.getText().startsWith("✅")) {
+            field.setForeground(new Color(0, 100, 0));
+        } else {
+            field.setForeground(TXT_UTAMA);
+        }
+    }
+
     private void aksiEdit() {
-        // Logika untuk membuka Form Input Dokumen agar admin bisa menambah berkas
-        JOptionPane.showMessageDialog(this, 
-            "Membuka Form Input untuk melengkapi berkas ID: " + idTarget, 
-            "Info", JOptionPane.INFORMATION_MESSAGE);
-            
-        // TODO: Instansiasi FormInputDokumen(idTarget) di sini jika dibutuhkan
+        if (dokumenTarget == null) return;
+
+        // Buka FormInputDokumen dengan panelInduk = null karena dibuka dari dialog detail
+        FormInputDokumen formInput = new FormInputDokumen(null, dokumenTarget);
+        formInput.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                // Muat ulang tampilan detail begitu form input ditutup
+                loadData();
+            }
+        });
+        formInput.setVisible(true);
     }
 }

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="LaporanDataPesertaAdmin" language="java" orientation="Landscape"
+              pageWidth="842" pageHeight="595" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <!-- STYLE ZEBRA STRIPING UNTUK BARIS TABEL -->
+    <style name="RowStyle" mode="Opaque" backcolor="#FFFFFF" fontName="SansSerif" fontSize="8">
+        <box>
+            <pen lineWidth="0.5" lineColor="#E2E8F0"/>
+        </box>
+        <conditionalStyle>
+            <conditionExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></conditionExpression>
+            <style mode="Opaque" backcolor="#F8FAFC"/>
+        </conditionalStyle>
+    </style>
+
+    <parameter name="nama_admin" class="java.lang.String" isForPrompting="false">
+        <defaultValueExpression><![CDATA["Admin LPK Yuuki"]]></defaultValueExpression>
+    </parameter>
+
+    <queryString>
+        <![CDATA[
+        SELECT
+            p.id_peserta,
+            p.nik,
+            pg_p.nama_lengkap,
+            p.jenis_kelamin,
+            p.no_hp,
+            COALESCE(pr.nama_program, '-') AS nama_program,
+            COALESCE(NULLIF(p.kelas, ''), 'Belum Ditentukan') AS kelas,
+            COALESCE(p.level_bahasa, '-') AS level_bahasa,
+            COALESCE(pg_i.nama_lengkap, 'Belum Ada') AS nama_instruktur,
+            COALESCE(p.status_pembayaran, '-') AS status_pembayaran,
+            COALESCE(p.status_seleksi, '-') AS status_seleksi,
+            COALESCE(p.status_keberangkatan, '-') AS status_keberangkatan
+        FROM peserta p
+        JOIN pengguna pg_p ON pg_p.username = p.username
+        LEFT JOIN program pr ON p.id_program = pr.id_program
+        LEFT JOIN instruktur i ON p.id_instruktur = i.id_instruktur
+        LEFT JOIN pengguna pg_i ON pg_i.username = i.username
+        ORDER BY p.id_peserta ASC
+        ]]>
+    </queryString>
+
+    <field name="id_peserta" class="java.lang.String"/>
+    <field name="nik" class="java.lang.String"/>
+    <field name="nama_lengkap" class="java.lang.String"/>
+    <field name="jenis_kelamin" class="java.lang.String"/>
+    <field name="no_hp" class="java.lang.String"/>
+    <field name="nama_program" class="java.lang.String"/>
+    <field name="kelas" class="java.lang.String"/>
+    <field name="level_bahasa" class="java.lang.String"/>
+    <field name="nama_instruktur" class="java.lang.String"/>
+    <field name="status_pembayaran" class="java.lang.String"/>
+    <field name="status_seleksi" class="java.lang.String"/>
+    <field name="status_keberangkatan" class="java.lang.String"/>
+
+    <!-- ==================== KOP SURAT & HEADER LAPORAN ==================== -->
+    <title>
+        <band height="118">
+            <!-- Logo LPK Yuuki -->
+            <image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" onErrorType="Blank">
+                <reportElement x="0" y="2" width="64" height="64"/>
+                <imageExpression><![CDATA[new java.io.File("/home/arelssi/Downloads/yuuki-logo.png")]]></imageExpression>
+            </image>
+
+            <!-- Nama Lembaga & Subjudul -->
+            <staticText>
+                <reportElement x="74" y="2" width="490" height="24" forecolor="#7A0000"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="17" isBold="true"/>
+                </textElement>
+                <text><![CDATA[LPK YUUKI — TRAINING CENTER INDONESIA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="74" y="26" width="490" height="16" forecolor="#334155"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Lembaga Pelatihan Kerja & Persiapan Pemagangan Jepang (SIMAPAN)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="74" y="42" width="490" height="15" forecolor="#64748B"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <text><![CDATA[Jl. Raya Kuningan — Jawa Barat, Indonesia  |  Email: info@lpkyuuki.id]]></text>
+            </staticText>
+
+            <!-- Badge Kode Dokumen di Kanan Atas -->
+            <rectangle radius="4">
+                <reportElement mode="Opaque" x="582" y="6" width="180" height="52" backcolor="#FFF5F5" forecolor="#7A0000"/>
+                <graphicElement>
+                    <pen lineWidth="0.8" lineColor="#7A0000"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="582" y="10" width="180" height="14" forecolor="#7A0000"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DOKUMEN REKAPITULASI]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="588" y="25" width="168" height="14" forecolor="#334155"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tgl: " + new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm").format(new java.util.Date())]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="588" y="39" width="168" height="14" forecolor="#334155"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Admin: " + $P{nama_admin}]]></textFieldExpression>
+            </textField>
+
+            <!-- Garis Ganda Pembatas Kop -->
+            <line>
+                <reportElement x="0" y="71" width="762" height="2" forecolor="#7A0000"/>
+                <graphicElement>
+                    <pen lineWidth="2.0" lineColor="#7A0000"/>
+                </graphicElement>
+            </line>
+            <line>
+                <reportElement x="0" y="75" width="762" height="1" forecolor="#CBD5E1"/>
+                <graphicElement>
+                    <pen lineWidth="0.75" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </line>
+
+            <!-- Banner Judul Laporan -->
+            <rectangle radius="3">
+                <reportElement mode="Opaque" x="0" y="83" width="762" height="26" backcolor="#F1F5F9" forecolor="#CBD5E1"/>
+                <graphicElement>
+                    <pen lineWidth="0.5" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="0" y="83" width="762" height="26" forecolor="#1E293B"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[LAPORAN DATA PESERTA PELATIHAN, STATUS SELEKSI & KEBERANGKATAN]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <!-- ==================== HEADER KOLOM TABEL ==================== -->
+    <columnHeader>
+        <band height="28">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="28" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[No]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="28" y="0" width="52" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[ID Peserta]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="80" y="0" width="95" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[NIK]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="175" y="0" width="123" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Nama Lengkap Peserta]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="298" y="0" width="105" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Program]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="403" y="0" width="75" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Kelas / Level]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="478" y="0" width="95" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Instruktur]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="573" y="0" width="60" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Pembayaran]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="633" y="0" width="60" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Seleksi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="693" y="0" width="69" height="28" forecolor="#FFFFFF" backcolor="#7A0000"/>
+                <box><pen lineWidth="0.5" lineColor="#5A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[Keberangkatan]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <!-- ==================== BARIS DATA PESERTA ==================== -->
+    <detail>
+        <band height="24" splitType="Prevent">
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="0" y="0" width="28" height="24"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="28" y="0" width="52" height="24" forecolor="#7A0000"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{id_peserta}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="80" y="0" width="95" height="24"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nik}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="175" y="0" width="123" height="24"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                    <paragraph leftIndent="5" rightIndent="4"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nama_lengkap}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="298" y="0" width="105" height="24"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="5" rightIndent="4"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nama_program}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="403" y="0" width="75" height="24"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{kelas} + " (" + $F{level_bahasa} + ")"]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="478" y="0" width="95" height="24"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="5" rightIndent="4"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{nama_instruktur}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="573" y="0" width="60" height="24"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{status_pembayaran}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="633" y="0" width="60" height="24"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{status_seleksi}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement style="RowStyle" stretchType="RelativeToBandHeight" x="693" y="0" width="69" height="24" forecolor="#1E293B"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{status_keberangkatan}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- ==================== FOOTER HALAMAN ==================== -->
+    <pageFooter>
+        <band height="22">
+            <line>
+                <reportElement x="0" y="2" width="762" height="1" forecolor="#E2E8F0"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="5" width="450" height="15" forecolor="#64748B"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                <text><![CDATA[SIMAPAN — Sistem Informasi Manajemen Pemagangan LPK Yuuki]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="580" y="5" width="145" height="15" forecolor="#64748B"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA["Halaman " + $V{PAGE_NUMBER} + " dari "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="725" y="5" width="37" height="15" forecolor="#64748B"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <!-- ==================== RINGKASAN & TANDA TANGAN ==================== -->
+    <summary>
+        <band height="115">
+            <!-- Kotak Ringkasan di Kiri -->
+            <rectangle radius="4">
+                <reportElement mode="Opaque" x="0" y="14" width="280" height="46" backcolor="#F8FAFC" forecolor="#CBD5E1"/>
+                <graphicElement>
+                    <pen lineWidth="0.6" lineColor="#CBD5E1"/>
+                </graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="12" y="19" width="256" height="18" forecolor="#7A0000"/>
+                <textElement verticalAlignment="Middle"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Total Peserta Terdaftar: " + $V{REPORT_COUNT} + " Orang"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="12" y="37" width="256" height="16" forecolor="#64748B"/>
+                <textElement verticalAlignment="Middle"><font size="8"/></textElement>
+                <text><![CDATA[Data bersumber langsung dari database aktif SIMAPAN.]]></text>
+            </staticText>
+
+            <!-- Blok Tanda Tangan di Kanan -->
+            <textField>
+                <reportElement x="542" y="14" width="220" height="16" forecolor="#334155"/>
+                <textElement textAlignment="Center"><font size="9"/></textElement>
+                <textFieldExpression><![CDATA["Kuningan, " + new java.text.SimpleDateFormat("dd MMMM yyyy").format(new java.util.Date())]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="542" y="30" width="220" height="16" forecolor="#334155"/>
+                <textElement textAlignment="Center"><font size="9"/></textElement>
+                <text><![CDATA[Mengetahui, Pimpinan / Admin LPK Yuuki]]></text>
+            </staticText>
+            <line>
+                <reportElement x="572" y="88" width="160" height="1" forecolor="#334155"/>
+            </line>
+            <textField>
+                <reportElement x="542" y="92" width="220" height="16" forecolor="#0F172A"/>
+                <textElement textAlignment="Center"><font size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["( " + $P{nama_admin} + " )"]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

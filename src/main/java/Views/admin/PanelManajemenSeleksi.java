@@ -20,85 +20,95 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelManajemenSeleksi extends javax.swing.JPanel {
 
-    /**
-     * Creates new form panelManajemenSeleksi
-     */
     public PanelManajemenSeleksi() {
         initComponents();
         setPreferredSize(new java.awt.Dimension(980, 616));
         setBackground(new java.awt.Color(245, 245, 245));
-        
-        cbFilterStatus.setModel(new DefaultComboBoxModel<>(new String[]{"Semua", "Lulus", "Gugur"}));
+
+        cbFilterStatus.setModel(new DefaultComboBoxModel<>(new String[]{"Semua", "Menunggu", "Lulus", "Gugur"}));
+        cbFilterStatus.addActionListener(this::cbFilterActionPerformed);
+
         setupTable();
-        
+
+        // Sinkronkan cache DataStore dengan data terbaru dari MySQL
+        DataStore.muatUlang();
         loadStatistics();
         loadTableData("");
     }
-    
+
     private void setupTable() {
-        // Styling tabel standar...
         tabelSeleksi.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelSeleksi.getTableHeader().setBackground(new Color(122, 0, 0));
         tabelSeleksi.getTableHeader().setForeground(Color.WHITE);
+        tabelSeleksi.getTableHeader().setOpaque(false);
         tabelSeleksi.setRowHeight(36);
-        
-        // Asumsi kolom "Aksi" berada di indeks ke-9 (Kolom ke-10)
+        tabelSeleksi.setSelectionBackground(new Color(255, 230, 230));
+
         tabelSeleksi.getColumnModel().getColumn(9).setCellRenderer(new TombolAksiRenderer());
         tabelSeleksi.getColumnModel().getColumn(9).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
-            
+
             @Override
             public void onDetail(int baris) {
-                String id = tabelSeleksi.getValueAt(baris, 1).toString();
-                    FormDetailSeleksi form = new FormDetailSeleksi(
-                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelManajemenSeleksi.this),
-                        true,
-                        id
-                    );
-                    form.setVisible(true);
+                String idSeleksi = tabelSeleksi.getValueAt(baris, 1).toString().trim();
+                String namaPeserta = tabelSeleksi.getValueAt(baris, 3).toString().trim();
+
+                if ("—".equals(idSeleksi) || idSeleksi.isEmpty()) {
+                    JOptionPane.showMessageDialog(PanelManajemenSeleksi.this,
+                        "Peserta \"" + namaPeserta + "\" belum memiliki riwayat seleksi.\n"
+                        + "Klik tombol Edit atau 'Input Seleksi' untuk menambahkan hasil seleksi.",
+                        "Belum Ada Riwayat Seleksi", JOptionPane.INFORMATION_MESSAGE);
+                    return;
                 }
+
+                java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelManajemenSeleksi.this);
+                java.awt.Frame parentFrame = (parentWindow instanceof java.awt.Frame) ? (java.awt.Frame) parentWindow : null;
+
+                FormDetailSeleksi form = new FormDetailSeleksi(parentFrame, true, idSeleksi);
+                form.setVisible(true);
+            }
 
             @Override
             public void onEdit(int baris) {
-                String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString(); 
-                
-                // 2. Cari objek Peserta aslinya dari DataStore
-                Model.Peserta pesertaTerpilih = null;
-                for (Model.Peserta p : DataStore.daftarPeserta) {
-                    if (p.getIdPeserta().equals(idPeserta)) {
-                        pesertaTerpilih = p;
-                        break;
-                    }
-                }
-                
-                // 3. Panggil Form Input Seleksi
+                String idPeserta = tabelSeleksi.getValueAt(baris, 2).toString().trim();
+                Model.Peserta pesertaTerpilih = DataStore.cariPeserta(idPeserta);
+
                 if (pesertaTerpilih != null) {
-                    
-                    // Gunakan PanelManajemenSeleksi.this agar lemparan induknya tepat sasaran
-                    FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, PanelManajemenSeleksi.this);
-                    form.setVisible(true); 
-                    
+                    bukaFormInputSeleksi(pesertaTerpilih);
                 }
             }
 
             @Override
             public void onHapus(int baris) {
-                // Kosongkan jika tidak ada tombol hapus
+                hapusData(baris);
             }
         }));
     }
 
+    // Membuka FormInputSeleksi dan otomatis refresh statistik + tabel saat ditutup
+    private void bukaFormInputSeleksi(Model.Peserta pesertaTerpilih) {
+        FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, PanelManajemenSeleksi.this);
+        form.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                DataStore.muatUlang();
+                loadStatistics();
+                loadTableData(txtCari.getText());
+            }
+        });
+        form.setVisible(true);
+    }
+
     // --- LOGIKA MENGHITUNG KARTU STATISTIK ---
-    private void loadStatistics() {
-        int totalSeleksi = DataStore.daftarSeleksi.size(); // Total semua riwayat seleksi yang pernah dilakukan
+    public void loadStatistics() {
+        int totalSeleksi = DataStore.daftarSeleksi.size();
         int pesertaLulus = 0;
         int gugurPermanen = 0;
 
-        // Kita hitung dari status akhir tiap peserta
         for (Model.Peserta p : DataStore.daftarPeserta) {
-            // Null-Safe: Jika status p null, tidak akan error, langsung dianggap false
             if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
                 pesertaLulus++;
-            } else if ("Gugur".equalsIgnoreCase(p.getStatusSeleksi()) || "Gugur Permanen".equalsIgnoreCase(p.getStatusSeleksi())) {
+            } else if ("Gugur".equalsIgnoreCase(p.getStatusSeleksi())
+                    || "Gugur Permanen".equalsIgnoreCase(p.getStatusSeleksi())) {
                 gugurPermanen++;
             }
         }
@@ -112,46 +122,38 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
     public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelSeleksi.getModel();
         model.setRowCount(0);
-        
+
+        String kw = (keyword == null) ? "" : keyword.trim().toLowerCase();
         String filter = cbFilterStatus.getSelectedItem() != null ? cbFilterStatus.getSelectedItem().toString() : "Semua";
         int no = 1;
 
-        // 1. Loop semua daftar Peserta
         for (Model.Peserta p : DataStore.daftarPeserta) {
-            
-            // Filter Pencarian Teks
-            boolean matchText = keyword.isEmpty() || 
-                                p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
-                                p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
-            
+            boolean matchText = kw.isEmpty()
+                    || p.getNamaLengkap().toLowerCase().contains(kw)
+                    || p.getIdPeserta().toLowerCase().contains(kw);
+
             if (!matchText) continue;
 
-            // 2. Kalkulasi Riwayat Seleksi (Algoritma Pencarian)
+            // Kalkulasi Riwayat Seleksi dari cache MySQL
             int jumlahPercobaan = 0;
             Model.Seleksi seleksiTerakhir = null;
-            
+
             for (Model.Seleksi s : DataStore.daftarSeleksi) {
-                if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                if (s.getPeserta() != null && p.getIdPeserta().equals(s.getPeserta().getIdPeserta())) {
                     jumlahPercobaan++;
-                    seleksiTerakhir = s; // Variabel ini akan terus tertimpa sampai menemukan data yang paling akhir (terbaru)
+                    seleksiTerakhir = s;
                 }
             }
 
-            // 3. Tentukan Nilai Kolom Berdasarkan Hasil Kalkulasi
             String idSel = (seleksiTerakhir != null) ? seleksiTerakhir.getIdSeleksi() : "—";
             String jenisSel = (seleksiTerakhir != null) ? seleksiTerakhir.getJenisSeleksi() : "—";
             String tglSel = (seleksiTerakhir != null) ? seleksiTerakhir.getTanggalSeleksi() : "—";
             String nilaiStr = (seleksiTerakhir != null) ? String.valueOf(seleksiTerakhir.getNilai()) : "—";
-            
-            // Tentukan status, jika belum pernah seleksi sama sekali = "Menunggu"
             String status = (seleksiTerakhir != null) ? seleksiTerakhir.getStatusHasil() : "Menunggu";
-            
-            // Format string percobaan seperti di desain: "1 / 3"
             String teksPercobaan = jumlahPercobaan + " / 3";
 
-            // 4. Terapkan Filter Status Dropdown
             boolean matchStatus = filter.equals("Semua") || status.equalsIgnoreCase(filter);
-            
+
             if (matchStatus) {
                 model.addRow(new Object[]{
                     no++,
@@ -168,23 +170,38 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
             }
         }
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data seleksi");
+
+        try {
+            Util.TabelUtil.autoResizeKolom(tabelSeleksi);
+        } catch (Exception e) {
+            System.out.println("TabelUtil belum tersedia: " + e.getMessage());
+        }
     }
 
-    // --- LOGIKA HAPUS DATA ---
+    // --- LOGIKA HAPUS DATA SELEKSI DARI MYSQL ---
     private void hapusData(int baris) {
-        String idSeleksi = tabelSeleksi.getValueAt(baris, 1).toString();
-        
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Hapus data seleksi " + idSeleksi + "?", 
-            "Konfirmasi", JOptionPane.YES_NO_OPTION);
-            
+        String idSeleksi = tabelSeleksi.getValueAt(baris, 1).toString().trim();
+        String namaPeserta = tabelSeleksi.getValueAt(baris, 3).toString().trim();
+
+        if ("—".equals(idSeleksi) || idSeleksi.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "Peserta \"" + namaPeserta + "\" belum memiliki data seleksi untuk dihapus.",
+                "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Hapus riwayat seleksi terakhir (" + idSeleksi + ") milik " + namaPeserta + "?",
+            "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
-            DataStore.daftarSeleksi.removeIf(sel -> sel.getIdSeleksi().equals(idSeleksi));
-            JOptionPane.showMessageDialog(this, "Berhasil dihapus!");
-            
-            // Refresh tabel dan kartu statistik
-            loadTableData(txtCari.getText());
-            loadStatistics();
+            if (Database.SeleksiDAO.hapus(idSeleksi)) {
+                DataStore.muatUlang();
+                JOptionPane.showMessageDialog(this, "Data seleksi berhasil dihapus!");
+
+                loadTableData(txtCari.getText());
+                loadStatistics();
+            }
         }
     }
 
@@ -390,32 +407,20 @@ public class PanelManajemenSeleksi extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // 1. Cek apakah ada baris tabel yang dipilih
         int barisTerpilih = tabelSeleksi.getSelectedRow();
-        
+
         if (barisTerpilih == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Pilih data peserta di tabel terlebih dahulu untuk menambah seleksi!", 
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Pilih data peserta di tabel terlebih dahulu untuk menambah seleksi!",
                 "Peringatan", javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        // 2. Ambil ID Peserta dari tabel (Asumsi ID Peserta ada di kolom indeks ke-2)
-        String idPeserta = tabelSeleksi.getValueAt(barisTerpilih, 2).toString();
-        
-        // 3. Cari objek Peserta aslinya dari DataStore
-        Model.Peserta pesertaTerpilih = null;
-        for (Model.Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta().equals(idPeserta)) {
-                pesertaTerpilih = p;
-                break;
-            }
-        }
-        
-        // 4. Buka Form Input dan "lempar" data peserta serta halaman ini (this) ke dalamnya
+
+        String idPeserta = tabelSeleksi.getValueAt(barisTerpilih, 2).toString().trim();
+        Model.Peserta pesertaTerpilih = DataStore.cariPeserta(idPeserta);
+
         if (pesertaTerpilih != null) {
-            FormInputSeleksi form = new FormInputSeleksi(pesertaTerpilih, this);
-            form.setVisible(true);
+            bukaFormInputSeleksi(pesertaTerpilih);
         }
     }//GEN-LAST:event_jButton3ActionPerformed
 

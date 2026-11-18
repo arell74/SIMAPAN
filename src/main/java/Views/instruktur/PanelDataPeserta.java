@@ -5,6 +5,7 @@
 package Views.instruktur;
 
 import DataStore.DataStore;
+import Model.HasilKuis;
 import Model.Instruktur;
 import Model.Pengguna;
 import Model.Peserta;
@@ -18,84 +19,87 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelDataPeserta extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelDataSiswa
-     */
     private String idInstrukturAktif;
     private Instruktur instrukturMilikKu;
-    
+
     public PanelDataPeserta(String idInstruktur) {
         initComponents();
-        initComponents();
         this.idInstrukturAktif = idInstruktur;
-        
+
         setupTable();
         loadDataKelas();
         loadTableData("");
     }
-    
+
     private void loadDataKelas() {
-        // 1. Cari data instruktur yang login
+        DataStore.muatUlang();
+
         for (Pengguna pgn : DataStore.daftarPengguna) {
             if (pgn instanceof Instruktur) {
                 Instruktur ins = (Instruktur) pgn;
-                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif)) || 
-                    (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
+                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif))
+                        || (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
                     instrukturMilikKu = ins;
-                    this.idInstrukturAktif = ins.getIdInstruktur(); // Amankan ID aslinya
+                    this.idInstrukturAktif = ins.getIdInstruktur();
                     break;
                 }
             }
         }
 
         if (instrukturMilikKu != null) {
-            lblNamaKelas.setText("Kelas A - " + instrukturMilikKu.getSpesialisasi()); 
-            lblDetailInstruktur.setText(instrukturMilikKu.getIdInstruktur() + " - " + instrukturMilikKu.getNamaLengkap() + " - LEVEL " + instrukturMilikKu.getLevelJlpt());
-            
+            String kelas = instrukturMilikKu.getKelasDiampu() != null ? instrukturMilikKu.getKelasDiampu() : "Belum Ada Kelas";
+            String spesialisasi = instrukturMilikKu.getSpesialisasi() != null ? instrukturMilikKu.getSpesialisasi() : "-";
+            String levelJlpt = instrukturMilikKu.getLevelJlpt() != null ? instrukturMilikKu.getLevelJlpt() : "-";
+
+            lblNamaKelas.setText(kelas + " - " + spesialisasi);
+            lblDetailInstruktur.setText(instrukturMilikKu.getIdInstruktur() + " - " + instrukturMilikKu.getNamaLengkap() + " - LEVEL " + levelJlpt);
+
             int totalSiswa = 0;
             int totalLulus = 0;
             int akumulasiNilaiKelas = 0;
             int jumlahNilaiKelas = 0;
 
-            // 2. Kalkulasi dari daftar peserta
             for (Peserta p : DataStore.daftarPeserta) {
-                // Cek apakah instruktur peserta ini sama dengan instruktur yang login
-                if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idInstrukturAktif)) {
-        
-                totalSiswa++; // Kalau cocok, hitung dia sebagai siswa kelas ini
+                if (p.getInstrukturDamping() != null
+                        && p.getInstrukturDamping().getIdInstruktur().equals(idInstrukturAktif)) {
 
-                if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
-                    totalLulus++; // Kalau cocok dan statusnya lulus, hitung juga
-                }
+                    totalSiswa++;
 
-                    // Ambil nilai dari riwayat seleksi untuk rata-rata
+                    if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
+                        totalLulus++;
+                    }
+
                     for (Seleksi s : DataStore.daftarSeleksi) {
-                        if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                        if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
                             akumulasiNilaiKelas += s.getNilai();
+                            jumlahNilaiKelas++;
+                        }
+                    }
+
+                    for (HasilKuis hk : DataStore.daftarHasilKuis) {
+                        if (p.getIdPeserta().equals(hk.getIdPeserta())) {
+                            akumulasiNilaiKelas += hk.getNilaiAkhir();
                             jumlahNilaiKelas++;
                         }
                     }
                 }
             }
 
-            // 3. Tampilkan ke kartu statistik
             lblTotalSiswa.setText(String.valueOf(totalSiswa));
             lblLulusSeleksi.setText(String.valueOf(totalLulus));
-            
+
             int rataRata = (jumlahNilaiKelas > 0) ? (akumulasiNilaiKelas / jumlahNilaiKelas) : 0;
             lblRataNilai.setText(String.valueOf(rataRata));
         }
     }
-    
+
     private void setupTable() {
         tabelPeserta.setRowHeight(40);
-        TabelUtil.autoResizeKolom(tabelPeserta);
         javax.swing.table.JTableHeader header = tabelPeserta.getTableHeader();
-        
+
         header.setBackground(new java.awt.Color(122, 0, 0));
         header.setForeground(java.awt.Color.WHITE);
-        
-        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13)); 
+        header.setFont(new java.awt.Font("Inter", java.awt.Font.BOLD, 13));
         header.setOpaque(true);
     }
 
@@ -103,28 +107,44 @@ public class PanelDataPeserta extends javax.swing.JPanel {
         DefaultTableModel model = (DefaultTableModel) tabelPeserta.getModel();
         model.setRowCount(0);
         int no = 1;
+        String kunci = (keyword != null) ? keyword.trim().toLowerCase() : "";
 
         for (Peserta p : DataStore.daftarPeserta) {
-            
-            if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idInstrukturAktif)) {
-                
-                boolean matchText = keyword.isEmpty() || 
-                                    p.getNamaLengkap().toLowerCase().contains(keyword.toLowerCase()) || 
-                                    p.getIdPeserta().toLowerCase().contains(keyword.toLowerCase());
-                
-                if (!matchText) continue;
+            if (p.getInstrukturDamping() != null
+                    && p.getInstrukturDamping().getIdInstruktur().equals(idInstrukturAktif)) {
+
+                String nama = p.getNamaLengkap() != null ? p.getNamaLengkap() : "";
+                String id = p.getIdPeserta() != null ? p.getIdPeserta() : "";
+
+                boolean matchText = kunci.isEmpty()
+                        || nama.toLowerCase().contains(kunci)
+                        || id.toLowerCase().contains(kunci);
+
+                if (!matchText) {
+                    continue;
+                }
 
                 int akumulasiIndividu = 0;
                 int jumlahUjian = 0;
+
                 for (Seleksi s : DataStore.daftarSeleksi) {
-                    if (s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
+                    if (s.getPeserta() != null && s.getPeserta().getIdPeserta().equals(p.getIdPeserta())) {
                         akumulasiIndividu += s.getNilai();
                         jumlahUjian++;
                     }
                 }
-                String rataNilaiIndividu = (jumlahUjian > 0) ? String.valueOf(akumulasiIndividu / jumlahUjian) : "-";
 
-                String persentaseHadir = "100%"; 
+                for (HasilKuis hk : DataStore.daftarHasilKuis) {
+                    if (p.getIdPeserta().equals(hk.getIdPeserta())) {
+                        akumulasiIndividu += hk.getNilaiAkhir();
+                        jumlahUjian++;
+                    }
+                }
+
+                String rataNilaiIndividu = (jumlahUjian > 0) ? String.valueOf(akumulasiIndividu / jumlahUjian) : "-";
+                String kehadiran = (p.getKehadiranHariIni() != null && !p.getKehadiranHariIni().isEmpty())
+                        ? p.getKehadiranHariIni()
+                        : "Hadir";
 
                 model.addRow(new Object[]{
                     no++,
@@ -132,12 +152,14 @@ public class PanelDataPeserta extends javax.swing.JPanel {
                     p.getNamaLengkap(),
                     p.getLevelBahasa(),
                     rataNilaiIndividu,
-                    persentaseHadir,
+                    kehadiran,
                     p.getStatusSeleksi(),
                     p.getStatusPembayaran()
                 });
             }
         }
+
+        TabelUtil.autoResizeKolom(tabelPeserta);
     }
 
     /**

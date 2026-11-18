@@ -1,13 +1,11 @@
 package Views.admin;
 
 import DataStore.DataStore;
+import Database.PenggunaDAO;
 import Model.Instruktur;
-import Model.Pengguna;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import org.netbeans.lib.awtextra.AbsoluteLayout;
 import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
@@ -26,7 +24,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
     private JPanel panelBody;
     private JLabel lblSectionIdentitas;
     private JSeparator separatorIdentitas;
-    
+
     private JLabel lblIdInstruktur;
     private JTextField txtIdInstruktur;
     private JLabel lblNamaLengkap;
@@ -36,7 +34,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
 
     private JLabel lblSectionKeahlian;
     private JSeparator separatorKeahlian;
-    
+
     private JLabel lblSpesialisasi;
     private JComboBox<String> cbSpesialisasi;
     private JLabel lblLevelJlpt;
@@ -65,7 +63,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         super(parent, modal);
         this.idTarget = idInstruktur;
         this.panelInduk = panelInduk;
-        
+
         // Setup Window Dialog
         this.setTitle("Edit Data Instruktur");
         this.setSize(600, 480);
@@ -77,11 +75,11 @@ public class FormEditInstruktur extends javax.swing.JDialog {
 
         // 1. Inisialisasi dan Render Komponen UI
         initComponentsManual();
-        
+
         // 2. Setup Data Dropdown & State
         initCustomData();
-        
-        // 3. Tarik Data dari DataStore
+
+        // 3. Tarik Data dari DataStore (MySQL)
         loadData();
     }
 
@@ -91,7 +89,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         // ==========================================
         panelHeader = new JPanel(new AbsoluteLayout());
         panelHeader.setBackground(MAROON_UTAMA);
-        
+
         lblJudulHeader = new JLabel("Edit Instruktur");
         lblJudulHeader.setForeground(Color.WHITE);
         lblJudulHeader.setFont(FONT_BOLD_16);
@@ -133,11 +131,11 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblIdInstruktur.setForeground(TXT_ABU);
         lblIdInstruktur.setFont(FONT_BOLD_11);
         panelBody.add(lblIdInstruktur, new AbsoluteConstraints(20, 50, 250, 20));
-        
+
         txtIdInstruktur = new JTextField();
         txtIdInstruktur.setFont(FONT_PLAIN_11);
         txtIdInstruktur.setEditable(false);
-        txtIdInstruktur.setBackground(new Color(230, 230, 230)); // Indikator read-only
+        txtIdInstruktur.setBackground(new Color(230, 230, 230));
         panelBody.add(txtIdInstruktur, new AbsoluteConstraints(20, 70, 250, 30));
 
         // Nama Lengkap
@@ -145,7 +143,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblNamaLengkap.setForeground(TXT_ABU);
         lblNamaLengkap.setFont(FONT_BOLD_11);
         panelBody.add(lblNamaLengkap, new AbsoluteConstraints(20, 110, 250, 20));
-        
+
         txtNamaLengkap = new JTextField();
         txtNamaLengkap.setFont(FONT_PLAIN_11);
         panelBody.add(txtNamaLengkap, new AbsoluteConstraints(20, 130, 250, 30));
@@ -155,11 +153,10 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblNoTelp.setForeground(TXT_ABU);
         lblNoTelp.setFont(FONT_BOLD_11);
         panelBody.add(lblNoTelp, new AbsoluteConstraints(20, 170, 250, 20));
-        
+
         txtNoTelp = new JTextField();
         txtNoTelp.setFont(FONT_PLAIN_11);
         panelBody.add(txtNoTelp, new AbsoluteConstraints(20, 190, 250, 30));
-
 
         // --- KOLOM KANAN (Data Keahlian) ---
         lblSectionKeahlian = new JLabel("DATA KEAHLIAN & KELAS");
@@ -175,7 +172,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblSpesialisasi.setForeground(TXT_ABU);
         lblSpesialisasi.setFont(FONT_BOLD_11);
         panelBody.add(lblSpesialisasi, new AbsoluteConstraints(310, 50, 250, 20));
-        
+
         cbSpesialisasi = new JComboBox<>();
         cbSpesialisasi.setFont(FONT_PLAIN_11);
         cbSpesialisasi.setBackground(Color.WHITE);
@@ -186,7 +183,7 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblLevelJlpt.setForeground(TXT_ABU);
         lblLevelJlpt.setFont(FONT_BOLD_11);
         panelBody.add(lblLevelJlpt, new AbsoluteConstraints(310, 110, 250, 20));
-        
+
         cbLevelJlpt = new JComboBox<>();
         cbLevelJlpt.setFont(FONT_PLAIN_11);
         cbLevelJlpt.setBackground(Color.WHITE);
@@ -197,14 +194,13 @@ public class FormEditInstruktur extends javax.swing.JDialog {
         lblKelasDiampu.setForeground(TXT_ABU);
         lblKelasDiampu.setFont(FONT_BOLD_11);
         panelBody.add(lblKelasDiampu, new AbsoluteConstraints(310, 170, 250, 20));
-        
+
         cbKelasDiampu = new JComboBox<>();
         cbKelasDiampu.setFont(FONT_PLAIN_11);
         cbKelasDiampu.setBackground(Color.WHITE);
         panelBody.add(cbKelasDiampu, new AbsoluteConstraints(310, 190, 250, 30));
 
         this.getContentPane().add(panelBody, new AbsoluteConstraints(0, 68, 600, 300));
-
 
         // ==========================================
         // 3. PANEL FOOTER (Tombol Aksi)
@@ -227,7 +223,6 @@ public class FormEditInstruktur extends javax.swing.JDialog {
     }
 
     private void initCustomData() {
-        // Setup Combo Box agar konsisten (JLPT pakai N1-N5 sesuai data seed)
         cbSpesialisasi.addItem("Budaya Jepang");
         cbSpesialisasi.addItem("Bahasa Jepang");
         cbSpesialisasi.addItem("JLPT");
@@ -244,60 +239,60 @@ public class FormEditInstruktur extends javax.swing.JDialog {
     }
 
     private void loadData() {
-        for (Pengguna p : DataStore.daftarPengguna) {
-            if (p instanceof Instruktur) {
-                Instruktur ins = (Instruktur) p;
-                if (ins.getIdInstruktur().equals(idTarget)) {
-                    this.instrukturTarget = ins;
-                    
-                    // Prefill form
-                    txtIdInstruktur.setText(ins.getIdInstruktur());
-                    txtNamaLengkap.setText(ins.getNamaLengkap());
-                    txtNoTelp.setText(ins.getNoTelp());
-                    
-                    cbSpesialisasi.setSelectedItem(ins.getSpesialisasi());
-                    
-                    // Normalisasi string level JLPT
-                    String level = ins.getLevelJlpt();
-                    if (level != null && !level.startsWith("N")) {
-                        level = "N" + level;
-                    }
-                    cbLevelJlpt.setSelectedItem(level);
-                    
-                    cbKelasDiampu.setSelectedItem(ins.getKelasDiampu());
-                    break;
-                }
+        DataStore.muatUlang();
+        this.instrukturTarget = DataStore.cariInstruktur(idTarget);
+
+        if (instrukturTarget != null) {
+            txtIdInstruktur.setText(instrukturTarget.getIdInstruktur());
+            txtNamaLengkap.setText(instrukturTarget.getNamaLengkap());
+            txtNoTelp.setText(instrukturTarget.getNoTelp());
+
+            cbSpesialisasi.setSelectedItem(instrukturTarget.getSpesialisasi());
+
+            String level = instrukturTarget.getLevelJlpt();
+            if (level != null && !level.startsWith("N")) {
+                level = "N" + level;
             }
+            cbLevelJlpt.setSelectedItem(level);
+
+            cbKelasDiampu.setSelectedItem(instrukturTarget.getKelasDiampu());
+        } else {
+            JOptionPane.showMessageDialog(this, "Data instruktur tidak ditemukan di database!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            this.dispose();
         }
     }
 
     private void aksiSimpan() {
         // 1. Validasi Input Kosong
         if (txtNamaLengkap.getText().trim().isEmpty() || txtNoTelp.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "Nama Lengkap dan No. Telp tidak boleh kosong!", 
+            JOptionPane.showMessageDialog(this,
+                "Nama Lengkap dan No. Telp tidak boleh kosong!",
                 "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Simpan Perubahan ke Referensi Objek yang Sama
+        // 2. Update objek & simpan ke MySQL melalui PenggunaDAO
         if (instrukturTarget != null) {
-            // Pastikan Anda sudah menambahkan Setter ini di class Pengguna dan Instruktur
             instrukturTarget.setNamaLengkap(txtNamaLengkap.getText().trim());
             instrukturTarget.setNoTelp(txtNoTelp.getText().trim());
             instrukturTarget.setSpesialisasi(cbSpesialisasi.getSelectedItem().toString());
             instrukturTarget.setLevelJlpt(cbLevelJlpt.getSelectedItem().toString());
             instrukturTarget.setKelasDiampu(cbKelasDiampu.getSelectedItem().toString());
 
-            JOptionPane.showMessageDialog(this, "Data instruktur berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            boolean ok = PenggunaDAO.ubahInstruktur(instrukturTarget);
+            DataStore.muatUlang(); // Sinkronkan cache (sekaligus rollback memori bila update gagal)
 
-            // 3. Refresh Tabel (jika form dibuka dari panel)
-            if (panelInduk != null) {
-                panelInduk.loadTableData(""); 
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Data instruktur berhasil diperbarui!",
+                        "Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+                if (panelInduk != null) {
+                    panelInduk.loadTableData("");
+                }
+
+                this.dispose();
             }
-            
-            // 4. Tutup form
-            this.dispose();
         }
     }
 }

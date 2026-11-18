@@ -73,7 +73,7 @@ public class FormLogin extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         pnlIkon2 = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
+        jLabel26 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         pnlIkon3 = new javax.swing.JPanel();
@@ -100,6 +100,7 @@ public class FormLogin extends javax.swing.JFrame {
         jLabel21 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
         bgImg = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -109,15 +110,14 @@ public class FormLogin extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("JetBrainsMono NF ExtraBold", 1, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(122, 0, 0));
-        jLabel1.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/Yuki-Logo-3-1024x389 (2).png")); // NOI18N
         jLabel1.setText(" LPK");
         jLabel1.setPreferredSize(new java.awt.Dimension(200, 40));
-        pnlLeft.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, 170, -1));
+        pnlLeft.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 70, -1));
 
         jLabel2.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
-        jLabel2.setText("KERJA");
+        jLabel2.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/yuuki-logo.png")); // NOI18N
         jLabel2.setPreferredSize(new java.awt.Dimension(200, 20));
-        pnlLeft.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 60, 60, -1));
+        pnlLeft.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 40, 120, 40));
 
         jLabel3.setFont(new java.awt.Font("Inter", 1, 32)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(30, 30, 30));
@@ -167,8 +167,8 @@ public class FormLogin extends javax.swing.JFrame {
         pnlIkon2.setPreferredSize(new java.awt.Dimension(44, 44));
         pnlIkon2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel9.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/city.png")); // NOI18N
-        pnlIkon2.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+        jLabel26.setIcon(new javax.swing.ImageIcon("/home/arelssi/Downloads/clipboard.png")); // NOI18N
+        pnlIkon2.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         pnlLeft.add(pnlIkon2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 400, -1, -1));
 
@@ -322,6 +322,11 @@ public class FormLogin extends javax.swing.JFrame {
         bgImg.setPreferredSize(new java.awt.Dimension(1100, 686));
         pnlLeft.add(bgImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
+        jLabel9.setFont(new java.awt.Font("Inter", 0, 10)); // NOI18N
+        jLabel9.setText("KERJA");
+        jLabel9.setPreferredSize(new java.awt.Dimension(200, 20));
+        pnlLeft.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 60, 60, -1));
+
         getContentPane().add(pnlLeft, java.awt.BorderLayout.CENTER);
 
         pack();
@@ -353,14 +358,13 @@ public class FormLogin extends javax.swing.JFrame {
                     Views.admin.AdminFrame adminDashboard = new Views.admin.AdminFrame(); 
                     adminDashboard.setVisible(true);
 
-                } else if (user.getRole().equals("INSTRUKTUR")) {
+               } else if (user.getRole().equals("INSTRUKTUR")) {
                     Model.Instruktur ins = (Model.Instruktur) user;
                     String idYangLogin = ins.getIdInstruktur(); 
 
-                    Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame(idYangLogin);
+                    Views.instruktur.InstrukturFrame instrukturDashboard = new Views.instruktur.InstrukturFrame(null, null, idYangLogin);
                     instrukturDashboard.setVisible(true);
 
-                // --- INI BAGIAN YANG DITAMBAHKAN UNTUK PESERTA ---
                 } else if (user.getRole().equals("PESERTA")) {
                     Model.Peserta pst = (Model.Peserta) user;
                     String idPesertaYangLogin = pst.getIdPeserta();
@@ -450,6 +454,7 @@ public class FormLogin extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;

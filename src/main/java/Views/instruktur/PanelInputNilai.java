@@ -5,120 +5,225 @@
 package Views.instruktur;
  
 import DataStore.DataStore;
+import Model.HasilKuis;
 import Model.Instruktur;
+import Model.JawabanSoal;
+import Model.Kuis;
 import Model.Pengguna;
 import Model.Peserta;
 import Util.TabelUtil;
-import Views.admin.FormTambahInstruktur;
+import java.awt.Color;
+import java.awt.Font;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class PanelInputNilai extends javax.swing.JPanel {
- 
-    /**
-     * Creates new form PanelInputNilai
-     */
-    
+
     private String idInstrukturAktif;
     private DefaultTableModel modelTabel;
-    
+    private boolean sedangMemuatData = false;
+
     public PanelInputNilai(String idInstruktur) {
         initComponents();
-        
+
         this.idInstrukturAktif = idInstruktur;
-        
+        this.modelTabel = (DefaultTableModel) tabelNilai.getModel();
+
+        setupTable();
+        muatFilterMateri();
+        loadDataSiswa();
     }
-    
-    
-    private void loadDataSiswa() {
-        modelTabel.setRowCount(0); // Kosongkan tabel
-        
-        // Cari ID asli instruktur (mencegah error username)
+
+    private void setupTable() {
+        JTableHeader header = tabelNilai.getTableHeader();
+        header.setBackground(new Color(122, 0, 0));
+        header.setForeground(Color.WHITE);
+        header.setFont(new Font("Inter", Font.BOLD, 12));
+        header.setOpaque(true);
+
+        jComboBox1.addActionListener(e -> {
+            if (!sedangMemuatData) {
+                loadDataSiswa();
+            }
+        });
+
+        // Otomatis hitung ulang status Lulus/Tidak Lulus & rata-rata saat kolom Nilai (index 4) diedit
+        modelTabel.addTableModelListener(e -> {
+            if (sedangMemuatData || e.getType() != TableModelEvent.UPDATE) {
+                return;
+            }
+            int baris = e.getFirstRow();
+            int kolom = e.getColumn();
+            if (kolom == 4 && baris >= 0 && baris < modelTabel.getRowCount()) {
+                sedangMemuatData = true;
+                try {
+                    Object val = modelTabel.getValueAt(baris, 4);
+                    int nilai = Integer.parseInt(val != null ? val.toString().trim() : "0");
+                    if (nilai < 0 || nilai > 100) {
+                        JOptionPane.showMessageDialog(this, "Nilai harus di antara 0 sampai 100!",
+                                "Peringatan", JOptionPane.WARNING_MESSAGE);
+                        modelTabel.setValueAt("0", baris, 4);
+                        modelTabel.setValueAt("Tidak Lulus", baris, 5);
+                    } else {
+                        String status = (nilai >= 70) ? "Lulus" : "Tidak Lulus";
+                        modelTabel.setValueAt(status, baris, 5);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Kolom Nilai harus berupa angka bulat!",
+                            "Error Format", JOptionPane.ERROR_MESSAGE);
+                    modelTabel.setValueAt("0", baris, 4);
+                    modelTabel.setValueAt("Tidak Lulus", baris, 5);
+                } finally {
+                    sedangMemuatData = false;
+                }
+                hitungRataRataKelas();
+            }
+        });
+    }
+
+    private String cariIdAsliInstruktur() {
         String idAsli = idInstrukturAktif;
         for (Pengguna pgn : DataStore.daftarPengguna) {
             if (pgn instanceof Instruktur) {
                 Instruktur ins = (Instruktur) pgn;
-                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif)) || 
-                    (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
+                if ((ins.getIdInstruktur() != null && ins.getIdInstruktur().equals(idInstrukturAktif))
+                        || (ins.getUsername() != null && ins.getUsername().equals(idInstrukturAktif))) {
                     idAsli = ins.getIdInstruktur();
                     break;
                 }
             }
         }
- 
-        int no = 1;
-        for (Peserta p : DataStore.daftarPeserta) {
-            // Hanya masukkan siswa dari instruktur ini
-            if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idAsli)) {
-                
-                modelTabel.addRow(new Object[]{
-                    no++,
-                    p.getIdPeserta(),
-                    p.getNamaLengkap(),
-                    p.getLevelBahasa(),
-                    "0", // Nilai awal default
-                    "Tidak Lulus" // Status awal
-                });
+        return idAsli;
+    }
+
+    private void muatFilterMateri() {
+        DataStore.muatUlang();
+        String idAsli = cariIdAsliInstruktur();
+
+        Set<String> daftarMateriKuis = new LinkedHashSet<>();
+        daftarMateriKuis.add("Semua Evaluasi / Kuis");
+        daftarMateriKuis.add("MNH 1");
+        daftarMateriKuis.add("MNH 2");
+        daftarMateriKuis.add("IRODORI");
+
+        for (Kuis k : DataStore.daftarKuis) {
+            if (idAsli != null && idAsli.equals(k.getIdInstruktur()) && k.getJudulKuis() != null) {
+                daftarMateriKuis.add(k.getJudulKuis());
             }
         }
-        
-        hitungRataRataKelas(); // Hitung rata-rata awal (pasti 0)
+
+        sedangMemuatData = true;
+        try {
+            jComboBox1.setModel(new DefaultComboBoxModel<>(daftarMateriKuis.toArray(new String[0])));
+        } finally {
+            sedangMemuatData = false;
+        }
     }
-    
+
+    private int hitungNilaiPesertaDariMySQL(String idPeserta, String filterMateri) {
+        int totalSkor = 0;
+        int jumlahKuis = 0;
+
+        for (HasilKuis hk : DataStore.daftarHasilKuis) {
+            if (idPeserta.equals(hk.getIdPeserta())) {
+                boolean cocokMateri = "Semua Evaluasi / Kuis".equals(filterMateri)
+                        || "MNH 1".equals(filterMateri)
+                        || "MNH 2".equals(filterMateri)
+                        || "IRODORI".equals(filterMateri)
+                        || (hk.getJudulKuis() != null && hk.getJudulKuis().equalsIgnoreCase(filterMateri));
+
+                if (cocokMateri) {
+                    totalSkor += hk.getNilaiAkhir();
+                    jumlahKuis++;
+                }
+            }
+        }
+
+        return (jumlahKuis > 0) ? Math.round((float) totalSkor / jumlahKuis) : 0;
+    }
+
+    private void loadDataSiswa() {
+        DataStore.muatUlang();
+
+        sedangMemuatData = true;
+        try {
+            modelTabel.setRowCount(0);
+
+            String idAsli = cariIdAsliInstruktur();
+            String filterMateri = (jComboBox1.getSelectedItem() != null)
+                    ? jComboBox1.getSelectedItem().toString()
+                    : "Semua Evaluasi / Kuis";
+
+            int no = 1;
+            for (Peserta p : DataStore.daftarPeserta) {
+                if (p.getInstrukturDamping() != null && p.getInstrukturDamping().getIdInstruktur().equals(idAsli)) {
+                    int nilaiAktual = hitungNilaiPesertaDariMySQL(p.getIdPeserta(), filterMateri);
+                    String status = (nilaiAktual >= 70) ? "Lulus" : "Tidak Lulus";
+
+                    modelTabel.addRow(new Object[]{
+                        String.valueOf(no++),
+                        p.getIdPeserta(),
+                        p.getNamaLengkap(),
+                        p.getLevelBahasa(),
+                        String.valueOf(nilaiAktual),
+                        status
+                    });
+                }
+            }
+        } finally {
+            sedangMemuatData = false;
+        }
+
+        hitungRataRataKelas();
+        TabelUtil.autoResizeKolom(tabelNilai);
+    }
+
     private void hitungRataRataKelas() {
         int totalSiswa = modelTabel.getRowCount();
-        if (totalSiswa == 0) return;
-        
+        if (totalSiswa == 0) {
+            lblRataRata.setText("Rata-rata: 0");
+            return;
+        }
+
         int akumulasiNilai = 0;
         int jumlahYangDinilai = 0;
-        
+
         for (int i = 0; i < totalSiswa; i++) {
             try {
                 Object nilaiObj = modelTabel.getValueAt(i, 4);
-                if (nilaiObj != null && !nilaiObj.toString().isEmpty()) {
-                    int nilai = Integer.parseInt(nilaiObj.toString());
+                if (nilaiObj != null && !nilaiObj.toString().trim().isEmpty()) {
+                    int nilai = Integer.parseInt(nilaiObj.toString().trim());
                     akumulasiNilai += nilai;
                     jumlahYangDinilai++;
                 }
             } catch (NumberFormatException ex) {
-                // Abaikan sel yang isinya huruf/kosong
+                // Abaikan sel yang isinya bukan angka
             }
         }
-        
+
         int rataRata = (jumlahYangDinilai > 0) ? (akumulasiNilai / jumlahYangDinilai) : 0;
-        
-        // Update Label Rata-rata di pojok kanan atas (Sesuaikan nama variabelnya)
         lblRataRata.setText("Rata-rata: " + rataRata);
     }
- 
-    /**
-     * Mengambil objek Peserta yang sedang dipilih di tabelNilai berdasarkan
-     * kolom ID (index 1). Mengembalikan null jika tidak ada baris terpilih
-     * atau peserta tidak ditemukan di DataStore.
-     */
+
     private Peserta ambilPesertaTerpilih() {
         int baris = tabelNilai.getSelectedRow();
         if (baris < 0) {
             return null;
         }
- 
-        // Konversi index tampilan ke index model, untuk berjaga-jaga jika
-        // tabel di-sort oleh user.
+
         int barisModel = tabelNilai.convertRowIndexToModel(baris);
         Object idObj = modelTabel.getValueAt(barisModel, 1);
         if (idObj == null) {
             return null;
         }
- 
-        String idPeserta = idObj.toString();
-        for (Peserta p : DataStore.daftarPeserta) {
-            if (p.getIdPeserta().equals(idPeserta)) {
-                return p;
-            }
-        }
-        return null;
+
+        return DataStore.cariPeserta(idObj.toString());
     }               
 
     /**

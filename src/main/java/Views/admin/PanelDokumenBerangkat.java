@@ -21,25 +21,27 @@ import javax.swing.table.DefaultTableModel;
  */
 public class PanelDokumenBerangkat extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PanelDokumenBerangkat
-     */
     public PanelDokumenBerangkat() {
         initComponents();
-        setupTable();
         setPreferredSize(new java.awt.Dimension(980, 616));
+        setupComboBoxFilter();
+        setupTable();
+
+        // Sinkronkan cache DataStore dengan data terbaru dari MySQL
+        DataStore.muatUlang();
         loadTableData("");
         loadStatistics();
     }
-    
+
     private void setupComboBoxFilter() {
         cbFilter.removeAllItems();
         cbFilter.addItem("Semua");
         cbFilter.addItem("Siap Berangkat");
         cbFilter.addItem("Menunggu Dokumen");
         cbFilter.addItem("Belum Berangkat");
-        
+
         cbFilter.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 if (cbFilter.getSelectedItem() != null) {
                     loadTableData("");
@@ -47,7 +49,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
             }
         });
     }
-    
+
     private void setupTable() {
         tabelDokumen.getTableHeader().setFont(new Font("Inter", Font.BOLD, 12));
         tabelDokumen.getTableHeader().setBackground(new Color(122, 0, 0));
@@ -56,50 +58,79 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
 
         // Pasang Renderer dan Editor di kolom Aksi (Indeks ke-8)
         tabelDokumen.getColumnModel().getColumn(8).setCellRenderer(new TombolAksiRenderer());
-        tabelDokumen.getColumnModel().getColumn(8).setCellEditor(
-            new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
-                
-                @Override
-                public void onDetail(int baris) {
-                    String id = tabelDokumen.getValueAt(baris, 1).toString();
-                    FormDetailDokumen form = new FormDetailDokumen(
-                        (java.awt.Frame) SwingUtilities.getWindowAncestor(PanelDokumenBerangkat.this),
-                        true,
-                        id
-                    );
+        tabelDokumen.getColumnModel().getColumn(8).setCellEditor(new TombolAksiEditor(new TombolAksiEditor.AksiListener() {
+
+            @Override
+            public void onDetail(int baris) {
+                String id = tabelDokumen.getValueAt(baris, 1).toString();
+                java.awt.Window parentWindow = SwingUtilities.getWindowAncestor(PanelDokumenBerangkat.this);
+                if (parentWindow instanceof java.awt.Frame) {
+                    FormDetailDokumen form = new FormDetailDokumen((java.awt.Frame) parentWindow, true, id);
                     form.setVisible(true);
                 }
+            }
 
-                @Override
-                public void onEdit(int baris) {
-                    // 1. Ambil ID Dokumen dari kolom indeks ke-1
-                    String idDokumen = tabelDokumen.getValueAt(baris, 1).toString();
-                    
-                    // 2. Cari objek Dokumen aslinya di DataStore
-                    Dokumen dokumenTerpilih = null;
-                    for (Dokumen dok : DataStore.daftarDokumen) {
-                        if (dok.getIdDokumen().equals(idDokumen)) {
-                            dokumenTerpilih = dok;
-                            break;
-                        }
-                    }
-                    
-                    // 3. Buka pop-up dan bawa "Walkie-Talkie" beserta datanya
-                    if (dokumenTerpilih != null) {
-                        FormInputDokumen form = new FormInputDokumen(PanelDokumenBerangkat.this, dokumenTerpilih);
-                        form.setVisible(true);
+            @Override
+            public void onEdit(int baris) {
+                String idDokumen = tabelDokumen.getValueAt(baris, 1).toString();
+
+                Dokumen dokumenTerpilih = null;
+                for (Dokumen dok : DataStore.daftarDokumen) {
+                    if (dok.getIdDokumen().equals(idDokumen)) {
+                        dokumenTerpilih = dok;
+                        break;
                     }
                 }
 
-                @Override
-                public void onHapus(int baris) {
-                    // Opsional: Biasanya data dokumen tidak dihapus, hanya diedit.
-                    // Jika butuh hapus, buat fungsi hapusData(baris) seperti panel sebelumnya.
+                if (dokumenTerpilih != null) {
+                   FormEditDokumen form = new FormEditDokumen(PanelDokumenBerangkat.this, dokumenTerpilih);
+                   tampilkanFormDenganRefresh(form);
                 }
-            })
-        );
+            }
+
+            @Override
+            public void onHapus(int baris) {
+                hapusData(baris);
+            }
+        }));
     }
-    
+
+    // Refresh cache MySQL, tabel, dan kartu statistik saat form input/edit ditutup
+    private void tampilkanFormDenganRefresh(javax.swing.JFrame form) {
+        form.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                DataStore.muatUlang();
+                loadTableData("");
+                loadStatistics();
+            }
+        });
+        form.setVisible(true);
+    }
+
+    private void hapusData(int baris) {
+        String idDokumen = tabelDokumen.getValueAt(baris, 1).toString();
+        String namaPeserta = tabelDokumen.getValueAt(baris, 3).toString();
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Yakin ingin menghapus data dokumen (" + idDokumen + ") milik " + namaPeserta + "?",
+            "Konfirmasi Hapus",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (Database.DokumenDAO.hapus(idDokumen)) {
+                DataStore.muatUlang();
+                JOptionPane.showMessageDialog(this, "Data dokumen berhasil dihapus!");
+                loadTableData("");
+                loadStatistics();
+            }
+            // Jika gagal, popup error sudah ditangani oleh DokumenDAO / Koneksi
+        }
+    }
+
     private String kalkulasiKelengkapan(Model.Dokumen dok) {
         int jumlahLengkap = 0;
 
@@ -118,41 +149,55 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
     // --- LOGIKA MENAMPILKAN & MENCARI DATA ---
     public void loadTableData(String keyword) {
         DefaultTableModel model = (DefaultTableModel) tabelDokumen.getModel();
-        model.setRowCount(0); 
+        model.setRowCount(0);
 
-        String filterStatus = cbFilter.getSelectedItem().toString(); // Ambil dari ComboBox
+        String filterStatus = (cbFilter.getSelectedItem() != null)
+                ? cbFilter.getSelectedItem().toString()
+                : "Semua";
 
         int no = 1;
         for (Dokumen dok : DataStore.daftarDokumen) {
-            
-            // Pencarian Teks (ID Dokumen, ID Peserta, Nama Peserta)
-            boolean textMatch = keyword.isEmpty() || 
-                                dok.getIdDokumen().toLowerCase().contains(keyword.toLowerCase()) || 
-                                dok.getPeserta().getIdPeserta().toLowerCase().contains(keyword.toLowerCase()) ||
-                                dok.getPeserta().getNamaLengkap().toLowerCase().contains(keyword.toLowerCase());
+            if (dok.getPeserta() == null) continue;
 
-            // Filter ComboBox Status Keberangkatan (Status ini menempel di objek Peserta)
-            boolean statusMatch = filterStatus.equals("Semua") || 
-                                  dok.getPeserta().getStatusKeberangkatan().equalsIgnoreCase(filterStatus);
+            String idDok = dok.getIdDokumen();
+            String idPeserta = dok.getPeserta().getIdPeserta();
+            String namaPeserta = dok.getPeserta().getNamaLengkap();
+            String statusBerangkat = (dok.getPeserta().getStatusKeberangkatan() != null)
+                    ? dok.getPeserta().getStatusKeberangkatan()
+                    : "Belum Berangkat";
+            String tglBerangkat = (dok.getTanggalBerangkat() != null && !dok.getTanggalBerangkat().trim().isEmpty())
+                    ? dok.getTanggalBerangkat()
+                    : "-";
+
+            boolean textMatch = keyword.isEmpty() ||
+                                idDok.toLowerCase().contains(keyword.toLowerCase()) ||
+                                idPeserta.toLowerCase().contains(keyword.toLowerCase()) ||
+                                namaPeserta.toLowerCase().contains(keyword.toLowerCase());
+
+            boolean statusMatch = filterStatus.equals("Semua") ||
+                                  statusBerangkat.equalsIgnoreCase(filterStatus);
 
             if (textMatch && statusMatch) {
-                
                 model.addRow(new Object[]{
                     no++,
-                    dok.getIdDokumen(),
-                    dok.getPeserta().getIdPeserta(),
-                    dok.getPeserta().getNamaLengkap(),
-                    dok.getPeserta().getProgram(), // Menampilkan ID Program (Bisa dikembangkan untuk mencari namanya)
+                    idDok,
+                    idPeserta,
+                    namaPeserta,
+                    dok.getPeserta().getProgram(),
                     kalkulasiKelengkapan(dok),
-                    dok.getTanggalBerangkat(),
-                    dok.getPeserta().getStatusKeberangkatan(), // Menarik status dari objek Peserta
+                    tglBerangkat,
+                    statusBerangkat,
                     "" // Kolom Aksi
                 });
             }
         }
         lblTotalData.setText("Menampilkan " + model.getRowCount() + " data peserta");
-        
-        try { TabelUtil.autoResizeKolom(tabelDokumen); } catch (Exception e) {}
+
+        try {
+            TabelUtil.autoResizeKolom(tabelDokumen);
+        } catch (Exception e) {
+            System.out.println("TabelUtil error/belum ada: " + e.getMessage());
+        }
     }
 
     // --- LOGIKA MENGHITUNG KARTU STATISTIK ---
@@ -160,6 +205,7 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         int totalLulus = 0;
         int dokumenLengkap = 0;
         int siapBerangkat = 0;
+
         for (Model.Peserta p : DataStore.daftarPeserta) {
             if ("Lulus".equalsIgnoreCase(p.getStatusSeleksi())) {
                 totalLulus++;
@@ -167,7 +213,6 @@ public class PanelDokumenBerangkat extends javax.swing.JPanel {
         }
 
         for (Model.Dokumen dok : DataStore.daftarDokumen) {
-            
             if ("Lengkap".equals(kalkulasiKelengkapan(dok))) {
                 dokumenLengkap++;
             }

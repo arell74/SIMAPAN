@@ -1,6 +1,7 @@
 package Views.admin;
 
 import DataStore.DataStore;
+import Database.ProgramDAO;
 import Model.Program;
 
 import javax.swing.*;
@@ -11,9 +12,7 @@ import org.netbeans.lib.awtextra.AbsoluteConstraints;
 public class FormEditProgram extends javax.swing.JDialog {
 
     private String idTarget;
-    // Asumsi Anda memiliki PanelDataProgram layaknya PanelDataInstruktur
-    // Ganti Object dengan PanelDataProgram jika class-nya sudah ada
-    private Object panelInduk; 
+    private PanelDataProgram panelInduk;
     private Program programTarget;
 
     // --- Definisi Komponen GUI ---
@@ -23,7 +22,7 @@ public class FormEditProgram extends javax.swing.JDialog {
     private JButton btnTutupHeader;
 
     private JPanel panelBody;
-    
+
     // Kolom Kiri
     private JLabel lblSectionInfo;
     private JSeparator separatorInfo;
@@ -51,7 +50,7 @@ public class FormEditProgram extends javax.swing.JDialog {
     private final Color BG_BODY = new Color(248, 248, 248);
     private final Color TXT_ABU = new Color(90, 90, 90);
     private final Color TXT_UTAMA = new Color(10, 10, 10);
-    
+
     private final Font FONT_BOLD_10 = new Font("Inter", Font.BOLD, 10);
     private final Font FONT_BOLD_11 = new Font("Inter", Font.BOLD, 11);
     private final Font FONT_PLAIN_11 = new Font("Inter", Font.PLAIN, 11);
@@ -59,13 +58,12 @@ public class FormEditProgram extends javax.swing.JDialog {
 
     /**
      * Constructor Manual FormEditProgram
-     * Catatan: Ubah tipe data Object panelInduk menjadi PanelDataProgram jika classnya sudah Anda buat
      */
-    public FormEditProgram(java.awt.Frame parent, boolean modal, String idProgram, Object panelInduk) {
+    public FormEditProgram(java.awt.Frame parent, boolean modal, String idProgram, PanelDataProgram panelInduk) {
         super(parent, modal);
         this.idTarget = idProgram;
         this.panelInduk = panelInduk;
-        
+
         // Setup Window Dialog
         this.setTitle("Edit Data Program Pemagangan");
         this.setSize(600, 420);
@@ -85,7 +83,7 @@ public class FormEditProgram extends javax.swing.JDialog {
         // ==========================================
         panelHeader = new JPanel(new AbsoluteLayout());
         panelHeader.setBackground(MAROON_UTAMA);
-        
+
         lblJudulHeader = new JLabel("Edit Program");
         lblJudulHeader.setForeground(Color.WHITE);
         lblJudulHeader.setFont(FONT_BOLD_16);
@@ -127,11 +125,11 @@ public class FormEditProgram extends javax.swing.JDialog {
         lblIdProgram.setForeground(TXT_ABU);
         lblIdProgram.setFont(FONT_BOLD_11);
         panelBody.add(lblIdProgram, new AbsoluteConstraints(20, 50, 250, 20));
-        
+
         txtIdProgram = new JTextField();
         txtIdProgram.setFont(FONT_PLAIN_11);
         txtIdProgram.setEditable(false);
-        txtIdProgram.setBackground(new Color(230, 230, 230)); // Indikator read-only
+        txtIdProgram.setBackground(new Color(230, 230, 230));
         panelBody.add(txtIdProgram, new AbsoluteConstraints(20, 70, 250, 30));
 
         // Nama Program
@@ -139,7 +137,7 @@ public class FormEditProgram extends javax.swing.JDialog {
         lblNamaProgram.setForeground(TXT_ABU);
         lblNamaProgram.setFont(FONT_BOLD_11);
         panelBody.add(lblNamaProgram, new AbsoluteConstraints(20, 110, 250, 20));
-        
+
         txtNamaProgram = new JTextField();
         txtNamaProgram.setFont(FONT_PLAIN_11);
         panelBody.add(txtNamaProgram, new AbsoluteConstraints(20, 130, 250, 30));
@@ -149,11 +147,10 @@ public class FormEditProgram extends javax.swing.JDialog {
         lblBidangUsaha.setForeground(TXT_ABU);
         lblBidangUsaha.setFont(FONT_BOLD_11);
         panelBody.add(lblBidangUsaha, new AbsoluteConstraints(20, 170, 250, 20));
-        
+
         txtBidangUsaha = new JTextField();
         txtBidangUsaha.setFont(FONT_PLAIN_11);
         panelBody.add(txtBidangUsaha, new AbsoluteConstraints(20, 190, 250, 30));
-
 
         // --- KOLOM KANAN (Biaya & Kuota) ---
         lblSectionBiaya = new JLabel("DETAIL BIAYA & KUOTA");
@@ -164,12 +161,12 @@ public class FormEditProgram extends javax.swing.JDialog {
         separatorBiaya = new JSeparator();
         panelBody.add(separatorBiaya, new AbsoluteConstraints(310, 35, 250, 10));
 
-        // Biaya (Tanpa format Rp agar mudah diedit)
+        // Biaya
         lblBiaya = new JLabel("Biaya Pemagangan (Angka)");
         lblBiaya.setForeground(TXT_ABU);
         lblBiaya.setFont(FONT_BOLD_11);
         panelBody.add(lblBiaya, new AbsoluteConstraints(310, 50, 250, 20));
-        
+
         txtBiaya = new JTextField();
         txtBiaya.setFont(FONT_PLAIN_11);
         panelBody.add(txtBiaya, new AbsoluteConstraints(310, 70, 250, 30));
@@ -179,13 +176,12 @@ public class FormEditProgram extends javax.swing.JDialog {
         lblKuota.setForeground(TXT_ABU);
         lblKuota.setFont(FONT_BOLD_11);
         panelBody.add(lblKuota, new AbsoluteConstraints(310, 110, 250, 20));
-        
+
         txtKuota = new JTextField();
         txtKuota.setFont(FONT_PLAIN_11);
         panelBody.add(txtKuota, new AbsoluteConstraints(310, 130, 250, 30));
 
         this.getContentPane().add(panelBody, new AbsoluteConstraints(0, 68, 600, 260));
-
 
         // ==========================================
         // 3. PANEL FOOTER (Tombol Aksi)
@@ -208,36 +204,25 @@ public class FormEditProgram extends javax.swing.JDialog {
     }
 
     private void loadData() {
-        boolean dataDitemukan = false;
-        
-        for (Program prog : DataStore.daftarProgram) {
-            if (prog.getIdProgram().equals(idTarget)) {
-                this.programTarget = prog;
-                
-                // Prefill form
-                txtIdProgram.setText(prog.getIdProgram());
-                txtNamaProgram.setText(prog.getNamaProgram());
-                txtBidangUsaha.setText(prog.getBidangUsaha());
-                
-                // Menampilkan angka asli tanpa format mata uang agar user gampang mengeditnya
-                // Menghilangkan desimal .0 jika angkanya bulat
-                long biayaBulat = (long) prog.getBiaya();
-                if (prog.getBiaya() == biayaBulat) {
-                    txtBiaya.setText(String.valueOf(biayaBulat));
-                } else {
-                    txtBiaya.setText(String.valueOf(prog.getBiaya()));
-                }
-                
-                txtKuota.setText(String.valueOf(prog.getKuota()));
-                
-                dataDitemukan = true;
-                break;
+        DataStore.muatUlang();
+        this.programTarget = DataStore.cariProgram(idTarget);
+
+        if (programTarget != null) {
+            txtIdProgram.setText(programTarget.getIdProgram());
+            txtNamaProgram.setText(programTarget.getNamaProgram());
+            txtBidangUsaha.setText(programTarget.getBidangUsaha());
+
+            long biayaBulat = (long) programTarget.getBiaya();
+            if (programTarget.getBiaya() == biayaBulat) {
+                txtBiaya.setText(String.valueOf(biayaBulat));
+            } else {
+                txtBiaya.setText(String.valueOf(programTarget.getBiaya()));
             }
-        }
-        
-        if (!dataDitemukan) {
-            System.out.println("ERROR: Data Program dengan ID '" + idTarget + "' tidak ditemukan!");
-            JOptionPane.showMessageDialog(this, "Data Program tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+
+            txtKuota.setText(String.valueOf(programTarget.getKuota()));
+        } else {
+            JOptionPane.showMessageDialog(this, "Data Program tidak ditemukan di database!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
             this.dispose();
         }
     }
@@ -246,42 +231,53 @@ public class FormEditProgram extends javax.swing.JDialog {
         // 1. Validasi Input Kosong
         if (txtNamaProgram.getText().trim().isEmpty() || txtBidangUsaha.getText().trim().isEmpty() ||
             txtBiaya.getText().trim().isEmpty() || txtKuota.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "Semua kolom harus diisi!", 
+            JOptionPane.showMessageDialog(this,
+                "Semua kolom harus diisi!",
                 "Peringatan", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        double biayaBaru = 0;
-        int kuotaBaru = 0;
+        double biayaBaru;
+        int kuotaBaru;
 
-        // 2. Validasi Tipe Data (Angka)
+        // 2. Validasi Tipe Data & Batas Nilai
         try {
             biayaBaru = Double.parseDouble(txtBiaya.getText().trim());
             kuotaBaru = Integer.parseInt(txtKuota.getText().trim());
+
+            if (biayaBaru < 0 || kuotaBaru <= 0) {
+                JOptionPane.showMessageDialog(this,
+                    "Biaya tidak boleh minus dan Kuota harus lebih dari 0!",
+                    "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Kolom Biaya dan Kuota harus berupa angka yang valid (tanpa titik atau koma kecuali untuk desimal)!", 
+            JOptionPane.showMessageDialog(this,
+                "Kolom Biaya dan Kuota harus berupa angka yang valid (tanpa titik atau koma kecuali untuk desimal)!",
                 "Error Format Angka", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // 3. Simpan Perubahan ke Referensi Objek yang Sama
+        // 3. Update objek & simpan ke MySQL via ProgramDAO
         if (programTarget != null) {
             programTarget.setNamaProgram(txtNamaProgram.getText().trim());
             programTarget.setBidangUsaha(txtBidangUsaha.getText().trim());
             programTarget.setBiaya(biayaBaru);
             programTarget.setKuota(kuotaBaru);
 
-            JOptionPane.showMessageDialog(this, "Data Program berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            boolean ok = ProgramDAO.ubah(programTarget);
+            DataStore.muatUlang(); // Sinkronkan cache (sekaligus rollback memori bila update gagal)
 
-            if (panelInduk != null && panelInduk instanceof PanelDataProgram) {
-                ((PanelDataProgram) panelInduk).loadTableData(""); 
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Data Program berhasil diperbarui!",
+                        "Sukses", JOptionPane.INFORMATION_MESSAGE);
+
+                if (panelInduk != null) {
+                    panelInduk.loadTableData("");
+                }
+
+                this.dispose();
             }
-            
-            
-            // 5. Tutup form
-            this.dispose();
         }
     }
 }
